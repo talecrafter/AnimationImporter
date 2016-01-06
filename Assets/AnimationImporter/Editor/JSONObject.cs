@@ -1,6 +1,10 @@
 /* JSONObject.cs -- Simple C# JSON parser
   version 1.4 - March 17, 2014
 
+  ## changed by Stephan Hövelbrinks (stephan.hoevelbrinks@craftinglegends.com)
+     -- added InvariantCulture to string conversion
+	 -- removed RegularExpressions System.Text.RegularExpressions from WinRT version
+
   Copyright (C) 2012 Boomlagoon Ltd.
 
   This software is provided 'as-is', without any express or implied
@@ -24,6 +28,10 @@
 
 */
 
+#if !UNITY_WINRT
+#define PARSE_ESCAPED_UNICODE
+#endif
+
 #if UNITY_EDITOR || UNITY_ANDROID || UNITY_IOS || UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_WII || UNITY_PS3 || UNITY_XBOX360 || UNITY_FLASH
 #define USE_UNITY_DEBUGGING
 #endif
@@ -32,7 +40,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+
+#if PARSE_ESCAPED_UNICODE
 using System.Text.RegularExpressions;
+#endif
 
 #if USE_UNITY_DEBUGGING
 using UnityEngine;
@@ -42,7 +53,6 @@ using System.Diagnostics;
 
 namespace AnimationImporter
 {
-
 	namespace Boomlagoon.JSON
 	{
 
@@ -113,8 +123,7 @@ namespace AnimationImporter
 				{
 					Type = JSONValueType.Null;
 				}
-				else
-				{
+				else {
 					Type = JSONValueType.Object;
 					Obj = obj;
 				}
@@ -214,7 +223,7 @@ namespace AnimationImporter
 						return Boolean ? "true" : "false";
 
 					case JSONValueType.Number:
-						return Number.ToString();
+						return Number.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
 					case JSONValueType.String:
 						return "\"" + Str + "\"";
@@ -329,8 +338,7 @@ namespace AnimationImporter
 				{
 					values.RemoveAt(index);
 				}
-				else
-				{
+				else {
 					JSONLogger.Error("index out of range: " + index + " (Expected 0 <= index < " + values.Count + ")");
 				}
 			}
@@ -374,8 +382,10 @@ namespace AnimationImporter
 
 			private readonly IDictionary<string, JSONValue> values = new Dictionary<string, JSONValue>();
 
+#if PARSE_ESCAPED_UNICODE
 			private static readonly Regex unicodeRegex = new Regex(@"\\u([0-9a-fA-F]{4})");
 			private static readonly byte[] unicodeBytes = new byte[2];
+#endif
 
 			public JSONObject()
 			{
@@ -631,8 +641,7 @@ namespace AnimationImporter
 											{
 												state = JSONParsingState.EndArray;
 											}
-											else
-											{
+											else {
 												return Fail("valid array", startPosition);
 											}
 											break;
@@ -737,8 +746,7 @@ namespace AnimationImporter
 
 								startPosition += 3;
 							}
-							else
-							{
+							else {
 								if (jsonString.Length < startPosition + 5 ||
 									jsonString[startPosition + 1] != 'a' ||
 									jsonString[startPosition + 2] != 'l' ||
@@ -894,6 +902,7 @@ namespace AnimationImporter
 
 				startPosition = endPosition;
 
+#if PARSE_ESCAPED_UNICODE
 				// Parse Unicode characters that are escaped as \uXXXX
 				do
 				{
@@ -910,6 +919,7 @@ namespace AnimationImporter
 
 					result = result.Replace(m.Value, s);
 				} while (true);
+#endif
 
 				return result;
 			}
@@ -925,8 +935,7 @@ namespace AnimationImporter
 
 				for (;
 					endPosition < str.Length && str[endPosition] != ',' && str[endPosition] != ']' && str[endPosition] != '}';
-					++endPosition)
-					;
+					++endPosition) ;
 
 				double result;
 				if (
