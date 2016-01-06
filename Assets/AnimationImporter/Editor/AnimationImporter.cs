@@ -560,6 +560,10 @@ namespace AnimationImporter
 				// parse the JSON file
 				JSONObject jsonObject = JSONObject.Parse(textAsset.ToString());
 				AsepriteAnimationInfo animations = AsepriteAnimationInfo.GetAnimationInfo(jsonObject);
+
+				if (animations == null)
+					return null;
+
 				animations.basePath = basePath;
 				animations.name = name;
 				animations.nonLoopingAnimations = _animationNamesThatDoNotLoop;

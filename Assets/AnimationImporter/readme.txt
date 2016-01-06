@@ -1,9 +1,11 @@
 --------------------------------
-ANIMATION IMPORTER for Unity
+Aseprite Animation Importer for Unity
 --------------------------------
 
 This tool is a work in progress Aseprite Importer for Unity.
 It may work for you, it may not. And it may overwrite files in unexpected ways. So be careful and always use Version Control, so you can go back to a previous state if something goes wrong.
+
+Tested with: Unity 5.2.2f1, Aseprite 1.1.1
 
 
 SETUP

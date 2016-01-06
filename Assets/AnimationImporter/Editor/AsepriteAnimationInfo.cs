@@ -30,36 +30,51 @@ namespace AnimationImporter
 		private Dictionary<string, AsepriteAnimation> _animationDatabase = null;
 
 		// ================================================================================
-		//  public methods
-		// --------------------------------------------------------------------------------
-
-		public AnimationClip GetClip(string clipName)
-		{
-			if (_animationDatabase == null)
-				BuildIndex();
-
-			if (_animationDatabase.ContainsKey(clipName))
-				return _animationDatabase[clipName].animationClip;
-
-			return null;
-		}
-
-		// ================================================================================
-		//  public static methods
+		//  JSON IMPORT
 		// --------------------------------------------------------------------------------
 
 		public static AsepriteAnimationInfo GetAnimationInfo(JSONObject root)
 		{
+			if (root == null)
+			{
+				Debug.LogWarning("Error importing JSON animation info: JSONObject is NULL");
+				return null;
+			}
+
 			AsepriteAnimationInfo importedInfos = new AsepriteAnimationInfo();
 
-			// meta animations
+			// import all informations from JSON
 
+			if (!root.ContainsKey("meta"))
+			{
+				Debug.LogWarning("Error importing JSON animation info: no 'meta' object");
+				return null;
+			}
 			var meta = root["meta"].Obj;
+			GetMetaInfosFromJSON(importedInfos, meta);
+			GetAnimationsFromJSON(importedInfos, meta);
 
+			if (!root.ContainsKey("frames"))
+			{
+				Debug.LogWarning("Error importing JSON animation info: no 'frames' object");
+				return null;
+			}
+			GetSpritesFromJSON(root, importedInfos);
+
+			importedInfos.CalculateTimings();
+
+			return importedInfos;
+		}
+
+		private static void GetMetaInfosFromJSON(AsepriteAnimationInfo importedInfos, JSONObject meta)
+		{
 			var size = meta["size"].Obj;
 			importedInfos.width = (int)size["w"].Number;
 			importedInfos.height = (int)size["h"].Number;
+		}
 
+		private static void GetAnimationsFromJSON(AsepriteAnimationInfo importedInfos, JSONObject meta)
+		{
 			var frameTags = meta["frameTags"].Array;
 			foreach (var item in frameTags)
 			{
@@ -71,9 +86,10 @@ namespace AnimationImporter
 
 				importedInfos.animations.Add(anim);
 			}
+		}
 
-			// sprites
-
+		private static void GetSpritesFromJSON(JSONObject root, AsepriteAnimationInfo importedInfos)
+		{
 			var list = root["frames"].Array;
 			foreach (var item in list)
 			{
@@ -90,10 +106,21 @@ namespace AnimationImporter
 
 				importedInfos.frames.Add(frame);
 			}
+		}
 
-			importedInfos.CalculateTimings();
+		// ================================================================================
+		//  public methods
+		// --------------------------------------------------------------------------------
 
-			return importedInfos;
+		public AnimationClip GetClip(string clipName)
+		{
+			if (_animationDatabase == null)
+				BuildIndex();
+
+			if (_animationDatabase.ContainsKey(clipName))
+				return _animationDatabase[clipName].animationClip;
+
+			return null;
 		}
 
 		public void CreateAnimation(string path, string masterName, AsepriteAnimation anim, List<Sprite> sprites)
