@@ -226,14 +226,40 @@ namespace AnimationImporter
 
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Aseprite Application Path");
-			string newPath = GUILayout.TextField(_asepritePath);
+
+			string newPath = _asepritePath;
+
+			if (GUILayout.Button("Select"))
+			{
+				var path = EditorUtility.OpenFilePanel(
+					"Select Aseprite Application",
+					"",
+					"exe");
+				if (!string.IsNullOrEmpty(path))
+				{
+					newPath = path;
+
+					if (Application.platform == RuntimePlatform.OSXEditor)
+					{
+						newPath += "/Contents/MacOS/aseprite";
+					}
+				}
+			}
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();			
+			newPath = GUILayout.TextField(newPath, GUILayout.MaxWidth(300f));
+
 			if (newPath != _asepritePath)
 			{
 				_asepritePath = newPath;
 				SaveUserConfig();
 				CheckIfApplicationIsValid();
 			}
-            GUILayout.EndHorizontal();
+
+			GUILayout.EndHorizontal();
+
+			GUILayout.Space(5f);
 
 			/*
 				sprite values
