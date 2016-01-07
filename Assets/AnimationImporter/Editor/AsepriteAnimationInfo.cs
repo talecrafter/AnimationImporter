@@ -75,6 +75,12 @@ namespace AnimationImporter
 
 		private static void GetAnimationsFromJSON(AsepriteAnimationInfo importedInfos, JSONObject meta)
 		{
+			if (!meta.ContainsKey("frameTags"))
+			{
+				Debug.LogWarning("No 'frameTags' found in JSON created by Aseprite. Please use official Aseprite 1.1.1 or newer.");
+				return;
+			}
+
 			var frameTags = meta["frameTags"].Array;
 			foreach (var item in frameTags)
 			{
