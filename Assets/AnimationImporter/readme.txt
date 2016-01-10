@@ -1,6 +1,5 @@
---------------------------------
 Aseprite Animation Importer for Unity
---------------------------------
+====
 
 This tool is a work in progress Aseprite Importer for Unity.
 It may work for you, it may not. And it may overwrite files in unexpected ways. So be careful and always use Version Control, so you can go back to a previous state if something goes wrong.
@@ -8,7 +7,8 @@ It may work for you, it may not. And it may overwrite files in unexpected ways. 
 Tested with: Unity 5.2.2f1, Aseprite 1.1.1
 
 
-SETUP
+Setup
+-----
 
 Open the tool with "Window" -> "Animation Importer".
 Edit the path to the Aseprite Application on your system. If it works, the drag and drop fields are no longer disabled.
@@ -39,15 +39,23 @@ THE STEPS THIS TOOL GOES THROUGH:
 	- if exists: replace all animations that have the same name
 
 
-FEEDBACK
+Feedback
+-----
 
 Send your comments, feedback and bugs to stephan.hoevelbrinks@craftinglegends.com or http://twitter.com/talecrafter.
 I cannot promise I have time to fix things or improve this tool, but there is a good chance I will have a look at it nonetheless.
 
 
-CREDITS
+Credits
+-----
 
 Mostly written by Stephan Hövelbrinks (http://twitter.com/talecrafter)
 
 Contains code from Ya-ma (http://twitter.com/PixelYam)
 Contains JSONObject from Boomlagoon (www.boomlagoon.com)
+
+
+License
+-----
+
+You can freely use/distribute this project in any way possible with the exception of selling it on it's own.
