@@ -27,6 +27,14 @@ namespace AnimationImporter
 		public List<AsepriteFrame> frames = new List<AsepriteFrame>();
 		public List<AsepriteAnimation> animations = new List<AsepriteAnimation>();
 
+		public bool hasAnimations
+		{
+			get
+			{
+				return animations != null && animations.Count > 0;
+			}
+		}
+
 		private Dictionary<string, AsepriteAnimation> _animationDatabase = null;
 
 		// ================================================================================
@@ -129,10 +137,10 @@ namespace AnimationImporter
 			return null;
 		}
 
-		public void CreateAnimation(string path, string masterName, AsepriteAnimation anim, List<Sprite> sprites)
+		public void CreateAnimation(AsepriteAnimation anim, List<Sprite> sprites, string basePath, string masterName)
 		{
 			AnimationClip clip;
-            string fileName = path + "/" + masterName + "_" + anim.name + ".anim";
+            string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
 
 			// check if animation file already exists
 			clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(fileName);

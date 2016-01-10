@@ -585,35 +585,21 @@ namespace AnimationImporter
 			{
 				// parse the JSON file
 				JSONObject jsonObject = JSONObject.Parse(textAsset.ToString());
-				AsepriteAnimationInfo animations = AsepriteAnimationInfo.GetAnimationInfo(jsonObject);
+				AsepriteAnimationInfo animationInfo = AsepriteAnimationInfo.GetAnimationInfo(jsonObject);
 
-				if (animations == null)
+				if (animationInfo == null)
 					return null;
 
-				animations.basePath = basePath;
-				animations.name = name;
-				animations.nonLoopingAnimations = _animationNamesThatDoNotLoop;
-                AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(textAsset)); // delete JSON file afterwards
+				animationInfo.basePath = basePath;
+				animationInfo.name = name;
+				animationInfo.nonLoopingAnimations = _animationNamesThatDoNotLoop;
+				AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(textAsset)); // delete JSON file afterwards
 
-				CreateSprites(imageAssetFilename, animations);
-				
-				if (_saveAnimationsToSubfolder)
-				{
-					string path = basePath + "/Animations";
-					if (!Directory.Exists(path))
-					{
-						Directory.CreateDirectory(path);
-					}
+				CreateSprites(imageAssetFilename, animationInfo);
 
-					CreateAnimations(imageAssetFilename, path, animations);
-				}
-				else
-				{
-					CreateAnimations(imageAssetFilename, basePath, animations);
+				CreateAnimations(animationInfo, imageAssetFilename);
 
-				}
-
-				return animations;
+				return animationInfo;
 			}
 			else
 			{
@@ -623,7 +609,28 @@ namespace AnimationImporter
 			return null;
 		}
 
-		private void CreateAnimations(string imageAssetFilename, string animationsPath, AsepriteAnimationInfo animationInfo)
+		private void CreateAnimations(AsepriteAnimationInfo animationInfo, string imageAssetFilename)
+		{
+			if (animationInfo.hasAnimations)
+			{
+				if (_saveAnimationsToSubfolder)
+				{
+					string path = animationInfo.basePath + "/Animations";
+					if (!Directory.Exists(path))
+					{
+						Directory.CreateDirectory(path);
+					}
+
+					CreateAnimationAssets(animationInfo, imageAssetFilename, path);
+				}
+				else
+				{
+					CreateAnimationAssets(animationInfo, imageAssetFilename, animationInfo.basePath);
+				}
+			}
+		}
+
+		private void CreateAnimationAssets(AsepriteAnimationInfo animationInfo, string imageAssetFilename, string pathForAnimations)
 		{
 			string masterName = Path.GetFileNameWithoutExtension(imageAssetFilename);
 
@@ -632,12 +639,14 @@ namespace AnimationImporter
 			foreach (var item in assets)
 			{
 				if (item is Sprite)
+				{
 					sprites.Add(item as Sprite);
+				}
 			}
 
 			foreach (var animation in animationInfo.animations)
 			{
-				animationInfo.CreateAnimation(animationsPath, masterName, animation, sprites);
+				animationInfo.CreateAnimation(animation, sprites, pathForAnimations, masterName);
 			}
 		}
 
