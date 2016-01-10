@@ -646,6 +646,7 @@ namespace AnimationImporter
 			TextureImporter importer = AssetImporter.GetAtPath(imageFile) as TextureImporter;
 
 			// adjust values for pixel art
+			importer.textureType = TextureImporterType.Sprite;
 			importer.spriteImportMode = SpriteImportMode.Multiple;
 			importer.spritePixelsPerUnit = _spritePixelsPerUnit;
 			importer.mipmapEnabled = false;
@@ -653,11 +654,19 @@ namespace AnimationImporter
 			importer.textureFormat = TextureImporterFormat.AutomaticTruecolor;
 			importer.maxTextureSize = animations.maxTextureSize;
 
-			// create sub sprites for this file
+			// create sub sprites for this file according to the AsepriteAnimationInfo 
 			importer.spritesheet = animations.GetSpriteSheet(_spriteAlignment, _spriteAlignmentCustomX, _spriteAlignmentCustomY);
 
 			EditorUtility.SetDirty(importer);
-			importer.SaveAndReimport();
+
+			try
+			{
+				importer.SaveAndReimport();
+			}
+			catch (Exception e)
+			{
+				Debug.LogWarning("There was a potential problem with applying settings to the generated sprite file: " + e.ToString());
+			}
 
 			AssetDatabase.ImportAsset(imageFile, ImportAssetOptions.ForceUpdate);
 		}
