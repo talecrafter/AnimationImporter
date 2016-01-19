@@ -11,6 +11,32 @@ namespace AnimationImporter
 {
 	public class AsepriteImporter
 	{
+		// ================================================================================
+		//  const
+		// --------------------------------------------------------------------------------
+
+		const string ASEPRITE_STANDARD_PATH_WINDOWS = @"C:\Program Files (x86)\Aseprite\Aseprite.exe";
+		const string ASEPRITE_STANDARD_PATH_MACOSX = @"/Applications/Aseprite.app/Contents/MacOS/aseprite";
+
+		public static string standardApplicationPath
+		{
+			get
+			{
+				if (Application.platform == RuntimePlatform.WindowsEditor)
+				{
+					return ASEPRITE_STANDARD_PATH_WINDOWS;
+				}
+				else
+				{
+					return ASEPRITE_STANDARD_PATH_MACOSX;
+				}
+			}
+		}
+
+		// ================================================================================
+		//  calling Aseprite for creating PNG and JSON files
+		// --------------------------------------------------------------------------------
+
 		/// <summary>
 		/// calls the Aseprite application which then should output a png with all sprites and a corresponding JSON
 		/// </summary>

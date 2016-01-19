@@ -16,8 +16,6 @@ namespace AnimationImporter
 		//  const
 		// --------------------------------------------------------------------------------
 
-		private const string ASEPRITE_STANDARD_PATH_WINDOWS = @"C:\Program Files (x86)\Aseprite\Aseprite.exe";
-		private const string ASEPRITE_STANDARD_PATH_MACOSX = @"/Applications/Aseprite.app/Contents/MacOS/aseprite";
 		private const string PREFS_PREFIX = "ANIMATION_IMPORTER_";
 
 		// ================================================================================
@@ -113,14 +111,7 @@ namespace AnimationImporter
             }
 			else
 			{
-				if (Application.platform == RuntimePlatform.WindowsEditor)
-				{
-					_asepritePath = ASEPRITE_STANDARD_PATH_WINDOWS;				
-                }
-				else
-				{
-					_asepritePath = ASEPRITE_STANDARD_PATH_MACOSX;
-				}
+				_asepritePath = AsepriteImporter.standardApplicationPath;
 
 				if (!File.Exists(_asepritePath))
 					_asepritePath = "";
@@ -539,7 +530,7 @@ namespace AnimationImporter
 				animationInfo.nonLoopingAnimations = _animationNamesThatDoNotLoop;
 				AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(textAsset)); // delete JSON file afterwards
 
-				CreateSprites(imageAssetFilename, animationInfo);
+				CreateSprites(animationInfo, imageAssetFilename);
 
 				CreateAnimations(animationInfo, imageAssetFilename);
 
@@ -594,7 +585,7 @@ namespace AnimationImporter
 			}
 		}
 
-		private void CreateSprites(string imageFile, ImportedAnimationInfo animations)
+		private void CreateSprites(ImportedAnimationInfo animations, string imageFile)
 		{
 			TextureImporter importer = AssetImporter.GetAtPath(imageFile) as TextureImporter;
 
