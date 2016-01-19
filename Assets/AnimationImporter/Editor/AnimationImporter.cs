@@ -353,7 +353,7 @@ namespace AnimationImporter
 			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(canImportAnimations);
 			if (droppedAsset != null)
 			{
-				CreateAnimationsForAseFile(droppedAsset);
+				CreateAnimationsForAssetFile(droppedAsset);
 				AssetDatabase.Refresh();
 			}
 		}
@@ -365,7 +365,7 @@ namespace AnimationImporter
 			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(canImportAnimations);
 			if (droppedAsset != null)
 			{
-				var animationInfo = CreateAnimationsForAseFile(droppedAsset);
+				var animationInfo = CreateAnimationsForAssetFile(droppedAsset);
 
 				if (animationInfo != null)
 				{
@@ -396,7 +396,7 @@ namespace AnimationImporter
 					return;
 				}
 
-				var animationInfo = CreateAnimationsForAseFile(droppedAsset);
+				var animationInfo = CreateAnimationsForAssetFile(droppedAsset);
 
 				if (animationInfo != null)
 				{
@@ -421,7 +421,7 @@ namespace AnimationImporter
 			_hasApplication = File.Exists(_asepritePath);
 		}
 
-		private AsepriteAnimationInfo CreateAnimationsForAseFile(DefaultAsset droppedAsset)
+		private ImportedAnimationInfo CreateAnimationsForAssetFile(DefaultAsset droppedAsset)
 		{
 			string path = AssetDatabase.GetAssetPath(droppedAsset);
 			string name = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(droppedAsset));
@@ -434,7 +434,7 @@ namespace AnimationImporter
 
 			path = path.Replace(lastPart, "");
 
-			if (CreateSpriteAtlasAndMetaFile(path, name))
+			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, path, name, _saveSpritesToSubfolder))
 			{
 				AssetDatabase.Refresh();
 				return ImportJSONAndCreateAnimations(path, name);
@@ -443,63 +443,7 @@ namespace AnimationImporter
 			return null;
         }
 
-		/// <summary>
-		/// calls the Aseprite application which then should output a png with all sprites and a corresponding JSON
-		/// </summary>
-		/// <returns></returns>
-		private bool CreateSpriteAtlasAndMetaFile(string path, string name)
-		{
-			string parameters = "'" + name + ".ase' --data '" + name + ".json' --sheet '" + name + ".png' --sheet-pack --list-tags --format json-array";
-			bool success = CallAsepriteCLI(path, parameters) == 0;
-
-			// move png and json file to subfolder
-			if (success && _saveSpritesToSubfolder)
-			{
-				// create subdirectory
-				if (!Directory.Exists(path + "/Sprites"))
-					Directory.CreateDirectory(path + "/Sprites");
-
-				string target = path + "/Sprites/" + name + ".json";
-				if (File.Exists(target))
-					File.Delete(target);
-                File.Move(path + "/" + name + ".json", target);
-
-				target = path + "/Sprites/" + name + ".png";
-				if (File.Exists(target))
-					File.Delete(target);
-				File.Move(path + "/" + name + ".png", target);
-			}
-
-			return success;
-		}
-
-		private int CallAsepriteCLI(string path, string buildOptions)
-		{
-			string workingDirectory = Application.dataPath.Replace("Assets", "") + path;
-
-			// determine application name depending on platform
-			string applicationName = _asepritePath;
-			if (Application.platform == RuntimePlatform.OSXEditor)
-				applicationName = ASEPRITE_STANDARD_PATH_MACOSX;
-
-            System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
-			start.Arguments = "-b " + buildOptions;
-			start.FileName = applicationName;
-            start.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-			start.CreateNoWindow = true;
-			start.UseShellExecute = false;
-			start.WorkingDirectory = workingDirectory;
-
-			// Run the external process & wait for it to finish
-			using (System.Diagnostics.Process proc = System.Diagnostics.Process.Start(start))
-			{
-				proc.WaitForExit();
-				// Retrieve the app's exit code
-				return proc.ExitCode;
-			}
-		}
-
-		private void CreateAnimatorController(AsepriteAnimationInfo animations)
+		private void CreateAnimatorController(ImportedAnimationInfo animations)
 		{
 			AnimatorController controller;
 
@@ -535,7 +479,7 @@ namespace AnimationImporter
 			AssetDatabase.SaveAssets();
 		}
 
-		private void CreateAnimatorOverrideController(AsepriteAnimationInfo animations)
+		private void CreateAnimatorOverrideController(ImportedAnimationInfo animations)
 		{
 			if (_baseController != null)
 			{
@@ -571,7 +515,7 @@ namespace AnimationImporter
 			}
 		}
 
-		private AsepriteAnimationInfo ImportJSONAndCreateAnimations(string basePath, string name)
+		private ImportedAnimationInfo ImportJSONAndCreateAnimations(string basePath, string name)
 		{
 			string imagePath = basePath;
 			if (_saveSpritesToSubfolder)
@@ -585,7 +529,7 @@ namespace AnimationImporter
 			{
 				// parse the JSON file
 				JSONObject jsonObject = JSONObject.Parse(textAsset.ToString());
-				AsepriteAnimationInfo animationInfo = AsepriteAnimationInfo.GetAnimationInfo(jsonObject);
+				ImportedAnimationInfo animationInfo = AsepriteImporter.GetAnimationInfo(jsonObject);
 
 				if (animationInfo == null)
 					return null;
@@ -609,7 +553,7 @@ namespace AnimationImporter
 			return null;
 		}
 
-		private void CreateAnimations(AsepriteAnimationInfo animationInfo, string imageAssetFilename)
+		private void CreateAnimations(ImportedAnimationInfo animationInfo, string imageAssetFilename)
 		{
 			if (animationInfo.hasAnimations)
 			{
@@ -630,7 +574,7 @@ namespace AnimationImporter
 			}
 		}
 
-		private void CreateAnimationAssets(AsepriteAnimationInfo animationInfo, string imageAssetFilename, string pathForAnimations)
+		private void CreateAnimationAssets(ImportedAnimationInfo animationInfo, string imageAssetFilename, string pathForAnimations)
 		{
 			string masterName = Path.GetFileNameWithoutExtension(imageAssetFilename);
 
@@ -650,7 +594,7 @@ namespace AnimationImporter
 			}
 		}
 
-		private void CreateSprites(string imageFile, AsepriteAnimationInfo animations)
+		private void CreateSprites(string imageFile, ImportedAnimationInfo animations)
 		{
 			TextureImporter importer = AssetImporter.GetAtPath(imageFile) as TextureImporter;
 
