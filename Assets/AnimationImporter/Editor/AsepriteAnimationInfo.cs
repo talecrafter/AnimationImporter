@@ -164,6 +164,7 @@ namespace AnimationImporter
 
 			EditorCurveBinding curveBinding = new EditorCurveBinding
 			{
+				path = "",
 				type = typeof(SpriteRenderer),
 				propertyName = "m_Sprite"
 			};
