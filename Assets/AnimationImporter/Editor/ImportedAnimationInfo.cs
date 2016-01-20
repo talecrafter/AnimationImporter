@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 using AnimationImporter.Boomlagoon.JSON;
 using UnityEditor;
+using System.Linq;
 
 namespace AnimationImporter
 {
@@ -41,6 +42,7 @@ namespace AnimationImporter
 		//  public methods
 		// --------------------------------------------------------------------------------
 
+		// get animation by name; used when updating an existing AnimatorController 
 		public AnimationClip GetClip(string clipName)
 		{
 			if (_animationDatabase == null)
@@ -48,6 +50,35 @@ namespace AnimationImporter
 
 			if (_animationDatabase.ContainsKey(clipName))
 				return _animationDatabase[clipName].animationClip;
+
+			return null;
+		}
+
+		/* 
+			get animation by name; used when creating an AnimatorOverrideController
+			we look for similar names so the OverrideController is still functional in cases where more specific or alternative animations are not present
+			idle <- idle
+			idleAlt <- idle
+		*/
+		public AnimationClip GetClipOrSimilar(string clipName)
+		{
+			AnimationClip clip = GetClip(clipName);
+
+			if (clip != null)
+				return clip;
+
+			List<ImportedSingleAnimationInfo> similarAnimations = new List<ImportedSingleAnimationInfo>();
+			foreach (var item in animations)
+			{
+				if (clipName.Contains(item.name))
+					similarAnimations.Add(item);
+			}
+
+			if (similarAnimations.Count > 0)
+			{
+				ImportedSingleAnimationInfo similar = similarAnimations.OrderBy(x => x.name.Length).Reverse().First();
+				return similar.animationClip;
+			}
 
 			return null;
 		}
@@ -166,7 +197,7 @@ namespace AnimationImporter
 			for (int i = 0; i < animations.Count; i++)
 			{
 				ImportedSingleAnimationInfo anim = animations[i];
-				_animationDatabase[animations[i].name] = anim;
+				_animationDatabase[anim.name] = anim;
 			}
 		}
 	}

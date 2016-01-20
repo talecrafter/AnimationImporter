@@ -493,7 +493,7 @@ namespace AnimationImporter
 				for (int i = 0; i < clipPairs.Length; i++)
 				{
 					string animationName = clipPairs[i].originalClip.name;
-					AnimationClip clip = animations.GetClip(animationName);
+					AnimationClip clip = animations.GetClipOrSimilar(animationName);
 					clipPairs[i].overrideClip = clip;
 				}
 				overrideController.clips = clipPairs;
