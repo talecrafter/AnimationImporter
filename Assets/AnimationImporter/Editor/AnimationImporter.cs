@@ -528,7 +528,9 @@ namespace AnimationImporter
 				animationInfo.basePath = basePath;
 				animationInfo.name = name;
 				animationInfo.nonLoopingAnimations = _animationNamesThatDoNotLoop;
-				AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(textAsset)); // delete JSON file afterwards
+
+				// delete JSON file afterwards
+				AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(textAsset));
 
 				CreateSprites(animationInfo, imageAssetFilename);
 

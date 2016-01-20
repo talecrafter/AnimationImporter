@@ -88,18 +88,18 @@ namespace AnimationImporter
 
 			for (int i = 0; i < anim.Count; i++)
 			{
-				ObjectReferenceKeyframe keyFrame = new ObjectReferenceKeyframe { time = anim.GetTimePoint(i) };
+				ObjectReferenceKeyframe keyFrame = new ObjectReferenceKeyframe { time = anim.GetKeyFrameTime(i) };
 
-				Sprite sprite = sprites[anim.from + i];
+				Sprite sprite = sprites[anim.firstSpriteIndex + i];
 				keyFrame.value = sprite;
 				keyFrames[i] = keyFrame;
 			}
 
 			// repeating the last frame at a point "just before the end" so the animation gets its correct length
 
-			ObjectReferenceKeyframe lastKeyFrame = new ObjectReferenceKeyframe { time = anim.GetLastTimePoint(clip.frameRate) };
+			ObjectReferenceKeyframe lastKeyFrame = new ObjectReferenceKeyframe { time = anim.GetLastKeyFrameTime(clip.frameRate) };
 
-			Sprite lastSprite = sprites[anim.from + anim.Count - 1];
+			Sprite lastSprite = sprites[anim.firstSpriteIndex + anim.Count - 1];
 			lastKeyFrame.value = lastSprite;
 			keyFrames[anim.Count] = lastKeyFrame;
 
@@ -136,7 +136,7 @@ namespace AnimationImporter
 					spriteMetaData.pivot.y = customY;
 				}
 
-				spriteMetaData.name = spriteInfo.filename.Replace(".ase","");
+				spriteMetaData.name = spriteInfo.name;
 				spriteMetaData.rect = new Rect(spriteInfo.x, spriteInfo.y, spriteInfo.width, spriteInfo.height);
 
 				metaData[i] = spriteMetaData;
@@ -151,15 +151,7 @@ namespace AnimationImporter
 			{
 				ImportedSingleAnimationInfo anim = animations[i];
 
-				anim.timings = new List<float>();
-				float timeCount = 0;
-				anim.timings.Add(timeCount);
-
-				for (int k = 0; k < anim.Count; k++)
-				{
-					timeCount += frames[k + anim.from].duration / 1000f;
-					anim.timings.Add(timeCount);
-				}
+				anim.SetFrames(frames.GetRange(anim.firstSpriteIndex, anim.Count));
 			}
 		}
 
@@ -181,50 +173,88 @@ namespace AnimationImporter
 
 	public class ImportedSpriteInfo
 	{
-		public string filename { get; set; }
+		// ================================================================================
+		//  naming
+		// --------------------------------------------------------------------------------
+
+		private string _name;
+		public string name
+		{
+			get { return _name; }
+			set { _name = value; }
+		}
+
+		// ================================================================================
+		//  properties
+		// --------------------------------------------------------------------------------
 
 		public int x;
 		public int y;
 		public int width;
 		public int height;
 
-		public int duration;
+		public int duration; // in milliseconds as part of an animation
 	}
 
 	public class ImportedSingleAnimationInfo
 	{
 		public string name;
-		public int from;
-		public int to;
 
-		public List<float> timings;
-
+		// assuming all sprites are in some array/list and an animation is defined as a continous list of indices
+		public int firstSpriteIndex;
+		public int lastSpriteIndex;
+		
+		// final animation clip; saved here for usage when building the AnimatorController
 		public AnimationClip animationClip;
+
+		// duration of each frame
+		private List<float> timings = null;
 
 		public int Count
 		{
 			get
 			{
-				return to - from + 1;
+				return lastSpriteIndex - firstSpriteIndex + 1;
+			}
+		}
+
+		// ================================================================================
+		//  public methods
+		// --------------------------------------------------------------------------------
+
+		public float GetKeyFrameTime(int i)
+		{
+			return timings[i];
+		}
+
+		public float GetLastKeyFrameTime(float frameRate)
+		{
+			float timePoint = GetKeyFrameTime(Count);
+			timePoint -= (1f / frameRate);
+
+			return timePoint;
+		}
+
+		public void SetFrames(List<ImportedSpriteInfo> frames)
+		{
+			float timeCount;
+			timings = new List<float>();
+
+			// first sprite will be set at the beginning of the animation
+			timeCount = 0;
+			timings.Add(timeCount);
+
+			for (int k = 0; k < frames.Count; k++)
+			{
+				// add duration of frame in seconds
+				timeCount += frames[k].duration / 1000f;
+				timings.Add(timeCount);
 			}
 		}
 
 		public override string ToString()
 		{
-			return name + " (" + from.ToString() + "-" + to.ToString() + ")";
-		}
-
-		public float GetTimePoint(int i)
-		{
-			return timings[i];
-		}
-
-		public float GetLastTimePoint(float frameRate)
-		{
-			float timePoint = GetTimePoint(Count);
-			timePoint -= (1f / frameRate);
-
-			return timePoint;
+			return name + " (" + firstSpriteIndex.ToString() + "-" + lastSpriteIndex.ToString() + ")";
 		}
 	}
 }

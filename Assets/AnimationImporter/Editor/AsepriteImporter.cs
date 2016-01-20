@@ -146,8 +146,8 @@ namespace AnimationImporter
 				JSONObject frameTag = item.Obj;
 				ImportedSingleAnimationInfo anim = new ImportedSingleAnimationInfo();
 				anim.name = frameTag["name"].Str;
-				anim.from = (int)(frameTag["from"].Number);
-				anim.to = (int)(frameTag["to"].Number);
+				anim.firstSpriteIndex = (int)(frameTag["from"].Number);
+				anim.lastSpriteIndex = (int)(frameTag["to"].Number);
 
 				importedInfos.animations.Add(anim);
 			}
@@ -159,7 +159,7 @@ namespace AnimationImporter
 			foreach (var item in list)
 			{
 				ImportedSpriteInfo frame = new ImportedSpriteInfo();
-				frame.filename = item.Obj["filename"].Str;
+				frame.name = item.Obj["filename"].Str.Replace(".ase","");
 
 				var frameValues = item.Obj["frame"].Obj;
 				frame.width = (int)frameValues["w"].Number;
