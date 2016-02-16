@@ -7,6 +7,7 @@ using UnityEditor;
 using System.IO;
 using AnimationImporter.Boomlagoon.JSON;
 using UnityEditor.Animations;
+using System.Linq;
 
 namespace AnimationImporter
 {
@@ -580,6 +581,11 @@ namespace AnimationImporter
 					sprites.Add(item as Sprite);
 				}
 			}
+
+			// we order the sprites by name here because the LoadAllAssets above does not necessarily return the sprites in correct order
+			// the OrderBy is fed with the last word of the name, which is an int from 0 upwards
+			sprites = sprites.OrderBy(x => int.Parse(x.name.Substring(x.name.LastIndexOf(' ')).TrimStart()))
+							 .ToList();
 
 			foreach (var animation in animationInfo.animations)
 			{
