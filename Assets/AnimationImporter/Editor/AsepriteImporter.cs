@@ -111,14 +111,16 @@ namespace AnimationImporter
 			}
 			var meta = root["meta"].Obj;
 			GetMetaInfosFromJSON(importedInfos, meta);
-			GetAnimationsFromJSON(importedInfos, meta);
 
-			if (!root.ContainsKey("frames"))
+			if (GetAnimationsFromJSON(importedInfos, meta) == false)
 			{
-				Debug.LogWarning("Error importing JSON animation info: no 'frames' object");
+				return null;
+			}		
+
+			if (GetSpritesFromJSON(root, importedInfos) == false)
+			{
 				return null;
 			}
-			GetSpritesFromJSON(root, importedInfos);
 
 			importedInfos.CalculateTimings();
 
@@ -132,12 +134,13 @@ namespace AnimationImporter
 			importedInfos.height = (int)size["h"].Number;
 		}
 
-		private static void GetAnimationsFromJSON(ImportedAnimationInfo importedInfos, JSONObject meta)
+		private static bool GetAnimationsFromJSON(ImportedAnimationInfo importedInfos, JSONObject meta)
 		{
 			if (!meta.ContainsKey("frameTags"))
 			{
-				Debug.LogWarning("No 'frameTags' found in JSON created by Aseprite. Please use official Aseprite 1.1.1 or newer.");
-				return;
+				Debug.LogWarning("No 'frameTags' found in JSON created by Aseprite.");
+				IssueVersionWarning();
+				return false;
 			}
 
 			var frameTags = meta["frameTags"].Array;
@@ -151,11 +154,21 @@ namespace AnimationImporter
 
 				importedInfos.animations.Add(anim);
 			}
+
+			return true;
 		}
 
-		private static void GetSpritesFromJSON(JSONObject root, ImportedAnimationInfo importedInfos)
+		private static bool GetSpritesFromJSON(JSONObject root, ImportedAnimationInfo importedInfos)
 		{
 			var list = root["frames"].Array;
+
+			if (list == null)
+			{
+				Debug.LogWarning("No 'frames' array found in JSON created by Aseprite.");
+				IssueVersionWarning();
+				return false;
+			}
+
 			foreach (var item in list)
 			{
 				ImportedSpriteInfo frame = new ImportedSpriteInfo();
@@ -171,6 +184,13 @@ namespace AnimationImporter
 
 				importedInfos.frames.Add(frame);
 			}
+
+			return true;
+		}
+
+		private static void IssueVersionWarning()
+		{
+			Debug.LogWarning("Please use official Aseprite 1.1.1 or newer.");
 		}
 	}
 }
