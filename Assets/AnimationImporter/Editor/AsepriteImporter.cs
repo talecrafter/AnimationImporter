@@ -43,7 +43,9 @@ namespace AnimationImporter
 		/// <returns></returns>
 		public static bool CreateSpriteAtlasAndMetaFile(string asepritePath, string path, string name, bool saveSpritesToSubfolder = true)
 		{
-			string parameters = "'" + name + ".ase' --data '" + name + ".json' --sheet '" + name + ".png' --sheet-pack --list-tags --format json-array";
+			char delimiter = '\"';
+			string parameters = delimiter + name + ".ase" + delimiter + " --data " + delimiter + name + ".json" + delimiter + " --sheet " + delimiter + name + ".png" + delimiter + " --sheet-pack --list-tags --format json-array";
+
 			bool success = CallAsepriteCLI(asepritePath, path, parameters) == 0;
 
 			// move png and json file to subfolder
