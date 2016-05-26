@@ -1,0 +1,116 @@
+﻿using UnityEngine;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Random = UnityEngine.Random;
+using UnityEditor;
+
+namespace AnimationImporter
+{
+	public class AnimationAssetPostprocessor : AssetPostprocessor
+	{
+		private static List<string> _assetsMarkedForImport = new List<string>();
+		private static EditorApplication.CallbackFunction _importDelegate;
+
+		// ================================================================================
+		//  unity methods
+		// --------------------------------------------------------------------------------
+
+		private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromPath)
+		{
+			AnimationImporter importer = AnimationImporter.Instance;
+
+			if (importer == null)
+			{
+				return;
+			}
+
+			importer.LoadUserConfig();
+
+			if (importer.automaticImporting)
+			{
+				List<string> markedAssets = new List<string>();
+
+				foreach (string asset in importedAssets)
+				{
+					if (AnimationImporter.IsValidAsset(asset))
+					{
+						MarkAssetForImport(asset, markedAssets);
+					}
+				}
+
+				if (markedAssets.Count > 0)
+				{
+					_assetsMarkedForImport.Clear();
+					_assetsMarkedForImport.AddRange(markedAssets);
+
+					if (_importDelegate == null)
+					{
+						_importDelegate = new EditorApplication.CallbackFunction(ImportAssets);
+					}
+
+					// Subscribe to callback
+					EditorApplication.update = Delegate.Combine(EditorApplication.update, _importDelegate) as EditorApplication.CallbackFunction;
+				}
+			}
+		}
+
+		// ================================================================================
+		//  private methods
+		// --------------------------------------------------------------------------------
+
+		private static void MarkAssetForImport(string asset, List<string> markedAssets)
+		{
+			AnimationImporter importer = AnimationImporter.Instance;
+
+			if (!importer.canImportAnimations)
+			{
+				return;
+			}
+
+			if (importer.HasExistingAnimatorController(asset)
+				|| importer.HasExistingAnimatorOverrideController(asset))
+			{
+				markedAssets.Add(asset);
+			}
+		}
+
+		private static void ImportAssets()
+		{
+			// Unsubscribe from callback
+			EditorApplication.update = Delegate.Remove(EditorApplication.update, _importDelegate as EditorApplication.CallbackFunction) as EditorApplication.CallbackFunction;
+
+			AssetDatabase.Refresh();
+			AnimationImporter importer = AnimationImporter.Instance;
+
+			foreach (var item in _assetsMarkedForImport)
+			{
+				if (item == null)
+				{
+					continue;
+				}
+
+				if (importer.HasExistingAnimatorController(item))
+				{
+					var animationInfo = importer.CreateAnimationsForAssetFile(item);
+
+					if (animationInfo != null)
+					{
+						importer.CreateAnimatorController(animationInfo);
+					}
+				}
+				else if (importer.HasExistingAnimatorOverrideController(item))
+				{
+					var animationInfo = importer.CreateAnimationsForAssetFile(item);
+
+					if (animationInfo != null)
+					{
+						importer.CreateAnimatorOverrideController(animationInfo, true);
+					}
+				}
+			}
+
+			_assetsMarkedForImport.Clear();
+		}
+	}
+}

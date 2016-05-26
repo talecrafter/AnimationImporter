@@ -39,6 +39,11 @@ THE STEPS THIS TOOL GOES THROUGH:
 	- if exists: replace all animations that have the same name
 
 
+AUTOMATIC IMPORT
+
+This option reimports Aseprite files when Unity recognizes them as changed. It looks for an AnimatorController or AnimatorOverrideController with the same name and in the same directory. Current import settings are used, not the ones from first import.
+
+
 Feedback
 -----
 

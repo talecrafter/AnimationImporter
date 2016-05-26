@@ -141,6 +141,15 @@ namespace AnimationImporter
 			importer.saveAnimationsToSubfolder = EditorGUILayout.Toggle("Animations to Subfolder", importer.saveAnimationsToSubfolder);
 			EditorGUILayout.EndHorizontal();
 
+			GUILayout.Space(25f);
+
+			ShowHeadline("Automatic Import");
+			EditorGUILayout.BeginHorizontal();
+			importer.automaticImporting = EditorGUILayout.Toggle("Automatic Import", importer.automaticImporting);
+			EditorGUILayout.LabelField("Use at your own risk!", EditorStyles.boldLabel);
+			EditorGUILayout.EndHorizontal();
+			EditorGUILayout.LabelField("Looks for existing Controller with same name. Uses current import setting.");
+
 			/*
 				animations that do not loop
 			*/
