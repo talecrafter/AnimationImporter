@@ -1,3 +1,9 @@
+# Project related (example files)
+
+/Assets/TestAnimations/
+/Assets/TestAnimations.meta
+
+
 # Unity generated
 
 Temp
@@ -7,7 +13,7 @@ UnityGenerated
 /.vs
  
 
-# Visual Studio  MonoDevelop generated
+# Visual Studio / MonoDevelop generated
 
 *sln.ide
 ExportedObj
