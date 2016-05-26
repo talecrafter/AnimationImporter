@@ -41,29 +41,29 @@ namespace AnimationImporter
 		/// calls the Aseprite application which then should output a png with all sprites and a corresponding JSON
 		/// </summary>
 		/// <returns></returns>
-		public static bool CreateSpriteAtlasAndMetaFile(string asepritePath, string path, string name, bool saveSpritesToSubfolder = true)
+		public static bool CreateSpriteAtlasAndMetaFile(string asepritePath, string assetBasePath, string name, bool saveSpritesToSubfolder = true)
 		{
 			char delimiter = '\"';
 			string parameters = delimiter + name + ".ase" + delimiter + " --data " + delimiter + name + ".json" + delimiter + " --sheet " + delimiter + name + ".png" + delimiter + " --sheet-pack --list-tags --format json-array";
 
-			bool success = CallAsepriteCLI(asepritePath, path, parameters) == 0;
+			bool success = CallAsepriteCLI(asepritePath, assetBasePath, parameters) == 0;
 
 			// move png and json file to subfolder
 			if (success && saveSpritesToSubfolder)
 			{
 				// create subdirectory
-				if (!Directory.Exists(path + "/Sprites"))
-					Directory.CreateDirectory(path + "/Sprites");
+				if (!Directory.Exists(assetBasePath + "/Sprites"))
+					Directory.CreateDirectory(assetBasePath + "/Sprites");
 
-				string target = path + "/Sprites/" + name + ".json";
+				string target = assetBasePath + "/Sprites/" + name + ".json";
 				if (File.Exists(target))
 					File.Delete(target);
-				File.Move(path + "/" + name + ".json", target);
+				File.Move(assetBasePath + "/" + name + ".json", target);
 
-				target = path + "/Sprites/" + name + ".png";
+				target = assetBasePath + "/Sprites/" + name + ".png";
 				if (File.Exists(target))
 					File.Delete(target);
-				File.Move(path + "/" + name + ".png", target);
+				File.Move(assetBasePath + "/" + name + ".png", target);
 			}
 
 			return success;

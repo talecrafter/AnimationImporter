@@ -11,100 +11,199 @@ using System.Linq;
 
 namespace AnimationImporter
 {
-	public class AnimationImporter : EditorWindow
+	public class AnimationImporter
 	{
+		private static AnimationImporter _instance = null;
+		public static AnimationImporter Instance
+		{
+			get
+			{
+				if (_instance == null)
+				{
+					_instance = new AnimationImporter();
+				}
+
+				return _instance;
+			}
+		}
+
 		// ================================================================================
 		//  const
 		// --------------------------------------------------------------------------------
 
 		private const string PREFS_PREFIX = "ANIMATION_IMPORTER_";
 
+		private static string[] allowedExtensions = { "ase" };
+
 		// ================================================================================
 		//  user values
 		// --------------------------------------------------------------------------------
 
 		string _asepritePath = "";
+		public string asepritePath
+		{
+			get
+			{
+				return _asepritePath;
+			}
+			set
+			{
+				if (_asepritePath != value)
+				{
+					_asepritePath = value;
+					SaveUserConfig();
+					CheckIfApplicationIsValid();
+				}
+			}
+		}
 
 		// sprite import values
 		private float _spritePixelsPerUnit = 100f;
+		public float spritePixelsPerUnit
+		{
+			get
+			{
+				return _spritePixelsPerUnit;
+			}
+			set
+			{
+				if (_spritePixelsPerUnit != value)
+				{
+					_spritePixelsPerUnit = value;
+					SaveUserConfig();
+				}
+			}
+		}
+
 		private SpriteAlignment _spriteAlignment = SpriteAlignment.BottomCenter;
+		public SpriteAlignment spriteAlignment
+		{
+			get
+			{
+				return _spriteAlignment;
+			}
+			set
+			{
+				if (_spriteAlignment != value)
+				{
+					_spriteAlignment = value;
+					SaveUserConfig();
+				}
+			}
+		}
+
 		private float _spriteAlignmentCustomX = 0;
+		public float spriteAlignmentCustomX
+		{
+			get
+			{
+				return _spriteAlignmentCustomX;
+			}
+			set
+			{
+				if (_spriteAlignmentCustomX != value)
+				{
+					_spriteAlignmentCustomX = value;
+					SaveUserConfig();
+				}
+			}
+		}
+
 		private float _spriteAlignmentCustomY = 0;
+		public float spriteAlignmentCustomY
+		{
+			get
+			{
+				return _spriteAlignmentCustomY;
+			}
+			set
+			{
+				if (_spriteAlignmentCustomY != value)
+				{
+					_spriteAlignmentCustomY = value;
+					SaveUserConfig();
+				}
+			}
+		}
 
 		private RuntimeAnimatorController _baseController = null;
+		public RuntimeAnimatorController baseController
+		{
+			get
+			{
+				return _baseController;
+			}
+			set
+			{
+				if (_baseController != value)
+				{
+					_baseController = value;
+					SaveUserConfig();
+				}
+			}
+		}
 
 		private bool _saveSpritesToSubfolder = true;
+		public bool saveSpritesToSubfolder
+		{
+			get
+			{
+				return _saveSpritesToSubfolder;
+			}
+			set
+			{
+				if (_saveSpritesToSubfolder != value)
+				{
+					_saveSpritesToSubfolder = value;
+					SaveUserConfig();
+				}
+			}
+		}
 		private bool _saveAnimationsToSubfolder = true;
+		public bool saveAnimationsToSubfolder
+		{
+			get
+			{
+				return _saveAnimationsToSubfolder;
+			}
+			set
+			{
+				if (_saveAnimationsToSubfolder != value)
+				{
+					_saveAnimationsToSubfolder = value;
+					SaveUserConfig();
+				}
+			}
+		}
 
 		private List<string> _animationNamesThatDoNotLoop = new List<string>() { "death" };
+		public List<string> animationNamesThatDoNotLoop { get { return _animationNamesThatDoNotLoop; } }
 
 		// ================================================================================
 		//  private
 		// --------------------------------------------------------------------------------
 
-		private GUIStyle _dropBoxStyle;
-		private string _nonLoopingAnimationEnterValue = "";
-		private Vector2 _scrollPos = Vector2.zero;
-
 		private bool _hasApplication = false;
-
-		private bool canImportAnimations
+		public bool canImportAnimations
 		{
 			get
 			{
 				return _hasApplication;
 			}
 		}
-
-		// ================================================================================
-		//  menu entry
-		// --------------------------------------------------------------------------------
-
-		[MenuItem("Window/Animation Importer")]
-		public static void ImportAnimationsMenu()
+		public bool canImportAnimationsForOverrideController
 		{
-			EditorWindow.GetWindow(typeof(AnimationImporter), false, "Anim Importer");
-        }
-
-		// ================================================================================
-		//  unity methods
-		// --------------------------------------------------------------------------------
-
-		public void OnEnable()
-		{
-			LoadUserConfig();
-		}
-
-		public void OnGUI()
-		{
-			if (_dropBoxStyle == null)
-				GetBoxStyle();
-
-			_scrollPos = GUILayout.BeginScrollView(_scrollPos);
-
-			EditorGUILayout.Space();
-			ShowAnimationsGUI();
-
-			GUILayout.Space(25f);
-
-			ShowAnimatorControllerGUI();
-
-			GUILayout.Space(25f);
-
-			ShowAnimatorOverrideControllerGUI();
-
-			GUILayout.Space(25f);
-
-			ShowUserConfig();
-
-			GUILayout.EndScrollView();
+			get
+			{
+				return canImportAnimations && _baseController != null;
+			}
 		}
 
 		// ================================================================================
 		//  save and load user values
 		// --------------------------------------------------------------------------------
 
-		private void LoadUserConfig()
+		public void LoadUserConfig()
 		{
 			if (EditorPrefs.HasKey(PREFS_PREFIX + "asepritePath"))
 			{
@@ -198,244 +297,67 @@ namespace AnimationImporter
 			}
 		}
 
-		// ================================================================================
-		//  GUI methods
-		// --------------------------------------------------------------------------------
-
-		private void GetBoxStyle()
+		public void RemoveAnimationThatDoesNotLoop(int index)
 		{
-			_dropBoxStyle = new GUIStyle(EditorStyles.helpBox);
-			_dropBoxStyle.alignment = TextAnchor.MiddleCenter;
+			_animationNamesThatDoNotLoop.RemoveAt(index);
+			SaveUserConfig();
 		}
 
-		private void ShowUserConfig()
+		public bool AddAnimationThatDoesNotLoop(string animationName)
 		{
-			ShowHeadline("Config");
+			if (string.IsNullOrEmpty(animationName) || _animationNamesThatDoNotLoop.Contains(animationName))
+				return false;
 
-			/*
-				Aseprite Application
-			*/
+			_animationNamesThatDoNotLoop.Add(animationName);
+			SaveUserConfig();
 
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Aseprite Application Path");
-
-			string newPath = _asepritePath;
-
-			if (GUILayout.Button("Select"))
-			{
-				var path = EditorUtility.OpenFilePanel(
-					"Select Aseprite Application",
-					"",
-					"exe");
-				if (!string.IsNullOrEmpty(path))
-				{
-					newPath = path;
-
-					if (Application.platform == RuntimePlatform.OSXEditor)
-					{
-						newPath += "/Contents/MacOS/aseprite";
-					}
-				}
-			}
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();			
-			newPath = GUILayout.TextField(newPath, GUILayout.MaxWidth(300f));
-
-			if (newPath != _asepritePath)
-			{
-				_asepritePath = newPath;
-				SaveUserConfig();
-				CheckIfApplicationIsValid();
-			}
-
-			GUILayout.EndHorizontal();
-
-			GUILayout.Space(5f);
-
-			/*
-				sprite values
-			*/
-
-			SpriteAlignment newAlignment = (SpriteAlignment)EditorGUILayout.EnumPopup("Sprite Alignment",_spriteAlignment);
-			if (newAlignment != _spriteAlignment)
-			{
-				_spriteAlignment = newAlignment;
-				SaveUserConfig();
-			}
-
-			if (_spriteAlignment == SpriteAlignment.Custom)
-			{
-				float newSpriteAlignmentCustomX = EditorGUILayout.Slider("x", _spriteAlignmentCustomX, 0, 1f);
-				float newSpriteAlignmentCustomY = EditorGUILayout.Slider("y", _spriteAlignmentCustomY, 0, 1f);
-
-				if (newSpriteAlignmentCustomX != _spriteAlignmentCustomX || newSpriteAlignmentCustomY != _spriteAlignmentCustomY)
-				{
-					_spriteAlignmentCustomX = newSpriteAlignmentCustomX;
-					_spriteAlignmentCustomY = newSpriteAlignmentCustomY;
-					SaveUserConfig();
-				}
-			}
-
-			float newPixelsPerUnit = EditorGUILayout.FloatField("Sprite Pixels per Unit", _spritePixelsPerUnit);
-			if (newPixelsPerUnit != _spritePixelsPerUnit)
-			{
-				_spritePixelsPerUnit = newPixelsPerUnit;
-				SaveUserConfig();
-			}
-
-			EditorGUILayout.BeginHorizontal();
-			bool saveSpritesToSubfolder = EditorGUILayout.Toggle("Sprites to Subfolder", _saveSpritesToSubfolder);
-			if (saveSpritesToSubfolder != _saveSpritesToSubfolder)
-			{
-				_saveSpritesToSubfolder = saveSpritesToSubfolder;
-				SaveUserConfig();
-			}
-
-			bool saveAninmationsToSubfolder = EditorGUILayout.Toggle("Animations to Subfolder", _saveAnimationsToSubfolder);
-			if (saveAninmationsToSubfolder != _saveAnimationsToSubfolder)
-			{
-				_saveAnimationsToSubfolder = saveAninmationsToSubfolder;
-				SaveUserConfig();
-			}
-			EditorGUILayout.EndHorizontal();
-
-			/*
-				animations that do not loop
-			*/
-
-			GUILayout.Space(25f);
-			ShowHeadline("Non-looping Animations");
-
-			for (int i = 0; i < _animationNamesThatDoNotLoop.Count; i++)
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Label(_animationNamesThatDoNotLoop[i]);
-				bool doDelete = GUILayout.Button("Delete");			
-				GUILayout.EndHorizontal();
-				if (doDelete)
-				{
-					_animationNamesThatDoNotLoop.RemoveAt(i);
-					SaveUserConfig();
-					break;
-				}
-			}
-
-			EditorGUILayout.Space();
-
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Add ");
-			_nonLoopingAnimationEnterValue = EditorGUILayout.TextField(_nonLoopingAnimationEnterValue);
-			if (GUILayout.Button("Enter"))
-			{
-				if (!string.IsNullOrEmpty(_nonLoopingAnimationEnterValue) && !_animationNamesThatDoNotLoop.Contains(_nonLoopingAnimationEnterValue))
-				{
-					_animationNamesThatDoNotLoop.Add(_nonLoopingAnimationEnterValue);
-					_nonLoopingAnimationEnterValue = "";
-					SaveUserConfig();
-				}
-			}
-			GUILayout.EndHorizontal();
-		}
-
-		private void ShowAnimationsGUI()
-		{
-			ShowHeadline("Animations");
-
-			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(canImportAnimations);
-			if (droppedAsset != null)
-			{
-				CreateAnimationsForAssetFile(droppedAsset);
-				AssetDatabase.Refresh();
-			}
-		}
-
-		private void ShowAnimatorControllerGUI()
-		{
-			ShowHeadline("Animator Controller + Animations");
-
-			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(canImportAnimations);
-			if (droppedAsset != null)
-			{
-				var animationInfo = CreateAnimationsForAssetFile(droppedAsset);
-
-				if (animationInfo != null)
-				{
-					CreateAnimatorController(animationInfo);
-				}
-
-				AssetDatabase.Refresh();
-			}
-		}
-
-		private void ShowAnimatorOverrideControllerGUI()
-		{
-			ShowHeadline("Animator Override Controller + Animations");
-
-			RuntimeAnimatorController newBaseController = EditorGUILayout.ObjectField("Based on Controller:", _baseController, typeof(RuntimeAnimatorController), false) as RuntimeAnimatorController;
-			if (newBaseController != _baseController)
-			{
-				_baseController = newBaseController;
-				SaveUserConfig();
-			}
-
-			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(canImportAnimations && _baseController != null);
-			if (droppedAsset != null)
-			{
-				if (_baseController == null)
-				{
-					Debug.LogWarning("Please assign an Animator Controller first");
-					return;
-				}
-
-				var animationInfo = CreateAnimationsForAssetFile(droppedAsset);
-
-				if (animationInfo != null)
-				{
-					CreateAnimatorOverrideController(animationInfo);
-				}
-
-				AssetDatabase.Refresh();
-			}
-		}
-
-		private void ShowHeadline(string headline)
-		{
-			EditorGUILayout.LabelField(headline, EditorStyles.boldLabel, GUILayout.Height(20f));
+			return true;
 		}
 
 		// ================================================================================
-		//  private methods
+		//  import methods
 		// --------------------------------------------------------------------------------
 
-		private void CheckIfApplicationIsValid()
+		// check if this is a valid file; we are only looking at the file extension here
+		public static bool IsValidAsset(string path)
 		{
-			_hasApplication = File.Exists(_asepritePath);
+			string name = Path.GetFileNameWithoutExtension(path);
+
+			for (int i = 0; i < allowedExtensions.Length; i++)
+			{
+				string lastPart = "/" + name + "." + allowedExtensions[i];
+
+				if (path.Contains(lastPart))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 
-		private ImportedAnimationInfo CreateAnimationsForAssetFile(DefaultAsset droppedAsset)
+		public ImportedAnimationInfo CreateAnimationsForAssetFile(DefaultAsset droppedAsset)
 		{
 			string path = AssetDatabase.GetAssetPath(droppedAsset);
-			string name = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(droppedAsset));
 
-			string lastPart = "/" + name + ".ase";
-
-			// check if this is an ASE file (HACK!)
-			if (!path.Contains(lastPart))
+			if (!IsValidAsset(path))
+			{
 				return null;
+			}
 
-			path = path.Replace(lastPart, "");
+			string name = Path.GetFileNameWithoutExtension(path);
+			string basePath = GetBasePath(path);
 
-			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, path, name, _saveSpritesToSubfolder))
+			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, basePath, name, _saveSpritesToSubfolder))
 			{
 				AssetDatabase.Refresh();
-				return ImportJSONAndCreateAnimations(path, name);
+				return ImportJSONAndCreateAnimations(basePath, name);
 			}
 
 			return null;
         }
 
-		private void CreateAnimatorController(ImportedAnimationInfo animations)
+		public void CreateAnimatorController(ImportedAnimationInfo animations)
 		{
 			AnimatorController controller;
 
@@ -471,7 +393,7 @@ namespace AnimationImporter
 			AssetDatabase.SaveAssets();
 		}
 
-		private void CreateAnimatorOverrideController(ImportedAnimationInfo animations)
+		public void CreateAnimatorOverrideController(ImportedAnimationInfo animations)
 		{
 			if (_baseController != null)
 			{
@@ -507,9 +429,9 @@ namespace AnimationImporter
 			}
 		}
 
-		private ImportedAnimationInfo ImportJSONAndCreateAnimations(string basePath, string name)
+		private ImportedAnimationInfo ImportJSONAndCreateAnimations(string assetBasePath, string name)
 		{
-			string imagePath = basePath;
+			string imagePath = assetBasePath;
 			if (_saveSpritesToSubfolder)
 				imagePath += "/Sprites";
 
@@ -526,7 +448,7 @@ namespace AnimationImporter
 				if (animationInfo == null)
 					return null;
 
-				animationInfo.basePath = basePath;
+				animationInfo.basePath = assetBasePath;
 				animationInfo.name = name;
 				animationInfo.nonLoopingAnimations = _animationNamesThatDoNotLoop;
 
@@ -624,66 +546,26 @@ namespace AnimationImporter
 		}
 
 		// ================================================================================
-		//  OnGUI helper
+		//  private methods
 		// --------------------------------------------------------------------------------
 
-		private T ShowDropButton<T>(bool isEnabled) where T : UnityEngine.Object
+		private void CheckIfApplicationIsValid()
 		{
-			T returnValue = null;
-
-			Rect drop_area = GUILayoutUtility.GetRect(0.0f, 80.0f, GUILayout.ExpandWidth(true));
-
-			GUI.enabled = isEnabled;
-			GUI.Box(drop_area, "Drop Aseprite file here", _dropBoxStyle);
-			GUI.enabled = true;
-
-			if (!isEnabled)
-				return null;
-
-			Event evt = Event.current;
-			switch (evt.type)
-			{
-				case EventType.DragUpdated:
-				case EventType.DragPerform:
-
-					if (!drop_area.Contains(evt.mousePosition)
-						|| !DraggedObjectsContainType<T>())
-						return null;
-
-					DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
-
-					if (evt.type == EventType.DragPerform)
-					{
-						DragAndDrop.AcceptDrag();
-
-						foreach (UnityEngine.Object dragged_object in DragAndDrop.objectReferences)
-						{
-							if (dragged_object is T)
-							{
-								returnValue = dragged_object as T;
-							}
-						}
-					}
-
-					evt.Use();
-
-					break;
-			}
-
-			return returnValue;
+			_hasApplication = File.Exists(_asepritePath);
 		}
 
-		private bool DraggedObjectsContainType<T>() where T : UnityEngine.Object
+		private string GetBasePath(string path)
 		{
-			foreach (UnityEngine.Object dragged_object in DragAndDrop.objectReferences)
+			string extension = Path.GetExtension(path);
+			if (extension.Length > 0 && extension[0] == '.')
 			{
-				if (dragged_object is T)
-				{
-					return true;
-				}
+				extension = extension.Remove(0, 1);
 			}
 
-			return false;
+			string fileName = Path.GetFileNameWithoutExtension(path);
+			string lastPart = "/" + fileName + "." + extension;
+
+			return path.Replace(lastPart, "");
 		}
 	}
 }
