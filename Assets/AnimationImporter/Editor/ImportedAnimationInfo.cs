@@ -95,10 +95,6 @@ namespace AnimationImporter
 				clip = new AnimationClip();
 				AssetDatabase.CreateAsset(clip, fileName);
 			}
-			else
-			{
-				clip.ClearCurves();
-			}
 
 			// change loop settings
 			if (ShouldLoop(anim.name))
