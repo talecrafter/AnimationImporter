@@ -75,6 +75,23 @@ namespace AnimationImporter
 			}
 		}
 
+		private AnimationTargetObjectType _targetObjectType = AnimationTargetObjectType.SpriteRenderer;
+		public AnimationTargetObjectType targetObjectType
+		{
+			get
+			{
+				return _targetObjectType;
+			}
+			set
+			{
+				if (_targetObjectType != value)
+				{
+					_targetObjectType = value;
+					SaveUserConfig();
+				}
+			}
+		}
+
 		private SpriteAlignment _spriteAlignment = SpriteAlignment.BottomCenter;
 		public SpriteAlignment spriteAlignment
 		{
@@ -238,6 +255,10 @@ namespace AnimationImporter
 			{
 				_spritePixelsPerUnit = EditorPrefs.GetFloat(PREFS_PREFIX + "spritePixelsPerUnit");
 			}
+			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteTargetObjectType"))
+			{
+				_targetObjectType = (AnimationTargetObjectType)EditorPrefs.GetInt(PREFS_PREFIX + "spriteTargetObjectType");
+			}
 			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteAlignment"))
 			{
 				_spriteAlignment = (SpriteAlignment)EditorPrefs.GetInt(PREFS_PREFIX + "spriteAlignment");
@@ -296,6 +317,7 @@ namespace AnimationImporter
 			EditorPrefs.SetString(PREFS_PREFIX + "asepritePath", _asepritePath);
 
 			EditorPrefs.SetFloat(PREFS_PREFIX + "spritePixelsPerUnit", _spritePixelsPerUnit);
+			EditorPrefs.SetInt(PREFS_PREFIX + "spriteTargetObjectType", (int)_targetObjectType);
 			EditorPrefs.SetInt(PREFS_PREFIX + "spriteAlignment", (int)_spriteAlignment);
 			EditorPrefs.SetFloat(PREFS_PREFIX + "spriteAlignmentCustomX", _spriteAlignmentCustomX);
 			EditorPrefs.SetFloat(PREFS_PREFIX + "spriteAlignmentCustomY", _spriteAlignmentCustomY);
@@ -567,7 +589,7 @@ namespace AnimationImporter
 
 			foreach (var animation in animationInfo.animations)
 			{
-				animationInfo.CreateAnimation(animation, sprites, pathForAnimations, masterName);
+				animationInfo.CreateAnimation(animation, sprites, pathForAnimations, masterName, targetObjectType);
 			}
 		}
 

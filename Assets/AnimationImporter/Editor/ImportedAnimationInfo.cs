@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
-using AnimationImporter.Boomlagoon.JSON;
+using UnityEngine.UI;
 using UnityEditor;
 using System.Linq;
 
@@ -83,7 +83,7 @@ namespace AnimationImporter
 			return null;
 		}
 
-		public void CreateAnimation(ImportedSingleAnimationInfo anim, List<Sprite> sprites, string basePath, string masterName)
+		public void CreateAnimation(ImportedSingleAnimationInfo anim, List<Sprite> sprites, string basePath, string masterName, AnimationTargetObjectType targetType)
 		{
 			AnimationClip clip;
             string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
@@ -108,13 +108,6 @@ namespace AnimationImporter
 				clip.SetLoop(false);
 			}
 
-			EditorCurveBinding curveBinding = new EditorCurveBinding
-			{
-				path = "", // assume SpriteRenderer is at same GameObject as AnimationController
-				type = typeof(SpriteRenderer),
-				propertyName = "m_Sprite"
-			};
-
 			ObjectReferenceKeyframe[] keyFrames = new ObjectReferenceKeyframe[anim.Count + 1]; // one more than sprites because we repeat the last sprite
 
 			for (int i = 0; i < anim.Count; i++)
@@ -134,20 +127,25 @@ namespace AnimationImporter
 			lastKeyFrame.value = lastSprite;
 			keyFrames[anim.Count] = lastKeyFrame;
 
-			// save animation clip values
-			AnimationUtility.SetObjectReferenceCurve(clip, curveBinding, keyFrames);
+			// save curve into clip, either for SpriteRenderer, Image, or both
+			if (targetType == AnimationTargetObjectType.SpriteRenderer)
+			{
+				AnimationUtility.SetObjectReferenceCurve(clip, spriteRendererCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, imageCurveBinding, null);
+			}
+			else if (targetType == AnimationTargetObjectType.Image)
+			{
+				AnimationUtility.SetObjectReferenceCurve(clip, spriteRendererCurveBinding, null);
+				AnimationUtility.SetObjectReferenceCurve(clip, imageCurveBinding, keyFrames);
+			}
+			else if (targetType == AnimationTargetObjectType.SpriteRendererAndImage)
+			{
+				AnimationUtility.SetObjectReferenceCurve(clip, spriteRendererCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, imageCurveBinding, keyFrames);
+			}
+
 			EditorUtility.SetDirty(clip);
 			anim.animationClip = clip;
-		}
-
-		private bool ShouldLoop(string name)
-		{
-			if (nonLoopingAnimations.Contains(name))
-			{
-				return false;
-			}
-			
-			return true;
 		}
 
 		public SpriteMetaData[] GetSpriteSheet(SpriteAlignment spriteAlignment, float customX, float customY)
@@ -189,6 +187,41 @@ namespace AnimationImporter
 		// ================================================================================
 		//  private methods
 		// --------------------------------------------------------------------------------
+
+		private static EditorCurveBinding spriteRendererCurveBinding
+		{
+			get
+			{
+				return new EditorCurveBinding
+				{
+					path = "", // assume SpriteRenderer is at same GameObject as AnimationController
+					type = typeof(SpriteRenderer),
+					propertyName = "m_Sprite"
+				};
+			}
+		}
+
+		private static EditorCurveBinding imageCurveBinding
+		{
+			get
+			{
+				return new EditorCurveBinding
+				{
+					type = typeof(Image),
+					propertyName = "m_Sprite"
+				};
+			}
+		}
+
+		private bool ShouldLoop(string name)
+		{
+			if (nonLoopingAnimations.Contains(name))
+			{
+				return false;
+			}
+
+			return true;
+		}
 
 		private void BuildIndex()
 		{

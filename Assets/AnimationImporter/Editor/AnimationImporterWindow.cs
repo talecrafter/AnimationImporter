@@ -125,6 +125,8 @@ namespace AnimationImporter
 				sprite values
 			*/
 
+			importer.targetObjectType = (AnimationTargetObjectType)EditorGUILayout.EnumPopup("Target Object", importer.targetObjectType);
+
 			importer.spriteAlignment = (SpriteAlignment)EditorGUILayout.EnumPopup("Sprite Alignment", importer.spriteAlignment);
 
 			if (importer.spriteAlignment == SpriteAlignment.Custom)
