@@ -3,9 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
-using UnityEngine.UI;
 using UnityEditor;
 using System.Linq;
+using UnityEngine.UI;
 
 namespace AnimationImporter
 {
@@ -207,6 +207,7 @@ namespace AnimationImporter
 			{
 				return new EditorCurveBinding
 				{
+					path = "", // assume Image is at same GameObject as AnimationController
 					type = typeof(Image),
 					propertyName = "m_Sprite"
 				};
