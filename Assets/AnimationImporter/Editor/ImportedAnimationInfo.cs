@@ -38,6 +38,26 @@ namespace AnimationImporter
 
 		private Dictionary<string, ImportedSingleAnimationInfo> _animationDatabase = null;
 
+		private PreviousImportSettings _previousImportSettings = null;
+		public PreviousImportSettings previousImportSettings
+		{
+			get
+			{
+				return _previousImportSettings;
+			}
+			set
+			{
+				_previousImportSettings = value;
+			}
+		}
+		public bool hasPreviousTextureImportSettings
+		{
+			get
+			{
+				return _previousImportSettings != null && _previousImportSettings.hasPreviousTextureImportSettings;
+			}
+		}
+
 		// ================================================================================
 		//  public methods
 		// --------------------------------------------------------------------------------
