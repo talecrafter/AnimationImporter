@@ -422,7 +422,6 @@ namespace AnimationImporter
 			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, basePath, name, _saveSpritesToSubfolder))
 			{
 				AssetDatabase.Refresh();
-				AssetDatabase.Refresh();
 				return ImportJSONAndCreateAnimations(basePath, name);
 			}
 
