@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Random = UnityEngine.Random;
 using UnityEditor;
 using System.Linq;
-using UnityEngine.UI;
 
 namespace AnimationImporter
 {
@@ -150,18 +149,18 @@ namespace AnimationImporter
 			// save curve into clip, either for SpriteRenderer, Image, or both
 			if (targetType == AnimationTargetObjectType.SpriteRenderer)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, spriteRendererCurveBinding, keyFrames);
-				AnimationUtility.SetObjectReferenceCurve(clip, imageCurveBinding, null);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.spriteRendererCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.imageCurveBinding, null);
 			}
 			else if (targetType == AnimationTargetObjectType.Image)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, spriteRendererCurveBinding, null);
-				AnimationUtility.SetObjectReferenceCurve(clip, imageCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.spriteRendererCurveBinding, null);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.imageCurveBinding, keyFrames);
 			}
 			else if (targetType == AnimationTargetObjectType.SpriteRendererAndImage)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, spriteRendererCurveBinding, keyFrames);
-				AnimationUtility.SetObjectReferenceCurve(clip, imageCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.spriteRendererCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.imageCurveBinding, keyFrames);
 			}
 
 			EditorUtility.SetDirty(clip);
@@ -207,32 +206,6 @@ namespace AnimationImporter
 		// ================================================================================
 		//  private methods
 		// --------------------------------------------------------------------------------
-
-		private static EditorCurveBinding spriteRendererCurveBinding
-		{
-			get
-			{
-				return new EditorCurveBinding
-				{
-					path = "", // assume SpriteRenderer is at same GameObject as AnimationController
-					type = typeof(SpriteRenderer),
-					propertyName = "m_Sprite"
-				};
-			}
-		}
-
-		private static EditorCurveBinding imageCurveBinding
-		{
-			get
-			{
-				return new EditorCurveBinding
-				{
-					path = "", // assume Image is at same GameObject as AnimationController
-					type = typeof(Image),
-					propertyName = "m_Sprite"
-				};
-			}
-		}
 
 		private bool ShouldLoop(string name)
 		{

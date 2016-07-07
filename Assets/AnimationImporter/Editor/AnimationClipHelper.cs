@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace AnimationImporter
 {
@@ -43,6 +44,36 @@ namespace AnimationImporter
 			clipSettings.loopBlend = value;
 
 			serializedClip.ApplyModifiedProperties();
+		}
+
+		// ================================================================================
+		//  curve bindings
+		// --------------------------------------------------------------------------------
+
+		public static EditorCurveBinding spriteRendererCurveBinding
+		{
+			get
+			{
+				return new EditorCurveBinding
+				{
+					path = "", // assume SpriteRenderer is at same GameObject as AnimationController
+					type = typeof(SpriteRenderer),
+					propertyName = "m_Sprite"
+				};
+			}
+		}
+
+		public static EditorCurveBinding imageCurveBinding
+		{
+			get
+			{
+				return new EditorCurveBinding
+				{
+					path = "", // assume Image is at same GameObject as AnimationController
+					type = typeof(Image),
+					propertyName = "m_Sprite"
+				};
+			}
 		}
 	}
 }
