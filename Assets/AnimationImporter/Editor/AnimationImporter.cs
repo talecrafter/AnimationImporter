@@ -506,14 +506,10 @@ namespace AnimationImporter
 			}
 		}
 
-		private ImportedAnimationInfo ImportJSONAndCreateAnimations(string assetBasePath, string name)
+		private ImportedAnimationInfo ImportJSONAndCreateAnimations(string basePath, string name)
 		{
-			string imagePath = assetBasePath;
-			if (_saveSpritesToSubfolder)
-				imagePath += "/Sprites";
-
-			string imageAssetFilename = imagePath + "/" + name + ".png";
-			string textAssetFilename = imagePath + "/" + name + ".json";
+			string imageAssetFilename = GetImageAssetFilename(basePath, name);
+			string textAssetFilename = GetJSONAssetFilename(basePath, name);
 			TextAsset textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(textAssetFilename);
 
 			if (textAsset != null)
@@ -525,7 +521,7 @@ namespace AnimationImporter
 				if (animationInfo == null)
 					return null;
 
-				animationInfo.basePath = assetBasePath;
+				animationInfo.basePath = basePath;
 				animationInfo.name = name;
 				animationInfo.nonLoopingAnimations = _animationNamesThatDoNotLoop;
 
@@ -643,6 +639,22 @@ namespace AnimationImporter
 			string lastPart = "/" + fileName + "." + extension;
 
 			return path.Replace(lastPart, "");
+		}
+
+		private string GetImageAssetFilename(string basePath, string name)
+		{
+			if (_saveSpritesToSubfolder)
+				basePath += "/Sprites";
+
+			return basePath + "/" + name + ".png";
+		}
+
+		private string GetJSONAssetFilename(string basePath, string name)
+		{
+			if (_saveSpritesToSubfolder)
+				basePath += "/Sprites";
+
+			return basePath + "/" + name + ".json";
 		}
 	}
 }
