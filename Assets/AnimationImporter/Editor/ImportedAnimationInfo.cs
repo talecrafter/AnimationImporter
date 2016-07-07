@@ -106,17 +106,24 @@ namespace AnimationImporter
 		{
 			AnimationClip clip;
             string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
+			bool isLooping = ShouldLoop(anim.name);
 
 			// check if animation file already exists
 			clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(fileName);
-			if (clip == null)
+			if (clip != null)
+			{
+				// get previous animation settings
+				targetType = PreviousImportSettings.GetAnimationTargetFromExistingClip(clip);
+				isLooping = clip.isLooping;
+			}
+			else
 			{
 				clip = new AnimationClip();
 				AssetDatabase.CreateAsset(clip, fileName);
 			}
 
 			// change loop settings
-			if (ShouldLoop(anim.name))
+			if (isLooping)
 			{
 				clip.wrapMode = WrapMode.Loop;
 				clip.SetLoop(true);
