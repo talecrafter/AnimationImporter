@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -160,51 +160,51 @@ namespace AnimationImporter
 			}
 		}
 
-		private bool _saveSpritesToSubfolder = true;
+		private int _saveSpritesToSubfolder = 1;
 		public bool saveSpritesToSubfolder
 		{
 			get
 			{
-				return _saveSpritesToSubfolder;
+				return Convert.ToBoolean(_saveSpritesToSubfolder);
 			}
 			set
 			{
-				if (_saveSpritesToSubfolder != value)
+				if (_saveSpritesToSubfolder != Convert.ToInt16(value))
 				{
-					_saveSpritesToSubfolder = value;
+					_saveSpritesToSubfolder = Convert.ToInt16(value);
 					SaveUserConfig();
 				}
 			}
 		}
-		private bool _saveAnimationsToSubfolder = true;
+		private int _saveAnimationsToSubfolder = 1;
 		public bool saveAnimationsToSubfolder
 		{
 			get
 			{
-				return _saveAnimationsToSubfolder;
+				return Convert.ToBoolean(_saveAnimationsToSubfolder);
 			}
 			set
 			{
-				if (_saveAnimationsToSubfolder != value)
+				if (_saveAnimationsToSubfolder != Convert.ToInt16(value))
 				{
-					_saveAnimationsToSubfolder = value;
+					_saveAnimationsToSubfolder = Convert.ToInt16(value);
 					SaveUserConfig();
 				}
 			}
 		}
 
-		private bool _automaticImporting = false;
+		private int _automaticImporting = 0;
 		public bool automaticImporting
 		{
 			get
 			{
-				return _automaticImporting;
+				return Convert.ToBoolean(_automaticImporting);
 			}
 			set
 			{
-				if (_automaticImporting != value)
+				if (_automaticImporting != Convert.ToInt16(value))
 				{
-					_automaticImporting = value;
+					_automaticImporting = Convert.ToInt16(value);
 					SaveUserConfig();
 				}
 			}
@@ -251,60 +251,60 @@ namespace AnimationImporter
 					_asepritePath = "";
 			}
 
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spritePixelsPerUnit"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "spritePixelsPerUnit"))
 			{
-				_spritePixelsPerUnit = EditorPrefs.GetFloat(PREFS_PREFIX + "spritePixelsPerUnit");
+				_spritePixelsPerUnit = PlayerPrefs.GetFloat(PREFS_PREFIX + "spritePixelsPerUnit");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteTargetObjectType"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "spriteTargetObjectType"))
 			{
-				_targetObjectType = (AnimationTargetObjectType)EditorPrefs.GetInt(PREFS_PREFIX + "spriteTargetObjectType");
+				_targetObjectType = (AnimationTargetObjectType)PlayerPrefs.GetInt(PREFS_PREFIX + "spriteTargetObjectType");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteAlignment"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "spriteAlignment"))
 			{
-				_spriteAlignment = (SpriteAlignment)EditorPrefs.GetInt(PREFS_PREFIX + "spriteAlignment");
+				_spriteAlignment = (SpriteAlignment)PlayerPrefs.GetInt(PREFS_PREFIX + "spriteAlignment");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteAlignmentCustomX"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "spriteAlignmentCustomX"))
 			{
-				_spriteAlignmentCustomX = EditorPrefs.GetFloat(PREFS_PREFIX + "spriteAlignmentCustomX");
+				_spriteAlignmentCustomX = PlayerPrefs.GetFloat(PREFS_PREFIX + "spriteAlignmentCustomX");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteAlignmentCustomY"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "spriteAlignmentCustomY"))
 			{
-				_spriteAlignmentCustomY = EditorPrefs.GetFloat(PREFS_PREFIX + "spriteAlignmentCustomY");
-			}
-
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "saveSpritesToSubfolder"))
-			{
-				_saveSpritesToSubfolder = EditorPrefs.GetBool(PREFS_PREFIX + "saveSpritesToSubfolder");
-			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "saveAnimationsToSubfolder"))
-			{
-				_saveAnimationsToSubfolder = EditorPrefs.GetBool(PREFS_PREFIX + "saveAnimationsToSubfolder");
+				_spriteAlignmentCustomY = PlayerPrefs.GetFloat(PREFS_PREFIX + "spriteAlignmentCustomY");
 			}
 
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "automaticImporting"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "saveSpritesToSubfolder"))
 			{
-				_automaticImporting = EditorPrefs.GetBool(PREFS_PREFIX + "automaticImporting");
+				_saveSpritesToSubfolder = PlayerPrefs.GetInt(PREFS_PREFIX + "saveSpritesToSubfolder");
+			}
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "saveAnimationsToSubfolder"))
+			{
+				_saveAnimationsToSubfolder = PlayerPrefs.GetInt(PREFS_PREFIX + "saveAnimationsToSubfolder");
 			}
 
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "baseControllerPath"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "automaticImporting"))
 			{
-				string baseControllerPath = EditorPrefs.GetString(PREFS_PREFIX + "baseControllerPath");
+				_automaticImporting = PlayerPrefs.GetInt(PREFS_PREFIX + "automaticImporting");
+			}
+
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "baseControllerPath"))
+			{
+				string baseControllerPath = PlayerPrefs.GetString(PREFS_PREFIX + "baseControllerPath");
 				if (!string.IsNullOrEmpty(baseControllerPath))
 				{
 					_baseController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(baseControllerPath);
 				}
 			}
 
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "nonLoopCount"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "nonLoopCount"))
 			{
 				_animationNamesThatDoNotLoop = new List<string>();
-				int count = EditorPrefs.GetInt(PREFS_PREFIX + "nonLoopCount");
+				int count = PlayerPrefs.GetInt(PREFS_PREFIX + "nonLoopCount");
 
 				for (int i = 0; i < count; i++)
 				{
-					if (EditorPrefs.HasKey(PREFS_PREFIX + "nonLoopCount" + i.ToString()))
+					if (PlayerPrefs.HasKey(PREFS_PREFIX + "nonLoopCount" + i.ToString()))
 					{
-						_animationNamesThatDoNotLoop.Add(EditorPrefs.GetString(PREFS_PREFIX + "nonLoopCount" + i.ToString()));
+						_animationNamesThatDoNotLoop.Add(PlayerPrefs.GetString(PREFS_PREFIX + "nonLoopCount" + i.ToString()));
 					}
 				}
 			}
@@ -316,30 +316,30 @@ namespace AnimationImporter
 		{
 			EditorPrefs.SetString(PREFS_PREFIX + "asepritePath", _asepritePath);
 
-			EditorPrefs.SetFloat(PREFS_PREFIX + "spritePixelsPerUnit", _spritePixelsPerUnit);
-			EditorPrefs.SetInt(PREFS_PREFIX + "spriteTargetObjectType", (int)_targetObjectType);
-			EditorPrefs.SetInt(PREFS_PREFIX + "spriteAlignment", (int)_spriteAlignment);
-			EditorPrefs.SetFloat(PREFS_PREFIX + "spriteAlignmentCustomX", _spriteAlignmentCustomX);
-			EditorPrefs.SetFloat(PREFS_PREFIX + "spriteAlignmentCustomY", _spriteAlignmentCustomY);
+			PlayerPrefs.SetFloat(PREFS_PREFIX + "spritePixelsPerUnit", _spritePixelsPerUnit);
+			PlayerPrefs.SetInt(PREFS_PREFIX + "spriteTargetObjectType", (int)_targetObjectType);
+			PlayerPrefs.SetInt(PREFS_PREFIX + "spriteAlignment", (int)_spriteAlignment);
+			PlayerPrefs.SetFloat(PREFS_PREFIX + "spriteAlignmentCustomX", _spriteAlignmentCustomX);
+			PlayerPrefs.SetFloat(PREFS_PREFIX + "spriteAlignmentCustomY", _spriteAlignmentCustomY);
 
-			EditorPrefs.SetBool(PREFS_PREFIX + "saveSpritesToSubfolder", _saveSpritesToSubfolder);
-			EditorPrefs.SetBool(PREFS_PREFIX + "saveAnimationsToSubfolder", _saveAnimationsToSubfolder);
+			PlayerPrefs.SetInt(PREFS_PREFIX + "saveSpritesToSubfolder", _saveSpritesToSubfolder);
+			PlayerPrefs.SetInt(PREFS_PREFIX + "saveAnimationsToSubfolder", _saveAnimationsToSubfolder);
 
-			EditorPrefs.SetBool(PREFS_PREFIX + "automaticImporting", _automaticImporting);
+			PlayerPrefs.SetInt(PREFS_PREFIX + "automaticImporting", _automaticImporting);
 
 			if (_baseController != null)
 			{
-				EditorPrefs.SetString(PREFS_PREFIX + "baseControllerPath", AssetDatabase.GetAssetPath(_baseController));
+				PlayerPrefs.SetString(PREFS_PREFIX + "baseControllerPath", AssetDatabase.GetAssetPath(_baseController));
 			}
 			else
 			{
-				EditorPrefs.SetString(PREFS_PREFIX + "baseControllerPath", "");
+				PlayerPrefs.SetString(PREFS_PREFIX + "baseControllerPath", "");
 			}
 
-			EditorPrefs.SetInt(PREFS_PREFIX + "nonLoopCount", _animationNamesThatDoNotLoop.Count);
+			PlayerPrefs.SetInt(PREFS_PREFIX + "nonLoopCount", _animationNamesThatDoNotLoop.Count);
 			for (int i = 0; i < _animationNamesThatDoNotLoop.Count; i++)
 			{
-				EditorPrefs.SetString(PREFS_PREFIX + "nonLoopCount" + i.ToString(), _animationNamesThatDoNotLoop[i]);
+				PlayerPrefs.SetString(PREFS_PREFIX + "nonLoopCount" + i.ToString(), _animationNamesThatDoNotLoop[i]);
 			}
 		}
 
@@ -422,7 +422,7 @@ namespace AnimationImporter
 			// we analyze import settings on existing files
 			PreviousImportSettings previousAnimationInfo = CollectPreviousImportSettings(basePath, name);
 
-			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, basePath, name, _saveSpritesToSubfolder))
+			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, basePath, name, saveSpritesToSubfolder))
 			{
 				AssetDatabase.Refresh();
 				return ImportJSONAndCreateAnimations(basePath, name, previousAnimationInfo);
@@ -551,7 +551,7 @@ namespace AnimationImporter
 		{
 			if (animationInfo.hasAnimations)
 			{
-				if (_saveAnimationsToSubfolder)
+				if (saveAnimationsToSubfolder)
 				{
 					string path = animationInfo.basePath + "/Animations";
 					if (!Directory.Exists(path))
@@ -607,7 +607,7 @@ namespace AnimationImporter
 				importer.textureFormat = TextureImporterFormat.AutomaticTruecolor;
 			}
 
-			// create sub sprites for this file according to the AsepriteAnimationInfo 
+			// create sub sprites for this file according to the AsepriteAnimationInfo
 			importer.spritesheet = animations.GetSpriteSheet(_spriteAlignment, _spriteAlignmentCustomX, _spriteAlignmentCustomY);
 
 			// reapply old import settings (pivot settings for sprites)
@@ -668,7 +668,7 @@ namespace AnimationImporter
 
 		private string GetImageAssetFilename(string basePath, string name)
 		{
-			if (_saveSpritesToSubfolder)
+			if (saveSpritesToSubfolder)
 				basePath += "/Sprites";
 
 			return basePath + "/" + name + ".png";
@@ -676,7 +676,7 @@ namespace AnimationImporter
 
 		private string GetJSONAssetFilename(string basePath, string name)
 		{
-			if (_saveSpritesToSubfolder)
+			if (saveSpritesToSubfolder)
 				basePath += "/Sprites";
 
 			return basePath + "/" + name + ".json";
