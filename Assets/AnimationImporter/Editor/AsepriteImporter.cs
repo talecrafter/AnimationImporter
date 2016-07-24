@@ -11,6 +11,7 @@ namespace AnimationImporter
 {
 	public class AsepriteImporter
 	{
+
 		// ================================================================================
 		//  const
 		// --------------------------------------------------------------------------------
@@ -43,6 +44,7 @@ namespace AnimationImporter
 		/// <returns></returns>
 		public static bool CreateSpriteAtlasAndMetaFile(string asepritePath, string assetBasePath, string name, bool saveSpritesToSubfolder = true)
 		{
+      AnimationImporter importer = AnimationImporter.Instance;
 			char delimiter = '\"';
 			string parameters = delimiter + name + ".ase" + delimiter + " --data " + delimiter + name + ".json" + delimiter + " --sheet " + delimiter + name + ".png" + delimiter + " --sheet-pack --list-tags --format json-array";
 
@@ -65,6 +67,21 @@ namespace AnimationImporter
 					File.Delete(target);
 				File.Move(assetBasePath + "/" + name + ".png", target);
 			}
+      else if (success && !string.IsNullOrEmpty(importer.spritesFolderPath)) {
+        // create subdirectory
+				if (!Directory.Exists(importer.spritesFolderPath))
+					Directory.CreateDirectory(importer.spritesFolderPath);
+
+				string target = importer.spritesFolderPath + "/" + name + ".json";
+				if (File.Exists(target))
+					File.Delete(target);
+				File.Move(assetBasePath + "/" + name + ".json", target);
+
+				target = importer.spritesFolderPath + "/" + name + ".png";
+				if (File.Exists(target))
+					File.Delete(target);
+				File.Move(assetBasePath + "/" + name + ".png", target);
+      }
 
 			return success;
 		}
@@ -117,7 +134,7 @@ namespace AnimationImporter
 			if (GetAnimationsFromJSON(importedInfos, meta) == false)
 			{
 				return null;
-			}		
+			}
 
 			if (GetSpritesFromJSON(root, importedInfos) == false)
 			{

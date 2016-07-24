@@ -94,7 +94,7 @@ namespace AnimationImporter
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Aseprite Application Path");
 
-			string newPath = importer.asepritePath;
+			string newAsepritePath = importer.asepritePath;
 
 			if (GUILayout.Button("Select"))
 			{
@@ -104,18 +104,18 @@ namespace AnimationImporter
 					"exe");
 				if (!string.IsNullOrEmpty(path))
 				{
-					newPath = path;
+					newAsepritePath = path;
 
 					if (Application.platform == RuntimePlatform.OSXEditor)
 					{
-						newPath += "/Contents/MacOS/aseprite";
+						newAsepritePath += "/Contents/MacOS/aseprite";
 					}
 				}
 			}
 			GUILayout.EndHorizontal();
 
-			GUILayout.BeginHorizontal();			
-			importer.asepritePath = GUILayout.TextField(newPath, GUILayout.MaxWidth(300f));
+			GUILayout.BeginHorizontal();
+			importer.asepritePath = GUILayout.TextField(newAsepritePath, GUILayout.MaxWidth(300f));
 
 			GUILayout.EndHorizontal();
 
@@ -137,11 +137,16 @@ namespace AnimationImporter
 
 			importer.spritePixelsPerUnit = EditorGUILayout.FloatField("Sprite Pixels per Unit", importer.spritePixelsPerUnit);
 
-			EditorGUILayout.BeginHorizontal();
-			importer.saveSpritesToSubfolder = EditorGUILayout.Toggle("Sprites to Subfolder", importer.saveSpritesToSubfolder);
+      /*
+        Custom folder options
+       */
+      ShowFolderSelectors();
 
-			importer.saveAnimationsToSubfolder = EditorGUILayout.Toggle("Animations to Subfolder", importer.saveAnimationsToSubfolder);
-			EditorGUILayout.EndHorizontal();
+      /*
+        Subfolder options
+       */
+			importer.saveSpritesToSubfolder = EditorGUILayout.ToggleLeft("Sprites to Subfolder", importer.saveSpritesToSubfolder);
+			importer.saveAnimationsToSubfolder = EditorGUILayout.ToggleLeft("Animations to Subfolder", importer.saveAnimationsToSubfolder);
 
 			GUILayout.Space(25f);
 
@@ -163,7 +168,7 @@ namespace AnimationImporter
 			{
 				GUILayout.BeginHorizontal();
 				GUILayout.Label(importer.animationNamesThatDoNotLoop[i]);
-				bool doDelete = GUILayout.Button("Delete");			
+				bool doDelete = GUILayout.Button("Delete");
 				GUILayout.EndHorizontal();
 				if (doDelete)
 				{
@@ -186,6 +191,71 @@ namespace AnimationImporter
 			}
 			GUILayout.EndHorizontal();
 		}
+
+    private void ShowFolderSelectors()
+    {
+      string newFolderPath;
+
+      // Sprites
+      GUILayout.BeginHorizontal();
+			GUILayout.Label("Sprites Folder Path");
+
+			newFolderPath = importer.spritesFolderPath;
+
+			if (GUILayout.Button("Select")) {
+				newFolderPath = ParseFolderPath(
+          EditorUtility.OpenFolderPanel("Select Florder to Save Imported Sprites", Application.dataPath, "")
+        );
+			}
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			importer.spritesFolderPath = GUILayout.TextField(newFolderPath);
+
+			GUILayout.EndHorizontal();
+
+			GUILayout.Space(5f);
+
+      // Animations
+      GUILayout.BeginHorizontal();
+			GUILayout.Label("Animations Folder Path");
+
+			newFolderPath = importer.animationsFolderPath;
+
+			if (GUILayout.Button("Select")) {
+				newFolderPath = ParseFolderPath(
+          EditorUtility.OpenFolderPanel("Select Florder to Save Generated Animations", Application.dataPath, "")
+        );
+			}
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			importer.animationsFolderPath = GUILayout.TextField(newFolderPath);
+
+			GUILayout.EndHorizontal();
+
+			GUILayout.Space(5f);
+
+      // AnimatorController
+      GUILayout.BeginHorizontal();
+			GUILayout.Label("Animator Controllers Folder Path");
+
+			newFolderPath = importer.animatorControllersFolderPath;
+
+			if (GUILayout.Button("Select")) {
+				newFolderPath = ParseFolderPath(
+          EditorUtility.OpenFolderPanel("Select Florder to Save Generated Animator Controllers", Application.dataPath, "")
+        );
+			}
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			importer.animatorControllersFolderPath = GUILayout.TextField(newFolderPath);
+
+			GUILayout.EndHorizontal();
+
+			GUILayout.Space(5f);
+    }
 
 		private void ShowAnimationsGUI()
 		{
@@ -304,5 +374,12 @@ namespace AnimationImporter
 
 			return false;
 		}
+
+    private string ParseFolderPath (string path) {
+      if (path == Application.dataPath.Replace("/Assets", "") || !path.Contains(Application.dataPath.Replace("/Assets", "")))
+        path = "Assets";
+
+      return path.Replace(Application.dataPath.Replace("Assets", ""), "");
+    }
 	}
 }
