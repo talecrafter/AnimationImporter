@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Random = UnityEngine.Random;
 using UnityEditor;
 using System.Linq;
@@ -10,9 +11,39 @@ namespace AnimationImporter
 {
 	public class ImportedAnimationInfo
 	{
+		private Regex nonLoopingAnimationsRegex;
+		private List<string> _nonLoopingAnimations;
+
 		public string basePath { get; set; }
 		public string name { get; set; }
-		public List<string> nonLoopingAnimations { get; set; }
+		public List<string> nonLoopingAnimations
+		{
+			get
+			{
+				return _nonLoopingAnimations;
+			}
+			set
+			{
+				// Build a regex from the supplied values
+				string regexString = string.Empty;
+				if (value.Count > 0)
+				{
+					// Add word boundaries to treat non-regular expressions as exact names
+					regexString = string.Concat("\\b", value[0], "\\b");
+				}
+
+				for (int i = 1; i < value.Count; i++)
+				{
+					string anim = value[i];
+					// Add or to speed up the test rather than building N regular expressions
+					regexString = string.Concat(regexString, "|", "\\b", anim, "\\b");
+				}
+
+				nonLoopingAnimationsRegex = new System.Text.RegularExpressions.Regex(regexString);
+
+				_nonLoopingAnimations = value;
+			}
+		}
 
 		public int width { get; set; }
 		public int height { get; set; }
@@ -216,9 +247,12 @@ namespace AnimationImporter
 
 		private bool ShouldLoop(string name)
 		{
-			if (nonLoopingAnimations.Contains(name))
+			if (!string.IsNullOrEmpty(nonLoopingAnimationsRegex.ToString()))
 			{
-				return false;
+				if (nonLoopingAnimationsRegex.IsMatch(name))
+				{
+					return false;
+				}
 			}
 
 			return true;
