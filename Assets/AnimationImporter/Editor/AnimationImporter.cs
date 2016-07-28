@@ -124,9 +124,9 @@ namespace AnimationImporter
 
 		private void LoadPreferences()
 		{
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "asepritePath"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "asepritePath"))
 			{
-				_asepritePath = EditorPrefs.GetString(PREFS_PREFIX + "asepritePath");
+				_asepritePath = PlayerPrefs.GetString(PREFS_PREFIX + "asepritePath");
 			}
 			else
 			{
@@ -136,9 +136,9 @@ namespace AnimationImporter
 					_asepritePath = "";
 			}
 
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "baseControllerPath"))
+			if (PlayerPrefs.HasKey(PREFS_PREFIX + "baseControllerPath"))
 			{
-				string baseControllerPath = EditorPrefs.GetString(PREFS_PREFIX + "baseControllerPath");
+				string baseControllerPath = PlayerPrefs.GetString(PREFS_PREFIX + "baseControllerPath");
 				if (!string.IsNullOrEmpty(baseControllerPath))
 				{
 					_baseController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(baseControllerPath);
@@ -150,15 +150,15 @@ namespace AnimationImporter
 
 		private void SaveUserConfig()
 		{
-			EditorPrefs.SetString(PREFS_PREFIX + "asepritePath", _asepritePath);
+			PlayerPrefs.SetString(PREFS_PREFIX + "asepritePath", _asepritePath);
 
 			if (_baseController != null)
 			{
-				EditorPrefs.SetString(PREFS_PREFIX + "baseControllerPath", AssetDatabase.GetAssetPath(_baseController));
+				PlayerPrefs.SetString(PREFS_PREFIX + "baseControllerPath", AssetDatabase.GetAssetPath(_baseController));
 			}
 			else
 			{
-				EditorPrefs.SetString(PREFS_PREFIX + "baseControllerPath", "");
+				PlayerPrefs.SetString(PREFS_PREFIX + "baseControllerPath", "");
 			}
 		}
 

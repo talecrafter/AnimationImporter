@@ -147,7 +147,8 @@ namespace AnimationImporter
 		/// <returns><c>true</c>, if the user has old preferences, <c>false</c> otherwise.</returns>
 		public bool UserHasOldPreferences()
 		{
-			return EditorPrefs.HasKey(PREFS_PREFIX + "spritePixelsPerUnit");
+			var pixelsPerUnityKey = PREFS_PREFIX + "spritePixelsPerUnit";
+			return PlayerPrefs.HasKey(pixelsPerUnityKey) || EditorPrefs.HasKey(pixelsPerUnityKey);
 		}
 
 		/// <summary>
@@ -155,46 +156,46 @@ namespace AnimationImporter
 		/// </summary>
 		public void CopyFromPreferences()
 		{
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spritePixelsPerUnit"))
+			if (HasKeyInPreferences(PREFS_PREFIX + "spritePixelsPerUnit"))
 			{
-				_spritePixelsPerUnit = EditorPrefs.GetFloat(PREFS_PREFIX + "spritePixelsPerUnit");
+				_spritePixelsPerUnit = GetFloatFromPreferences(PREFS_PREFIX + "spritePixelsPerUnit");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteTargetObjectType"))
+			if (HasKeyInPreferences(PREFS_PREFIX + "spriteTargetObjectType"))
 			{
-				_targetObjectType = (AnimationTargetObjectType)EditorPrefs.GetInt(PREFS_PREFIX + "spriteTargetObjectType");
+				_targetObjectType = (AnimationTargetObjectType)GetIntFromPreferences(PREFS_PREFIX + "spriteTargetObjectType");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteAlignment"))
+			if (HasKeyInPreferences(PREFS_PREFIX + "spriteAlignment"))
 			{
-				_spriteAlignment = (SpriteAlignment)EditorPrefs.GetInt(PREFS_PREFIX + "spriteAlignment");
+				_spriteAlignment = (SpriteAlignment)GetIntFromPreferences(PREFS_PREFIX + "spriteAlignment");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteAlignmentCustomX"))
+			if (HasKeyInPreferences(PREFS_PREFIX + "spriteAlignmentCustomX"))
 			{
-				_spriteAlignmentCustomX = EditorPrefs.GetFloat(PREFS_PREFIX + "spriteAlignmentCustomX");
+				_spriteAlignmentCustomX = GetFloatFromPreferences(PREFS_PREFIX + "spriteAlignmentCustomX");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "spriteAlignmentCustomY"))
+			if (HasKeyInPreferences(PREFS_PREFIX + "spriteAlignmentCustomY"))
 			{
-				_spriteAlignmentCustomY = EditorPrefs.GetFloat(PREFS_PREFIX + "spriteAlignmentCustomY");
+				_spriteAlignmentCustomY = GetFloatFromPreferences(PREFS_PREFIX + "spriteAlignmentCustomY");
 			}
 
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "saveSpritesToSubfolder"))
+			if (HasKeyInPreferences(PREFS_PREFIX + "saveSpritesToSubfolder"))
 			{
-				_saveSpritesToSubfolder = EditorPrefs.GetBool(PREFS_PREFIX + "saveSpritesToSubfolder");
+				_saveSpritesToSubfolder = GetBoolFromPreferences(PREFS_PREFIX + "saveSpritesToSubfolder");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "saveAnimationsToSubfolder"))
+			if (HasKeyInPreferences(PREFS_PREFIX + "saveAnimationsToSubfolder"))
 			{
-				_saveAnimationsToSubfolder = EditorPrefs.GetBool(PREFS_PREFIX + "saveAnimationsToSubfolder");
+				_saveAnimationsToSubfolder = GetBoolFromPreferences(PREFS_PREFIX + "saveAnimationsToSubfolder");
 			}
-			if (EditorPrefs.HasKey(PREFS_PREFIX + "automaticImporting"))
+			if (HasKeyInPreferences(PREFS_PREFIX + "automaticImporting"))
 			{
-				_automaticImporting = EditorPrefs.GetBool(PREFS_PREFIX + "automaticImporting");
+				_automaticImporting = GetBoolFromPreferences(PREFS_PREFIX + "automaticImporting");
 			}
 
 			// Find all nonLoopingClip Prefences, load them into the sharedData.
 			int numOldClips = 0;
 			string loopCountKey = PREFS_PREFIX + "nonLoopCount";
-			if (EditorPrefs.HasKey(loopCountKey))
+			if (HasKeyInPreferences(loopCountKey))
 			{
-				numOldClips = EditorPrefs.GetInt(loopCountKey);
+				numOldClips = GetIntFromPreferences(loopCountKey);
 			}
 
 			for (int i = 0; i < numOldClips; ++i)
@@ -202,14 +203,83 @@ namespace AnimationImporter
 				string clipKey = PREFS_PREFIX + "nonLoopCount" + i.ToString();
 
 				// If the clip hasn't already been moved to the shared data, do it now.
-				if (EditorPrefs.HasKey(clipKey))
+				if (HasKeyInPreferences(clipKey))
 				{
-					var stringAtKey = EditorPrefs.GetString(clipKey);
+					var stringAtKey = GetStringFromPreferences(clipKey);
 					if (!_animationNamesThatDoNotLoop.Contains(stringAtKey))
 					{
 						_animationNamesThatDoNotLoop.Add(stringAtKey);
 					}
 				}
+			}
+		}
+
+		private bool HasKeyInPreferences(string key)
+		{
+			return PlayerPrefs.HasKey(key) || EditorPrefs.HasKey(key);
+		}
+
+		private int GetIntFromPreferences(string intKey)
+		{
+			if (PlayerPrefs.HasKey(intKey))
+			{
+				return PlayerPrefs.GetInt(intKey);
+			}
+			else if (EditorPrefs.HasKey(intKey))
+			{
+				return EditorPrefs.GetInt(intKey);
+			}
+			else
+			{
+				return int.MinValue;
+			}
+		}
+
+		private float GetFloatFromPreferences(string floatKey)
+		{
+			if (PlayerPrefs.HasKey(floatKey))
+			{
+				return PlayerPrefs.GetFloat(floatKey);
+			}
+			else if (EditorPrefs.HasKey(floatKey))
+			{
+				return EditorPrefs.GetFloat(floatKey);
+			}
+			else
+			{
+				return float.NaN;
+			}
+		}
+
+		private bool GetBoolFromPreferences(string boolKey)
+		{
+			if (PlayerPrefs.HasKey(boolKey))
+			{
+				return System.Convert.ToBoolean(PlayerPrefs.GetInt(boolKey));
+			}
+			else if (EditorPrefs.HasKey(boolKey))
+			{
+				return EditorPrefs.GetBool(boolKey);
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		private string GetStringFromPreferences(string stringKey)
+		{
+			if (PlayerPrefs.HasKey(stringKey))
+			{
+				return PlayerPrefs.GetString(stringKey);
+			}
+			else if (EditorPrefs.HasKey(stringKey))
+			{
+				return EditorPrefs.GetString(stringKey);
+			}
+			else
+			{
+				return string.Empty;
 			}
 		}
 	}
