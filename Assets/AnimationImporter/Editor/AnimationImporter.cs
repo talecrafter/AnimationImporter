@@ -34,7 +34,7 @@ namespace AnimationImporter
 		private const string PREFS_PREFIX = "ANIMATION_IMPORTER_";
 		private const string SHARED_CONFIG_PATH = "Assets/Resources/AnimationImporter/AnimationImporterConfig.asset";
 
-		private static string[] allowedExtensions = { "ase" };
+		private static string[] allowedExtensions = { "ase", "aseprite" };
 
 		// ================================================================================
 		//  user values
@@ -169,13 +169,11 @@ namespace AnimationImporter
 		// check if this is a valid file; we are only looking at the file extension here
 		public static bool IsValidAsset(string path)
 		{
-			string name = Path.GetFileNameWithoutExtension(path);
+			string extension = Path.GetExtension(path);
 
 			for (int i = 0; i < allowedExtensions.Length; i++)
 			{
-				string lastPart = "/" + name + "." + allowedExtensions[i];
-
-				if (path.Contains(lastPart))
+				if (extension == "." + allowedExtensions[i])
 				{
 					return true;
 				}
@@ -218,16 +216,17 @@ namespace AnimationImporter
 				return null;
 			}
 
-			string name = Path.GetFileNameWithoutExtension(assetPath);
+			string fileName = Path.GetFileName(assetPath);
+			string assetName = Path.GetFileNameWithoutExtension(fileName);
 			string basePath = GetBasePath(assetPath);
 
 			// we analyze import settings on existing files
-			PreviousImportSettings previousAnimationInfo = CollectPreviousImportSettings(basePath, name);
+			PreviousImportSettings previousAnimationInfo = CollectPreviousImportSettings(basePath, assetName);
 
-			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, basePath, name, _sharedData.saveSpritesToSubfolder))
+			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, basePath, fileName, assetName, _sharedData.saveSpritesToSubfolder))
 			{
 				AssetDatabase.Refresh();
-				return ImportJSONAndCreateAnimations(basePath, name, previousAnimationInfo);
+				return ImportJSONAndCreateAnimations(basePath, assetName, previousAnimationInfo);
 			}
 
 			return null;

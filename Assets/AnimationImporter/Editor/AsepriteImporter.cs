@@ -41,12 +41,12 @@ namespace AnimationImporter
 		/// calls the Aseprite application which then should output a png with all sprites and a corresponding JSON
 		/// </summary>
 		/// <returns></returns>
-		public static bool CreateSpriteAtlasAndMetaFile(string asepritePath, string assetBasePath, string name, bool saveSpritesToSubfolder = true)
+		public static bool CreateSpriteAtlasAndMetaFile(string applicationPath, string assetBasePath, string fileName, string assetName, bool saveSpritesToSubfolder = true)
 		{
 			char delimiter = '\"';
-			string parameters = delimiter + name + ".ase" + delimiter + " --data " + delimiter + name + ".json" + delimiter + " --sheet " + delimiter + name + ".png" + delimiter + " --sheet-pack --list-tags --format json-array";
+			string parameters = delimiter + fileName + delimiter + " --data " + delimiter + assetName + ".json" + delimiter + " --sheet " + delimiter + assetName + ".png" + delimiter + " --sheet-pack --list-tags --format json-array";
 
-			bool success = CallAsepriteCLI(asepritePath, assetBasePath, parameters) == 0;
+			bool success = CallAsepriteCLI(applicationPath, assetBasePath, parameters) == 0;
 
 			// move png and json file to subfolder
 			if (success && saveSpritesToSubfolder)
@@ -55,15 +55,15 @@ namespace AnimationImporter
 				if (!Directory.Exists(assetBasePath + "/Sprites"))
 					Directory.CreateDirectory(assetBasePath + "/Sprites");
 
-				string target = assetBasePath + "/Sprites/" + name + ".json";
+				string target = assetBasePath + "/Sprites/" + assetName + ".json";
 				if (File.Exists(target))
 					File.Delete(target);
-				File.Move(assetBasePath + "/" + name + ".json", target);
+				File.Move(assetBasePath + "/" + assetName + ".json", target);
 
-				target = assetBasePath + "/Sprites/" + name + ".png";
+				target = assetBasePath + "/Sprites/" + assetName + ".png";
 				if (File.Exists(target))
 					File.Delete(target);
-				File.Move(assetBasePath + "/" + name + ".png", target);
+				File.Move(assetBasePath + "/" + assetName + ".png", target);
 			}
 
 			return success;
@@ -174,7 +174,7 @@ namespace AnimationImporter
 			foreach (var item in list)
 			{
 				ImportedSpriteInfo frame = new ImportedSpriteInfo();
-				frame.name = item.Obj["filename"].Str.Replace(".ase","");
+				frame.name = Path.GetFileNameWithoutExtension(item.Obj["filename"].Str);
 
 				var frameValues = item.Obj["frame"].Obj;
 				frame.width = (int)frameValues["w"].Number;
