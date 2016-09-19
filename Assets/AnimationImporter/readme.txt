@@ -54,9 +54,13 @@ I cannot promise I have time to fix things or improve this tool, but there is a 
 Credits
 -----
 
-Mostly written by Stephan Hövelbrinks (http://twitter.com/talecrafter)
+Contributors:
 
-Contains code from Ya-ma (http://twitter.com/PixelYam)
+Stephan Hövelbrinks (http://twitter.com/talecrafter)
+Ya-ma (http://twitter.com/PixelYam)
+Edward Rowe
+Alberto Fernandez
+
 Contains JSONObject from Boomlagoon (www.boomlagoon.com)
 
 

@@ -6,7 +6,7 @@ using UnityEditor;
 namespace AnimationImporter
 {
 	[CustomEditor(typeof(AnimationImporterSharedConfig))]
-	public class AnimationImporterShaderConfigEditor : Editor
+	public class AnimationImporterSharedConfigEditor : Editor
 	{
 		public override void OnInspectorGUI ()
 		{
