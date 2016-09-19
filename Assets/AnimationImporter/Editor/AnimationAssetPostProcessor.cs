@@ -25,9 +25,16 @@ namespace AnimationImporter
 				return;
 			}
 
+			// Do not create shared config during AssetPostprocess, or else it will recreate an empty config
 			importer.LoadUserConfig();
 
-			if (importer.automaticImporting)
+			// If no config exists, they can't have set up automatic importing so just return out.
+			if (importer.sharedData == null)
+			{
+				return;
+			}
+
+			if (importer.sharedData.automaticImporting)
 			{
 				List<string> markedAssets = new List<string>();
 
