@@ -37,7 +37,7 @@ namespace AnimationImporter
 		public static void ImportAnimationsMenu()
 		{
 			EditorWindow.GetWindow(typeof(AnimationImporterWindow), false, "Anim Importer");
-        }
+		}
 
 		// ================================================================================
 		//  unity methods
@@ -130,7 +130,7 @@ namespace AnimationImporter
 			}
 			GUILayout.EndHorizontal();
 
-			GUILayout.BeginHorizontal();			
+			GUILayout.BeginHorizontal();
 			importer.asepritePath = GUILayout.TextField(newPath, GUILayout.MaxWidth(300f));
 
 			GUILayout.EndHorizontal();
@@ -179,7 +179,7 @@ namespace AnimationImporter
 			{
 				GUILayout.BeginHorizontal();
 				GUILayout.Label(importer.sharedData.animationNamesThatDoNotLoop[i]);
-				bool doDelete = GUILayout.Button("Delete");			
+				bool doDelete = GUILayout.Button("Delete");
 				GUILayout.EndHorizontal();
 				if (doDelete)
 				{
@@ -204,7 +204,7 @@ namespace AnimationImporter
 
 			EditorGUILayout.LabelField("Enter Part of the Animation Name or a Regex Expression.");
 
-			if (GUI.changed) 
+			if (GUI.changed)
 			{
 				EditorUtility.SetDirty(importer.sharedData);
 			}
@@ -217,8 +217,19 @@ namespace AnimationImporter
 			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimations);
 			if (droppedAsset != null)
 			{
-				importer.CreateAnimationsForAssetFile(droppedAsset);
-				AssetDatabase.Refresh();
+				EditorUtility.DisplayProgressBar("Import Animations", "Importing...", 0);
+				try
+				{
+					importer.CreateAnimationsForAssetFile(droppedAsset);
+					AssetDatabase.Refresh();
+				}
+				catch (Exception error)
+				{
+					Debug.LogWarning(error.ToString());
+					throw;
+				}
+
+				EditorUtility.ClearProgressBar();
 			}
 		}
 
@@ -229,14 +240,25 @@ namespace AnimationImporter
 			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimations);
 			if (droppedAsset != null)
 			{
-				var animationInfo = importer.CreateAnimationsForAssetFile(droppedAsset);
-
-				if (animationInfo != null)
+				EditorUtility.DisplayProgressBar("Import Animator Controller", "Importing...", 0);
+				try
 				{
-					importer.CreateAnimatorController(animationInfo);
+					var animationInfo = importer.CreateAnimationsForAssetFile(droppedAsset);
+
+					if (animationInfo != null)
+					{
+						importer.CreateAnimatorController(animationInfo);
+					}
+
+					AssetDatabase.Refresh();
+				}
+				catch (Exception error)
+				{
+					Debug.LogWarning(error.ToString());
+					throw;
 				}
 
-				AssetDatabase.Refresh();
+				EditorUtility.ClearProgressBar();
 			}
 		}
 
@@ -249,14 +271,25 @@ namespace AnimationImporter
 			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimationsForOverrideController);
 			if (droppedAsset != null)
 			{
-				var animationInfo = importer.CreateAnimationsForAssetFile(droppedAsset);
-
-				if (animationInfo != null)
+				EditorUtility.DisplayProgressBar("Import Animator Override Controller", "Importing...", 0);
+				try
 				{
-					importer.CreateAnimatorOverrideController(animationInfo);
+					var animationInfo = importer.CreateAnimationsForAssetFile(droppedAsset);
+
+					if (animationInfo != null)
+					{
+						importer.CreateAnimatorOverrideController(animationInfo);
+					}
+
+					AssetDatabase.Refresh();
+				}
+				catch (Exception error)
+				{
+					Debug.LogWarning(error.ToString());
+					throw;
 				}
 
-				AssetDatabase.Refresh();
+				EditorUtility.ClearProgressBar();
 			}
 		}
 
