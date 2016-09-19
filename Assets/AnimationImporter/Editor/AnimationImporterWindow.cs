@@ -202,6 +202,8 @@ namespace AnimationImporter
 			}
 			GUILayout.EndHorizontal();
 
+			EditorGUILayout.LabelField("Enter Part of the Animation Name or a Regex Expression.");
+
 			if (GUI.changed) 
 			{
 				EditorUtility.SetDirty(importer.sharedData);
