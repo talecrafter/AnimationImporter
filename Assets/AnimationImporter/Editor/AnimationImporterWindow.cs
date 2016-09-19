@@ -85,6 +85,11 @@ namespace AnimationImporter
 
 		private void ShowUserConfig()
 		{
+			if (importer == null || importer.sharedData == null)
+			{
+				return;
+			}
+
 			ShowHeadline("Config");
 
 			/*
