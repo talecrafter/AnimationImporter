@@ -85,6 +85,12 @@ namespace AnimationImporter
 
 		private void ShowUserConfig()
 		{
+			// check if config is null (User might have just deleted the file)
+			if (importer == null || importer.sharedData == null)
+			{
+				return;
+			}
+
 			ShowHeadline("Config");
 
 			/*
