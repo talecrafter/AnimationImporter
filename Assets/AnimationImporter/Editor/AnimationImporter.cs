@@ -13,6 +13,10 @@ namespace AnimationImporter
 {
 	public class AnimationImporter
 	{
+		// ================================================================================
+		//	Singleton
+		// --------------------------------------------------------------------------------
+
 		private static AnimationImporter _instance = null;
 		public static AnimationImporter Instance
 		{
@@ -26,6 +30,13 @@ namespace AnimationImporter
 				return _instance;
 			}
 		}
+
+		// ================================================================================
+		//  delegates
+		// --------------------------------------------------------------------------------
+
+		public delegate bool HasCustomReImportDelegate(string fileName);
+		public static HasCustomReImportDelegate HasCustomReImport = null;
 
 		// ================================================================================
 		//  const
@@ -76,7 +87,7 @@ namespace AnimationImporter
 		}
 
 		private AnimationImporterSharedConfig _sharedData;
-		public AnimationImporterSharedConfig sharedData 
+		public AnimationImporterSharedConfig sharedData
 		{
 			get
 			{
@@ -166,50 +177,12 @@ namespace AnimationImporter
 		//  import methods
 		// --------------------------------------------------------------------------------
 
-		// check if this is a valid file; we are only looking at the file extension here
-		public static bool IsValidAsset(string path)
-		{
-			string extension = Path.GetExtension(path);
-
-			for (int i = 0; i < allowedExtensions.Length; i++)
-			{
-				if (extension == "." + allowedExtensions[i])
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		public bool HasExistingAnimatorController(string assetPath)
-		{
-			string name = Path.GetFileNameWithoutExtension(assetPath);
-			string basePath = GetBasePath(assetPath);
-
-			string pathForController = basePath + "/" + name + ".controller";
-			AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(pathForController);
-
-			return controller != null;
-		}
-
-		public bool HasExistingAnimatorOverrideController(string assetPath)
-		{
-			string name = Path.GetFileNameWithoutExtension(assetPath);
-			string basePath = GetBasePath(assetPath);
-
-			string pathForController = basePath + "/" + name + ".overrideController";
-			AnimatorOverrideController controller = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(pathForController);
-
-			return controller != null;
-		}
-
 		public ImportedAnimationInfo CreateAnimationsForAssetFile(DefaultAsset droppedAsset)
 		{
 			return CreateAnimationsForAssetFile(AssetDatabase.GetAssetPath(droppedAsset));
 		}
 
-		public ImportedAnimationInfo CreateAnimationsForAssetFile(string assetPath)
+		public ImportedAnimationInfo CreateAnimationsForAssetFile(string assetPath, string additionalCommandLineArguments = null)
 		{
 			if (!IsValidAsset(assetPath))
 			{
@@ -223,7 +196,7 @@ namespace AnimationImporter
 			// we analyze import settings on existing files
 			PreviousImportSettings previousAnimationInfo = CollectPreviousImportSettings(basePath, assetName);
 
-			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, basePath, fileName, assetName, _sharedData.saveSpritesToSubfolder))
+			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, additionalCommandLineArguments, basePath, fileName, assetName, _sharedData.saveSpritesToSubfolder))
 			{
 				AssetDatabase.Refresh();
 				return ImportJSONAndCreateAnimations(basePath, assetName, previousAnimationInfo);
@@ -309,6 +282,10 @@ namespace AnimationImporter
 				Debug.LogWarning("No Animator Controller found as a base for the Override Controller");
 			}
 		}
+
+		// ================================================================================
+		//  import images and create animations
+		// --------------------------------------------------------------------------------
 
 		private ImportedAnimationInfo ImportJSONAndCreateAnimations(string basePath, string name, PreviousImportSettings previousImportSettings)
 		{
@@ -445,6 +422,132 @@ namespace AnimationImporter
 			previousImportSettings.GetTextureImportSettings(GetImageAssetFilename(basePath, name));
 
 			return previousImportSettings;
+		}
+
+		// ================================================================================
+		//  querying existing assets
+		// --------------------------------------------------------------------------------
+
+		// check if this is a valid file; we are only looking at the file extension here
+		public static bool IsValidAsset(string path)
+		{
+			string extension = Path.GetExtension(path);
+
+			for (int i = 0; i < allowedExtensions.Length; i++)
+			{
+				if (extension == "." + allowedExtensions[i])
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public bool HasExistingRuntimeAnimatorController(string assetPath)
+		{
+			return HasExistingAnimatorController(assetPath) || HasExistingAnimatorOverrideController(assetPath);
+		}
+
+		public bool HasExistingAnimatorController(string assetPath)
+		{
+			return GetExistingAnimatorController(assetPath) != null;
+		}
+
+		public bool HasExistingAnimatorOverrideController(string assetPath)
+		{
+			return GetExistingAnimatorOverrideController(assetPath) != null;
+		}
+
+		public RuntimeAnimatorController GetExistingRuntimeAnimatorController(string assetPath)
+		{
+			AnimatorController animatorController = GetExistingAnimatorController(assetPath);
+			if (animatorController != null)
+			{
+				return animatorController;
+			}
+
+			return GetExistingAnimatorOverrideController(assetPath);
+		}
+
+		public AnimatorController GetExistingAnimatorController(string assetPath)
+		{
+			string name = Path.GetFileNameWithoutExtension(assetPath);
+			string basePath = GetBasePath(assetPath);
+
+			string pathForController = basePath + "/" + name + ".controller";
+			AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(pathForController);
+
+			return controller;
+		}
+
+		public AnimatorOverrideController GetExistingAnimatorOverrideController(string assetPath)
+		{
+			string name = Path.GetFileNameWithoutExtension(assetPath);
+			string basePath = GetBasePath(assetPath);
+
+			string pathForController = basePath + "/" + name + ".overrideController";
+			AnimatorOverrideController controller = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(pathForController);
+
+			return controller;
+		}
+
+		// ================================================================================
+		//  automatic ReImport
+		// --------------------------------------------------------------------------------
+
+		/// <summary>
+		/// will be called by the AssetPostProcessor
+		/// </summary>
+		public void AutomaticReImport(string filePath)
+		{
+			if (filePath == null)
+			{
+				return;
+			}
+
+			// check if file is handled by other Importers
+			if (HasCustomReImport != null && HasCustomReImport(filePath))
+			{
+				return;
+			}
+
+			HandleReImport(filePath);
+		}
+
+		/// <summary>
+		/// can be used for manually handling ReImport
+		/// </summary>
+		public void HandleReImport(string filePath, string additionalCommandLineArguments = null)
+		{
+			if (filePath == null)
+			{
+				return;
+			}
+
+			if (sharedData == null)
+			{
+				LoadUserConfig();
+			}
+
+			if (HasExistingAnimatorController(filePath))
+			{
+				var animationInfo = CreateAnimationsForAssetFile(filePath, additionalCommandLineArguments);
+
+				if (animationInfo != null)
+				{
+					CreateAnimatorController(animationInfo);
+				}
+			}
+			else if (HasExistingAnimatorOverrideController(filePath))
+			{
+				var animationInfo = CreateAnimationsForAssetFile(filePath, additionalCommandLineArguments);
+
+				if (animationInfo != null)
+				{
+					CreateAnimatorOverrideController(animationInfo, true);
+				}
+			}
 		}
 
 		// ================================================================================

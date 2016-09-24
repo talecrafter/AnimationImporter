@@ -41,10 +41,15 @@ namespace AnimationImporter
 		/// calls the Aseprite application which then should output a png with all sprites and a corresponding JSON
 		/// </summary>
 		/// <returns></returns>
-		public static bool CreateSpriteAtlasAndMetaFile(string applicationPath, string assetBasePath, string fileName, string assetName, bool saveSpritesToSubfolder = true)
+		public static bool CreateSpriteAtlasAndMetaFile(string applicationPath, string additionalCommandLineArguments, string assetBasePath, string fileName, string assetName, bool saveSpritesToSubfolder = true)
 		{
 			char delimiter = '\"';
-			string parameters = delimiter + fileName + delimiter + " --data " + delimiter + assetName + ".json" + delimiter + " --sheet " + delimiter + assetName + ".png" + delimiter + " --sheet-pack --list-tags --format json-array";
+			string parameters = "--data " + delimiter + assetName + ".json" + delimiter + " --sheet " + delimiter + assetName + ".png" + delimiter + " --sheet-pack --list-tags --format json-array " + delimiter + fileName + delimiter;
+
+			if (!string.IsNullOrEmpty(additionalCommandLineArguments))
+			{
+				parameters = additionalCommandLineArguments + " " + parameters;
+			}
 
 			bool success = CallAsepriteCLI(applicationPath, assetBasePath, parameters) == 0;
 

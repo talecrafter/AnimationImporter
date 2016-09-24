@@ -92,29 +92,7 @@ namespace AnimationImporter
 
 			foreach (var item in _assetsMarkedForImport)
 			{
-				if (item == null)
-				{
-					continue;
-				}
-
-				if (importer.HasExistingAnimatorController(item))
-				{
-					var animationInfo = importer.CreateAnimationsForAssetFile(item);
-
-					if (animationInfo != null)
-					{
-						importer.CreateAnimatorController(animationInfo);
-					}
-				}
-				else if (importer.HasExistingAnimatorOverrideController(item))
-				{
-					var animationInfo = importer.CreateAnimationsForAssetFile(item);
-
-					if (animationInfo != null)
-					{
-						importer.CreateAnimatorOverrideController(animationInfo, true);
-					}
-				}
+				importer.AutomaticReImport(item);
 			}
 
 			_assetsMarkedForImport.Clear();
