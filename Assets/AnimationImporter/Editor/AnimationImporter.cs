@@ -177,12 +177,12 @@ namespace AnimationImporter
 		//  import methods
 		// --------------------------------------------------------------------------------
 
-		public ImportedAnimationInfo CreateAnimationsForAssetFile(DefaultAsset droppedAsset)
+		public ImportedAnimationSheet CreateAnimationsForAssetFile(DefaultAsset droppedAsset)
 		{
 			return CreateAnimationsForAssetFile(AssetDatabase.GetAssetPath(droppedAsset));
 		}
 
-		public ImportedAnimationInfo CreateAnimationsForAssetFile(string assetPath, string additionalCommandLineArguments = null)
+		public ImportedAnimationSheet CreateAnimationsForAssetFile(string assetPath, string additionalCommandLineArguments = null)
 		{
 			if (!IsValidAsset(assetPath))
 			{
@@ -205,7 +205,7 @@ namespace AnimationImporter
 			return null;
 		}
 
-		public void CreateAnimatorController(ImportedAnimationInfo animations)
+		public void CreateAnimatorController(ImportedAnimationSheet animations)
 		{
 			AnimatorController controller;
 
@@ -241,7 +241,7 @@ namespace AnimationImporter
 			AssetDatabase.SaveAssets();
 		}
 
-		public void CreateAnimatorOverrideController(ImportedAnimationInfo animations, bool useExistingBaseController = false)
+		public void CreateAnimatorOverrideController(ImportedAnimationSheet animations, bool useExistingBaseController = false)
 		{
 			AnimatorOverrideController overrideController;
 
@@ -287,7 +287,7 @@ namespace AnimationImporter
 		//  import images and create animations
 		// --------------------------------------------------------------------------------
 
-		private ImportedAnimationInfo ImportJSONAndCreateAnimations(string basePath, string name, PreviousImportSettings previousImportSettings)
+		private ImportedAnimationSheet ImportJSONAndCreateAnimations(string basePath, string name, PreviousImportSettings previousImportSettings)
 		{
 			string imageAssetFilename = GetImageAssetFilename(basePath, name);
 			string textAssetFilename = GetJSONAssetFilename(basePath, name);
@@ -297,7 +297,7 @@ namespace AnimationImporter
 			{
 				// parse the JSON file
 				JSONObject jsonObject = JSONObject.Parse(textAsset.ToString());
-				ImportedAnimationInfo animationInfo = AsepriteImporter.GetAnimationInfo(jsonObject);
+				ImportedAnimationSheet animationInfo = AsepriteImporter.GetAnimationInfo(jsonObject);
 
 				if (animationInfo == null)
 					return null;
@@ -325,7 +325,7 @@ namespace AnimationImporter
 			return null;
 		}
 
-		private void CreateAnimations(ImportedAnimationInfo animationInfo, string imageAssetFilename)
+		private void CreateAnimations(ImportedAnimationSheet animationInfo, string imageAssetFilename)
 		{
 			if (animationInfo.hasAnimations)
 			{
@@ -346,7 +346,7 @@ namespace AnimationImporter
 			}
 		}
 
-		private void CreateAnimationAssets(ImportedAnimationInfo animationInfo, string imageAssetFilename, string pathForAnimations)
+		private void CreateAnimationAssets(ImportedAnimationSheet animationInfo, string imageAssetFilename, string pathForAnimations)
 		{
 			string masterName = Path.GetFileNameWithoutExtension(imageAssetFilename);
 
@@ -371,7 +371,7 @@ namespace AnimationImporter
 			}
 		}
 
-		private void CreateSprites(ImportedAnimationInfo animations, string imageFile)
+		private void CreateSprites(ImportedAnimationSheet animations, string imageFile)
 		{
 			TextureImporter importer = AssetImporter.GetAtPath(imageFile) as TextureImporter;
 

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace AnimationImporter
 {
-	public static class AnimationClipHelper
+	public static class AnimationClipUtility
 	{
 		class AnimationClipSettings
 		{

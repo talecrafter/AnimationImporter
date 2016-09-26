@@ -99,7 +99,7 @@ namespace AnimationImporter
 		//  JSON IMPORT
 		// --------------------------------------------------------------------------------
 
-		public static ImportedAnimationInfo GetAnimationInfo(JSONObject root)
+		public static ImportedAnimationSheet GetAnimationInfo(JSONObject root)
 		{
 			if (root == null)
 			{
@@ -107,7 +107,7 @@ namespace AnimationImporter
 				return null;
 			}
 
-			ImportedAnimationInfo importedInfos = new ImportedAnimationInfo();
+			ImportedAnimationSheet importedInfos = new ImportedAnimationSheet();
 
 			// import all informations from JSON
 
@@ -134,14 +134,14 @@ namespace AnimationImporter
 			return importedInfos;
 		}
 
-		private static void GetMetaInfosFromJSON(ImportedAnimationInfo importedInfos, JSONObject meta)
+		private static void GetMetaInfosFromJSON(ImportedAnimationSheet importedInfos, JSONObject meta)
 		{
 			var size = meta["size"].Obj;
 			importedInfos.width = (int)size["w"].Number;
 			importedInfos.height = (int)size["h"].Number;
 		}
 
-		private static bool GetAnimationsFromJSON(ImportedAnimationInfo importedInfos, JSONObject meta)
+		private static bool GetAnimationsFromJSON(ImportedAnimationSheet importedInfos, JSONObject meta)
 		{
 			if (!meta.ContainsKey("frameTags"))
 			{
@@ -154,7 +154,7 @@ namespace AnimationImporter
 			foreach (var item in frameTags)
 			{
 				JSONObject frameTag = item.Obj;
-				ImportedSingleAnimationInfo anim = new ImportedSingleAnimationInfo();
+				ImportedAnimation anim = new ImportedAnimation();
 				anim.name = frameTag["name"].Str;
 				anim.firstSpriteIndex = (int)(frameTag["from"].Number);
 				anim.lastSpriteIndex = (int)(frameTag["to"].Number);
@@ -165,7 +165,7 @@ namespace AnimationImporter
 			return true;
 		}
 
-		private static bool GetSpritesFromJSON(JSONObject root, ImportedAnimationInfo importedInfos)
+		private static bool GetSpritesFromJSON(JSONObject root, ImportedAnimationSheet importedInfos)
 		{
 			var list = root["frames"].Array;
 
@@ -178,7 +178,7 @@ namespace AnimationImporter
 
 			foreach (var item in list)
 			{
-				ImportedSpriteInfo frame = new ImportedSpriteInfo();
+				ImportedAnimationFrame frame = new ImportedAnimationFrame();
 				frame.name = Path.GetFileNameWithoutExtension(item.Obj["filename"].Str);
 
 				var frameValues = item.Obj["frame"].Obj;

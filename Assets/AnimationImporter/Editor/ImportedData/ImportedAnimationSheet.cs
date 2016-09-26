@@ -3,13 +3,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Random = UnityEngine.Random;
 using UnityEditor;
 using System.Linq;
 
 namespace AnimationImporter
 {
-	public class ImportedAnimationInfo
+	public class ImportedAnimationSheet
 	{
 		private Regex nonLoopingAnimationsRegex;
 		private List<string> _nonLoopingAnimations;
@@ -55,8 +54,8 @@ namespace AnimationImporter
 			}			
 		}
 
-		public List<ImportedSpriteInfo> frames = new List<ImportedSpriteInfo>();
-		public List<ImportedSingleAnimationInfo> animations = new List<ImportedSingleAnimationInfo>();
+		public List<ImportedAnimationFrame> frames = new List<ImportedAnimationFrame>();
+		public List<ImportedAnimation> animations = new List<ImportedAnimation>();
 
 		public bool hasAnimations
 		{
@@ -66,7 +65,7 @@ namespace AnimationImporter
 			}
 		}
 
-		private Dictionary<string, ImportedSingleAnimationInfo> _animationDatabase = null;
+		private Dictionary<string, ImportedAnimation> _animationDatabase = null;
 
 		private PreviousImportSettings _previousImportSettings = null;
 		public PreviousImportSettings previousImportSettings
@@ -117,7 +116,7 @@ namespace AnimationImporter
 			if (clip != null)
 				return clip;
 
-			List<ImportedSingleAnimationInfo> similarAnimations = new List<ImportedSingleAnimationInfo>();
+			List<ImportedAnimation> similarAnimations = new List<ImportedAnimation>();
 			foreach (var item in animations)
 			{
 				if (clipName.Contains(item.name))
@@ -126,14 +125,14 @@ namespace AnimationImporter
 
 			if (similarAnimations.Count > 0)
 			{
-				ImportedSingleAnimationInfo similar = similarAnimations.OrderBy(x => x.name.Length).Reverse().First();
+				ImportedAnimation similar = similarAnimations.OrderBy(x => x.name.Length).Reverse().First();
 				return similar.animationClip;
 			}
 
 			return null;
 		}
 
-		public void CreateAnimation(ImportedSingleAnimationInfo anim, List<Sprite> sprites, string basePath, string masterName, AnimationTargetObjectType targetType)
+		public void CreateAnimation(ImportedAnimation anim, List<Sprite> sprites, string basePath, string masterName, AnimationTargetObjectType targetType)
 		{
 			AnimationClip clip;
             string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
@@ -187,18 +186,18 @@ namespace AnimationImporter
 			// save curve into clip, either for SpriteRenderer, Image, or both
 			if (targetType == AnimationTargetObjectType.SpriteRenderer)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.spriteRendererCurveBinding, keyFrames);
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.imageCurveBinding, null);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.spriteRendererCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.imageCurveBinding, null);
 			}
 			else if (targetType == AnimationTargetObjectType.Image)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.spriteRendererCurveBinding, null);
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.imageCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.spriteRendererCurveBinding, null);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.imageCurveBinding, keyFrames);
 			}
 			else if (targetType == AnimationTargetObjectType.SpriteRendererAndImage)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.spriteRendererCurveBinding, keyFrames);
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipHelper.imageCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.spriteRendererCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.imageCurveBinding, keyFrames);
 			}
 
 			EditorUtility.SetDirty(clip);
@@ -211,7 +210,7 @@ namespace AnimationImporter
 
 			for (int i = 0; i < frames.Count; i++)
 			{
-				ImportedSpriteInfo spriteInfo = frames[i];
+				ImportedAnimationFrame spriteInfo = frames[i];
 				SpriteMetaData spriteMetaData = new SpriteMetaData();
 
 				// sprite alignment
@@ -235,7 +234,7 @@ namespace AnimationImporter
 		{
 			for (int i = 0; i < animations.Count; i++)
 			{
-				ImportedSingleAnimationInfo anim = animations[i];
+				ImportedAnimation anim = animations[i];
 
 				anim.SetFrames(frames.GetRange(anim.firstSpriteIndex, anim.Count));
 			}
@@ -260,100 +259,13 @@ namespace AnimationImporter
 
 		private void BuildIndex()
 		{
-			_animationDatabase = new Dictionary<string, ImportedSingleAnimationInfo>();
+			_animationDatabase = new Dictionary<string, ImportedAnimation>();
 
 			for (int i = 0; i < animations.Count; i++)
 			{
-				ImportedSingleAnimationInfo anim = animations[i];
+				ImportedAnimation anim = animations[i];
 				_animationDatabase[anim.name] = anim;
 			}
-		}
-	}
-
-	public class ImportedSpriteInfo
-	{
-		// ================================================================================
-		//  naming
-		// --------------------------------------------------------------------------------
-
-		private string _name;
-		public string name
-		{
-			get { return _name; }
-			set { _name = value; }
-		}
-
-		// ================================================================================
-		//  properties
-		// --------------------------------------------------------------------------------
-
-		public int x;
-		public int y;
-		public int width;
-		public int height;
-
-		public int duration; // in milliseconds as part of an animation
-	}
-
-	public class ImportedSingleAnimationInfo
-	{
-		public string name;
-
-		// assuming all sprites are in some array/list and an animation is defined as a continous list of indices
-		public int firstSpriteIndex;
-		public int lastSpriteIndex;
-		
-		// final animation clip; saved here for usage when building the AnimatorController
-		public AnimationClip animationClip;
-
-		// duration of each frame
-		private List<float> timings = null;
-
-		public int Count
-		{
-			get
-			{
-				return lastSpriteIndex - firstSpriteIndex + 1;
-			}
-		}
-
-		// ================================================================================
-		//  public methods
-		// --------------------------------------------------------------------------------
-
-		public float GetKeyFrameTime(int i)
-		{
-			return timings[i];
-		}
-
-		public float GetLastKeyFrameTime(float frameRate)
-		{
-			float timePoint = GetKeyFrameTime(Count);
-			timePoint -= (1f / frameRate);
-
-			return timePoint;
-		}
-
-		public void SetFrames(List<ImportedSpriteInfo> frames)
-		{
-			float timeCount;
-			timings = new List<float>();
-
-			// first sprite will be set at the beginning of the animation
-			timeCount = 0;
-			timings.Add(timeCount);
-
-			for (int k = 0; k < frames.Count; k++)
-			{
-				// add duration of frame in seconds
-				timeCount += frames[k].duration / 1000f;
-				timings.Add(timeCount);
-			}
-		}
-
-		public override string ToString()
-		{
-			return name + " (" + firstSpriteIndex.ToString() + "-" + lastSpriteIndex.ToString() + ")";
 		}
 	}
 }
