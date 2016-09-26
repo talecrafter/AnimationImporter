@@ -1,8 +1,13 @@
 # Project related (example files)
 
+/Assets/Resources/
+/Assets/Resources.meta
+
 /Assets/TestAnimations/
 /Assets/TestAnimations.meta
+
 /ProjectSettings/
+
 
 # Unity generated
 
