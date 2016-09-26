@@ -283,6 +283,34 @@ namespace AnimationImporter
 			}
 		}
 
+		public ImportedAnimationSheet ImportSpritesAndAnimationSheet(string assetPath, string additionalCommandLineArguments = null)
+		{
+			if (assetPath == null)
+			{
+				return null;
+			}
+
+			if (sharedData == null)
+			{
+				LoadUserConfig();
+			}
+
+			string fileName = Path.GetFileName(assetPath);
+			string assetName = Path.GetFileNameWithoutExtension(fileName);
+			string basePath = GetBasePath(assetPath);
+
+			// we analyze import settings on existing files
+			PreviousImportSettings previousAnimationInfo = CollectPreviousImportSettings(basePath, assetName);
+
+			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, additionalCommandLineArguments, basePath, fileName, assetName, _sharedData.saveSpritesToSubfolder))
+			{
+				AssetDatabase.Refresh();
+				return ImportJSONAndCreateSprites(basePath, assetName, previousAnimationInfo);
+			}
+
+			return null;
+		}
+
 		// ================================================================================
 		//  import images and create animations
 		// --------------------------------------------------------------------------------
