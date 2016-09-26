@@ -8,16 +8,25 @@ namespace AnimationImporter
 	{
 		public string name;
 
-		// assuming all sprites are in some array/list and an animation is defined as a continous list of indices
-		public int firstSpriteIndex;
-		public int lastSpriteIndex;
+		public ImportedAnimationFrame[] frames = null;
 
-		// final animation clip; saved here for usage when building the AnimatorController
-		public AnimationClip animationClip;
+		public bool isLooping = true;
 
 		// duration of each frame
 		private List<float> timings = null;
 
+		// final animation clip; saved here for usage when building the AnimatorController
+		public AnimationClip animationClip;
+
+		// ================================================================================
+		//  temporary data, only used for first import
+		// --------------------------------------------------------------------------------
+
+		// assuming all sprites are in some array/list and an animation is defined as a continous list of indices
+		public int firstSpriteIndex;
+		public int lastSpriteIndex;
+
+		// used with the indices because we to not have the Frame array yet
 		public int Count
 		{
 			get
@@ -28,6 +37,17 @@ namespace AnimationImporter
 
 		// ================================================================================
 		//  public methods
+		// --------------------------------------------------------------------------------
+
+		public void SetFrames(ImportedAnimationFrame[] frames)
+		{
+			this.frames = frames;
+
+			CalculateKeyFrameTimings();
+		}
+
+		// ================================================================================
+		//  Key Frames
 		// --------------------------------------------------------------------------------
 
 		public float GetKeyFrameTime(int i)
@@ -43,7 +63,7 @@ namespace AnimationImporter
 			return timePoint;
 		}
 
-		public void SetFrames(List<ImportedAnimationFrame> frames)
+		private void CalculateKeyFrameTimings()
 		{
 			float timeCount;
 			timings = new List<float>();
@@ -52,17 +72,12 @@ namespace AnimationImporter
 			timeCount = 0;
 			timings.Add(timeCount);
 
-			for (int k = 0; k < frames.Count; k++)
+			for (int k = 0; k < frames.Length; k++)
 			{
 				// add duration of frame in seconds
 				timeCount += frames[k].duration / 1000f;
 				timings.Add(timeCount);
 			}
-		}
-
-		public override string ToString()
-		{
-			return name + " (" + firstSpriteIndex.ToString() + "-" + lastSpriteIndex.ToString() + ")";
 		}
 	}
 }

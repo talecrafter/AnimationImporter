@@ -107,7 +107,7 @@ namespace AnimationImporter
 				return null;
 			}
 
-			ImportedAnimationSheet importedInfos = new ImportedAnimationSheet();
+			ImportedAnimationSheet animationSheet = new ImportedAnimationSheet();
 
 			// import all informations from JSON
 
@@ -117,31 +117,31 @@ namespace AnimationImporter
 				return null;
 			}
 			var meta = root["meta"].Obj;
-			GetMetaInfosFromJSON(importedInfos, meta);
+			GetMetaInfosFromJSON(animationSheet, meta);
 
-			if (GetAnimationsFromJSON(importedInfos, meta) == false)
+			if (GetAnimationsFromJSON(animationSheet, meta) == false)
 			{
 				return null;
 			}		
 
-			if (GetSpritesFromJSON(root, importedInfos) == false)
+			if (GetFramesFromJSON(animationSheet, root) == false)
 			{
 				return null;
 			}
 
-			importedInfos.CalculateTimings();
+			animationSheet.ApplyCreatedFrames();
 
-			return importedInfos;
+			return animationSheet;
 		}
 
-		private static void GetMetaInfosFromJSON(ImportedAnimationSheet importedInfos, JSONObject meta)
+		private static void GetMetaInfosFromJSON(ImportedAnimationSheet animationSheet, JSONObject meta)
 		{
 			var size = meta["size"].Obj;
-			importedInfos.width = (int)size["w"].Number;
-			importedInfos.height = (int)size["h"].Number;
+			animationSheet.width = (int)size["w"].Number;
+			animationSheet.height = (int)size["h"].Number;
 		}
 
-		private static bool GetAnimationsFromJSON(ImportedAnimationSheet importedInfos, JSONObject meta)
+		private static bool GetAnimationsFromJSON(ImportedAnimationSheet animationSheet, JSONObject meta)
 		{
 			if (!meta.ContainsKey("frameTags"))
 			{
@@ -159,13 +159,13 @@ namespace AnimationImporter
 				anim.firstSpriteIndex = (int)(frameTag["from"].Number);
 				anim.lastSpriteIndex = (int)(frameTag["to"].Number);
 
-				importedInfos.animations.Add(anim);
+				animationSheet.animations.Add(anim);
 			}
 
 			return true;
 		}
 
-		private static bool GetSpritesFromJSON(JSONObject root, ImportedAnimationSheet importedInfos)
+		private static bool GetFramesFromJSON(ImportedAnimationSheet animationSheet, JSONObject root)
 		{
 			var list = root["frames"].Array;
 
@@ -185,11 +185,11 @@ namespace AnimationImporter
 				frame.width = (int)frameValues["w"].Number;
 				frame.height = (int)frameValues["h"].Number;
 				frame.x = (int)frameValues["x"].Number;
-				frame.y = importedInfos.height - (int)frameValues["y"].Number - frame.height; // unity has a different coord system
+				frame.y = animationSheet.height - (int)frameValues["y"].Number - frame.height; // unity has a different coord system
 
 				frame.duration = (int)item.Obj["duration"].Number;
 
-				importedInfos.frames.Add(frame);
+				animationSheet.frames.Add(frame);
 			}
 
 			return true;

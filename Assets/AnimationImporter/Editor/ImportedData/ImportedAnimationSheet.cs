@@ -10,39 +10,8 @@ namespace AnimationImporter
 {
 	public class ImportedAnimationSheet
 	{
-		private Regex nonLoopingAnimationsRegex;
-		private List<string> _nonLoopingAnimations;
-
-		public string basePath { get; set; }
 		public string name { get; set; }
-		public List<string> nonLoopingAnimations
-		{
-			get
-			{
-				return _nonLoopingAnimations;
-			}
-			set
-			{
-				// Build a regex from the supplied values
-				string regexString = string.Empty;
-				if (value.Count > 0)
-				{
-					// Add word boundaries to treat non-regular expressions as exact names
-					regexString = string.Concat("\\b", value[0], "\\b");
-				}
-
-				for (int i = 1; i < value.Count; i++)
-				{
-					string anim = value[i];
-					// Add or to speed up the test rather than building N regular expressions
-					regexString = string.Concat(regexString, "|", "\\b", anim, "\\b");
-				}
-
-				nonLoopingAnimationsRegex = new System.Text.RegularExpressions.Regex(regexString);
-
-				_nonLoopingAnimations = value;
-			}
-		}
+		public string basePath { get; set; }
 
 		public int width { get; set; }
 		public int height { get; set; }
@@ -132,11 +101,11 @@ namespace AnimationImporter
 			return null;
 		}
 
-		public void CreateAnimation(ImportedAnimation anim, List<Sprite> sprites, string basePath, string masterName, AnimationTargetObjectType targetType)
+		public void CreateAnimation(ImportedAnimation anim, string basePath, string masterName, AnimationTargetObjectType targetType)
 		{
 			AnimationClip clip;
             string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
-			bool isLooping = ShouldLoop(anim.name);
+			bool isLooping = anim.isLooping;
 
 			// check if animation file already exists
 			clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(fileName);
@@ -170,7 +139,7 @@ namespace AnimationImporter
 			{
 				ObjectReferenceKeyframe keyFrame = new ObjectReferenceKeyframe { time = anim.GetKeyFrameTime(i) };
 
-				Sprite sprite = sprites[anim.firstSpriteIndex + i];
+				Sprite sprite = anim.frames[i].sprite;
 				keyFrame.value = sprite;
 				keyFrames[i] = keyFrame;
 			}
@@ -179,7 +148,7 @@ namespace AnimationImporter
 
 			ObjectReferenceKeyframe lastKeyFrame = new ObjectReferenceKeyframe { time = anim.GetLastKeyFrameTime(clip.frameRate) };
 
-			Sprite lastSprite = sprites[anim.firstSpriteIndex + anim.Count - 1];
+			Sprite lastSprite = anim.frames[anim.Count - 1].sprite;
 			lastKeyFrame.value = lastSprite;
 			keyFrames[anim.Count] = lastKeyFrame;
 
@@ -203,6 +172,66 @@ namespace AnimationImporter
 			EditorUtility.SetDirty(clip);
 			anim.animationClip = clip;
 		}
+
+		public void ApplyCreatedFrames()
+		{
+			for (int i = 0; i < animations.Count; i++)
+			{
+				ImportedAnimation anim = animations[i];
+
+				anim.SetFrames(frames.GetRange(anim.firstSpriteIndex, anim.Count).ToArray());
+			}
+		}
+
+		// ================================================================================
+		//  determine looping state of animations
+		// --------------------------------------------------------------------------------
+
+		public void SetNonLoopingAnimations(List<string> nonLoopingAnimationNames)
+		{
+			Regex nonLoopingAnimationsRegex = GetRegexFromNonLoopingAnimationNames(nonLoopingAnimationNames);
+
+			foreach (var item in animations)
+			{
+				item.isLooping = ShouldLoop(nonLoopingAnimationsRegex, item.name);
+			}
+		}
+
+		private bool ShouldLoop(Regex nonLoopingAnimationsRegex, string name)
+		{
+			if (!string.IsNullOrEmpty(nonLoopingAnimationsRegex.ToString()))
+			{
+				if (nonLoopingAnimationsRegex.IsMatch(name))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		private Regex GetRegexFromNonLoopingAnimationNames(List<string> value)
+		{
+			string regexString = string.Empty;
+			if (value.Count > 0)
+			{
+				// Add word boundaries to treat non-regular expressions as exact names
+				regexString = string.Concat("\\b", value[0], "\\b");
+			}
+
+			for (int i = 1; i < value.Count; i++)
+			{
+				string anim = value[i];
+				// Add or to speed up the test rather than building N regular expressions
+				regexString = string.Concat(regexString, "|", "\\b", anim, "\\b");
+			}
+
+			return new System.Text.RegularExpressions.Regex(regexString);
+		}
+
+		// ================================================================================
+		//  Sprite Data
+		// --------------------------------------------------------------------------------
 
 		public SpriteMetaData[] GetSpriteSheet(SpriteAlignment spriteAlignment, float customX, float customY)
 		{
@@ -230,32 +259,17 @@ namespace AnimationImporter
 			return metaData;
 		}
 
-		public void CalculateTimings()
+		public void ApplyCreatedSprites(Sprite[] sprites)
 		{
-			for (int i = 0; i < animations.Count; i++)
+			for (int i = 0; i < sprites.Length; i++)
 			{
-				ImportedAnimation anim = animations[i];
-
-				anim.SetFrames(frames.GetRange(anim.firstSpriteIndex, anim.Count));
+				frames[i].sprite = sprites[i];
 			}
 		}
 
 		// ================================================================================
 		//  private methods
 		// --------------------------------------------------------------------------------
-
-		private bool ShouldLoop(string name)
-		{
-			if (!string.IsNullOrEmpty(nonLoopingAnimationsRegex.ToString()))
-			{
-				if (nonLoopingAnimationsRegex.IsMatch(name))
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
 
 		private void BuildIndex()
 		{

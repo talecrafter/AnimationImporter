@@ -289,33 +289,50 @@ namespace AnimationImporter
 
 		private ImportedAnimationSheet ImportJSONAndCreateAnimations(string basePath, string name, PreviousImportSettings previousImportSettings)
 		{
-			string imageAssetFilename = GetImageAssetFilename(basePath, name);
+			// parse the JSON file
+			ImportedAnimationSheet animationSheet = CreateAnimationSheetFromJSON(basePath, name, previousImportSettings);
+
+			CreateSprites(animationSheet);
+			CreateAnimations(animationSheet);
+
+			return animationSheet;
+		}
+
+		private ImportedAnimationSheet ImportJSONAndCreateSprites(string basePath, string name, PreviousImportSettings previousImportSettings)
+		{
+			// parse the JSON file
+			ImportedAnimationSheet animationSheet = CreateAnimationSheetFromJSON(basePath, name, previousImportSettings);
+
+			CreateSprites(animationSheet);
+
+			return animationSheet;
+		}
+
+		// parses a JSON file and creates the raw data for ImportedAnimationSheet from it
+		private ImportedAnimationSheet CreateAnimationSheetFromJSON(string basePath, string name, PreviousImportSettings previousImportSettings)
+		{
 			string textAssetFilename = GetJSONAssetFilename(basePath, name);
 			TextAsset textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(textAssetFilename);
 
 			if (textAsset != null)
 			{
-				// parse the JSON file
 				JSONObject jsonObject = JSONObject.Parse(textAsset.ToString());
-				ImportedAnimationSheet animationInfo = AsepriteImporter.GetAnimationInfo(jsonObject);
+				ImportedAnimationSheet animationSheet = AsepriteImporter.GetAnimationInfo(jsonObject);
 
-				if (animationInfo == null)
+				if (animationSheet == null)
 					return null;
 
-				animationInfo.previousImportSettings = previousImportSettings;
+				animationSheet.previousImportSettings = previousImportSettings;
 
-				animationInfo.basePath = basePath;
-				animationInfo.name = name;
-				animationInfo.nonLoopingAnimations = sharedData.animationNamesThatDoNotLoop;
+				animationSheet.name = name;
+				animationSheet.basePath = basePath;
+
+				animationSheet.SetNonLoopingAnimations(sharedData.animationNamesThatDoNotLoop);
 
 				// delete JSON file afterwards
 				AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(textAsset));
 
-				CreateSprites(animationInfo, imageAssetFilename);
-
-				CreateAnimations(animationInfo, imageAssetFilename);
-
-				return animationInfo;
+				return animationSheet;
 			}
 			else
 			{
@@ -325,23 +342,25 @@ namespace AnimationImporter
 			return null;
 		}
 
-		private void CreateAnimations(ImportedAnimationSheet animationInfo, string imageAssetFilename)
+		private void CreateAnimations(ImportedAnimationSheet animationSheet)
 		{
-			if (animationInfo.hasAnimations)
+			string imageAssetFilename = GetImageAssetFilename(animationSheet.basePath, animationSheet.name);
+
+			if (animationSheet.hasAnimations)
 			{
 				if (sharedData.saveAnimationsToSubfolder)
 				{
-					string path = animationInfo.basePath + "/Animations";
+					string path = animationSheet.basePath + "/Animations";
 					if (!Directory.Exists(path))
 					{
 						Directory.CreateDirectory(path);
 					}
 
-					CreateAnimationAssets(animationInfo, imageAssetFilename, path);
+					CreateAnimationAssets(animationSheet, imageAssetFilename, path);
 				}
 				else
 				{
-					CreateAnimationAssets(animationInfo, imageAssetFilename, animationInfo.basePath);
+					CreateAnimationAssets(animationSheet, imageAssetFilename, animationSheet.basePath);
 				}
 			}
 		}
@@ -350,33 +369,20 @@ namespace AnimationImporter
 		{
 			string masterName = Path.GetFileNameWithoutExtension(imageAssetFilename);
 
-			var assets = AssetDatabase.LoadAllAssetsAtPath(imageAssetFilename);
-			List<Sprite> sprites = new List<Sprite>();
-			foreach (var item in assets)
-			{
-				if (item is Sprite)
-				{
-					sprites.Add(item as Sprite);
-				}
-			}
-
-			// we order the sprites by name here because the LoadAllAssets above does not necessarily return the sprites in correct order
-			// the OrderBy is fed with the last word of the name, which is an int from 0 upwards
-			sprites = sprites.OrderBy(x => int.Parse(x.name.Substring(x.name.LastIndexOf(' ')).TrimStart()))
-							 .ToList();
-
 			foreach (var animation in animationInfo.animations)
 			{
-				animationInfo.CreateAnimation(animation, sprites, pathForAnimations, masterName, sharedData.targetObjectType);
+				animationInfo.CreateAnimation(animation, pathForAnimations, masterName, sharedData.targetObjectType);
 			}
 		}
 
-		private void CreateSprites(ImportedAnimationSheet animations, string imageFile)
+		private void CreateSprites(ImportedAnimationSheet animationSheet)
 		{
+			string imageFile = GetImageAssetFilename(animationSheet.basePath, animationSheet.name);
+
 			TextureImporter importer = AssetImporter.GetAtPath(imageFile) as TextureImporter;
 
 			// apply texture import settings if there are no previous ones
-			if (!animations.hasPreviousTextureImportSettings)
+			if (!animationSheet.hasPreviousTextureImportSettings)
 			{
 				importer.textureType = TextureImporterType.Sprite;
 				importer.spritePixelsPerUnit = sharedData.spritePixelsPerUnit;
@@ -386,20 +392,20 @@ namespace AnimationImporter
 			}
 
 			// create sub sprites for this file according to the AsepriteAnimationInfo 
-			importer.spritesheet = animations.GetSpriteSheet(
+			importer.spritesheet = animationSheet.GetSpriteSheet(
 				sharedData.spriteAlignment,
 				sharedData.spriteAlignmentCustomX,
 				sharedData.spriteAlignmentCustomY);
 
 			// reapply old import settings (pivot settings for sprites)
-			if (animations.hasPreviousTextureImportSettings)
+			if (animationSheet.hasPreviousTextureImportSettings)
 			{
-				animations.previousImportSettings.ApplyPreviousTextureImportSettings(importer);
+				animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(importer);
 			}
 
 			// these values will be set in any case, not influenced by previous import settings
 			importer.spriteImportMode = SpriteImportMode.Multiple;
-			importer.maxTextureSize = animations.maxTextureSize;
+			importer.maxTextureSize = animationSheet.maxTextureSize;
 
 			EditorUtility.SetDirty(importer);
 
@@ -413,15 +419,30 @@ namespace AnimationImporter
 			}
 
 			AssetDatabase.ImportAsset(imageFile, ImportAssetOptions.ForceUpdate);
+
+			Sprite[] createdSprites = GetAllSpritesFromAssetFile(imageFile);
+			animationSheet.ApplyCreatedSprites(createdSprites);
 		}
 
-		private PreviousImportSettings CollectPreviousImportSettings(string basePath, string name)
+		private static Sprite[] GetAllSpritesFromAssetFile(string imageFilename)
 		{
-			PreviousImportSettings previousImportSettings = new PreviousImportSettings();
+			var assets = AssetDatabase.LoadAllAssetsAtPath(imageFilename);
+			List<Sprite> sprites = new List<Sprite>();
+			foreach (var item in assets)
+			{
+				if (item is Sprite)
+				{
+					sprites.Add(item as Sprite);
+				}
+			}
 
-			previousImportSettings.GetTextureImportSettings(GetImageAssetFilename(basePath, name));
+			// we order the sprites by name here because the LoadAllAssets above does not necessarily return the sprites in correct order
+			// the OrderBy is fed with the last word of the name, which is an int from 0 upwards
+			Sprite[] orderedSprites = sprites
+									 .OrderBy(x => int.Parse(x.name.Substring(x.name.LastIndexOf(' ')).TrimStart()))
+									 .ToArray();
 
-			return previousImportSettings;
+			return orderedSprites;
 		}
 
 		// ================================================================================
@@ -553,6 +574,15 @@ namespace AnimationImporter
 		// ================================================================================
 		//  private methods
 		// --------------------------------------------------------------------------------
+
+		private PreviousImportSettings CollectPreviousImportSettings(string basePath, string name)
+		{
+			PreviousImportSettings previousImportSettings = new PreviousImportSettings();
+
+			previousImportSettings.GetTextureImportSettings(GetImageAssetFilename(basePath, name));
+
+			return previousImportSettings;
+		}
 
 		private void CheckIfApplicationIsValid()
 		{

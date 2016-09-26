@@ -27,5 +27,8 @@ namespace AnimationImporter
 		public int height;
 
 		public int duration; // in milliseconds as part of an animation
+
+		// reference to the Sprite that was created with this frame information
+		public Sprite sprite = null;
 	}
 }
