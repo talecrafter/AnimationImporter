@@ -26,7 +26,10 @@ namespace AnimationImporter
 		}
 
 		private GUIStyle _dropBoxStyle;
+		private GUIStyle _infoTextStyle;
+
 		private string _nonLoopingAnimationEnterValue = "";
+
 		private Vector2 _scrollPos = Vector2.zero;
 
 		// ================================================================================
@@ -50,37 +53,72 @@ namespace AnimationImporter
 
 		public void OnGUI()
 		{
-			if (_dropBoxStyle == null)
-				GetBoxStyle();
+			CheckGUIStyles();
 
-			_scrollPos = GUILayout.BeginScrollView(_scrollPos);
+			if (importer.canImportAnimations)
+			{
+				_scrollPos = GUILayout.BeginScrollView(_scrollPos);
 
-			EditorGUILayout.Space();
-			ShowAnimationsGUI();
+				EditorGUILayout.Space();
 
-			GUILayout.Space(25f);
+				ShowAnimationsGUI();
 
-			ShowAnimatorControllerGUI();
+				GUILayout.Space(25f);
 
-			GUILayout.Space(25f);
+				ShowAnimatorControllerGUI();
 
-			ShowAnimatorOverrideControllerGUI();
+				GUILayout.Space(25f);
 
-			GUILayout.Space(25f);
+				ShowAnimatorOverrideControllerGUI();
 
-			ShowUserConfig();
+				GUILayout.Space(25f);
 
-			GUILayout.EndScrollView();
+				ShowUserConfig();
+
+				GUILayout.EndScrollView();
+			}
+			else
+			{
+				EditorGUILayout.Space();
+
+				ShowHeadline("Select Aseprite Application");
+
+				EditorGUILayout.Space();
+
+				ShowAsepriteApplicationSelection();
+
+				EditorGUILayout.Space();
+
+				GUILayout.Label("Aseprite has to be installed on this machine because the Importer calls Aseprite through the command line for creating images and getting animation data.", _infoTextStyle);
+			}
 		}
 
 		// ================================================================================
 		//  GUI methods
 		// --------------------------------------------------------------------------------
 
+		private void CheckGUIStyles()
+		{
+			if (_dropBoxStyle == null)
+			{
+				GetBoxStyle();
+			}
+			if (_infoTextStyle == null)
+			{
+				GetTextInfoStyle();
+			}
+		}
+
 		private void GetBoxStyle()
 		{
 			_dropBoxStyle = new GUIStyle(EditorStyles.helpBox);
 			_dropBoxStyle.alignment = TextAnchor.MiddleCenter;
+		}
+
+		private void GetTextInfoStyle()
+		{
+			_infoTextStyle = new GUIStyle(EditorStyles.label);
+			_infoTextStyle.wordWrap = true;
 		}
 
 		private void ShowUserConfig()
@@ -107,33 +145,7 @@ namespace AnimationImporter
 				EditorGUILayout.Space();
 			}
 
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Aseprite Application Path");
-
-			string newPath = importer.asepritePath;
-
-			if (GUILayout.Button("Select"))
-			{
-				var path = EditorUtility.OpenFilePanel(
-					"Select Aseprite Application",
-					"",
-					"exe");
-				if (!string.IsNullOrEmpty(path))
-				{
-					newPath = path;
-
-					if (Application.platform == RuntimePlatform.OSXEditor)
-					{
-						newPath += "/Contents/MacOS/aseprite";
-					}
-				}
-			}
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();
-			importer.asepritePath = GUILayout.TextField(newPath, GUILayout.MaxWidth(300f));
-
-			GUILayout.EndHorizontal();
+			ShowAsepriteApplicationSelection();
 
 			GUILayout.Space(5f);
 
@@ -208,6 +220,37 @@ namespace AnimationImporter
 			{
 				EditorUtility.SetDirty(importer.sharedData);
 			}
+		}
+
+		private void ShowAsepriteApplicationSelection()
+		{
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Aseprite Application Path");
+
+			string newPath = importer.asepritePath;
+
+			if (GUILayout.Button("Select"))
+			{
+				var path = EditorUtility.OpenFilePanel(
+					"Select Aseprite Application",
+					"",
+					"exe");
+				if (!string.IsNullOrEmpty(path))
+				{
+					newPath = path;
+
+					if (Application.platform == RuntimePlatform.OSXEditor)
+					{
+						newPath += "/Contents/MacOS/aseprite";
+					}
+				}
+			}
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			importer.asepritePath = GUILayout.TextField(newPath, GUILayout.MaxWidth(300f));
+
+			GUILayout.EndHorizontal();
 		}
 
 		private void ShowAnimationsGUI()
