@@ -35,8 +35,9 @@ namespace AnimationImporter
 		//  delegates
 		// --------------------------------------------------------------------------------
 
-		public delegate bool HasCustomReImportDelegate(string fileName);
-		public static HasCustomReImportDelegate HasCustomReImport = null;
+		public delegate bool CustomReImportDelegate(string fileName);
+		public static CustomReImportDelegate HasCustomReImport = null;
+		public static CustomReImportDelegate HandleCustomReImport = null;
 
 		// ================================================================================
 		//  const
@@ -556,7 +557,7 @@ namespace AnimationImporter
 			}
 
 			// check if file is handled by other Importers
-			if (HasCustomReImport != null && HasCustomReImport(filePath))
+			if (HandleCustomReImport != null && HandleCustomReImport(filePath))
 			{
 				return;
 			}

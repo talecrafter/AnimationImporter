@@ -75,7 +75,8 @@ namespace AnimationImporter
 				return;
 			}
 
-			if (importer.HasExistingAnimatorController(asset)
+			if ((AnimationImporter.HasCustomReImport != null && AnimationImporter.HasCustomReImport(asset))
+				|| importer.HasExistingAnimatorController(asset)
 				|| importer.HasExistingAnimatorOverrideController(asset))
 			{
 				markedAssets.Add(asset);
