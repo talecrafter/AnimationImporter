@@ -20,7 +20,7 @@ namespace AnimationImporter
 		public static void CreateAssetAndDirectories(UnityEngine.Object unityObject, string unityFilePath)
 		{
 			var pathDirectory = Path.GetDirectoryName(unityFilePath) + UnityDirectorySeparator;
-			AssetDatabaseUtility.CreateDirectoriesInPath(pathDirectory);
+			CreateDirectoriesInPath(pathDirectory);
 
 			AssetDatabase.CreateAsset(unityObject, unityFilePath);
 		}

@@ -39,7 +39,7 @@ namespace AnimationImporter
 		[MenuItem("Window/Animation Importer")]
 		public static void ImportAnimationsMenu()
 		{
-			EditorWindow.GetWindow(typeof(AnimationImporterWindow), false, "Anim Importer");
+			GetWindow(typeof(AnimationImporterWindow), false, "Anim Importer");
 		}
 
 		// ================================================================================
@@ -176,9 +176,8 @@ namespace AnimationImporter
 			ShowHeadline("Automatic Import");
 			EditorGUILayout.BeginHorizontal();
 			importer.sharedData.automaticImporting = EditorGUILayout.Toggle("Automatic Import", importer.sharedData.automaticImporting);
-			EditorGUILayout.LabelField("Use at your own risk!", EditorStyles.boldLabel);
 			EditorGUILayout.EndHorizontal();
-			EditorGUILayout.LabelField("Looks for existing Controller with same name. Uses current import setting.");
+			EditorGUILayout.LabelField("Looks for existing Animation Controller with same name.");
 
 			/*
 				animations that do not loop
@@ -257,7 +256,7 @@ namespace AnimationImporter
 		{
 			ShowHeadline("Animations");
 
-			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimations);
+			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
 			if (droppedAsset != null)
 			{
 				EditorUtility.DisplayProgressBar("Import Animations", "Importing...", 0);
@@ -280,7 +279,7 @@ namespace AnimationImporter
 		{
 			ShowHeadline("Animator Controller + Animations");
 
-			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimations);
+			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
 			if (droppedAsset != null)
 			{
 				EditorUtility.DisplayProgressBar("Import Animator Controller", "Importing...", 0);
@@ -311,7 +310,7 @@ namespace AnimationImporter
 
 			importer.baseController = EditorGUILayout.ObjectField("Based on Controller:", importer.baseController, typeof(RuntimeAnimatorController), false) as RuntimeAnimatorController;
 
-			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimationsForOverrideController);
+			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimationsForOverrideController, AnimationImporter.IsValidAsset);
 			if (droppedAsset != null)
 			{
 				EditorUtility.DisplayProgressBar("Import Animator Override Controller", "Importing...", 0);
@@ -345,14 +344,16 @@ namespace AnimationImporter
 		//  OnGUI helper
 		// --------------------------------------------------------------------------------
 
-		private T ShowDropButton<T>(bool isEnabled) where T : UnityEngine.Object
+		public delegate bool IsValidAssetDelegate(string path);
+
+		private T ShowDropButton<T>(bool isEnabled, IsValidAssetDelegate IsValidAsset) where T : UnityEngine.Object
 		{
 			T returnValue = null;
 
 			Rect drop_area = GUILayoutUtility.GetRect(0.0f, 80.0f, GUILayout.ExpandWidth(true));
 
 			GUI.enabled = isEnabled;
-			GUI.Box(drop_area, "Drop Aseprite file here", _dropBoxStyle);
+			GUI.Box(drop_area, "Drop Animation file here", _dropBoxStyle);
 			GUI.enabled = true;
 
 			if (!isEnabled)
@@ -365,7 +366,7 @@ namespace AnimationImporter
 				case EventType.DragPerform:
 
 					if (!drop_area.Contains(evt.mousePosition)
-						|| !DraggedObjectsContainType<T>())
+						|| !DraggedObjectsContainValidObject<T>(IsValidAsset))
 						return null;
 
 					DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
@@ -376,7 +377,9 @@ namespace AnimationImporter
 
 						foreach (UnityEngine.Object dragged_object in DragAndDrop.objectReferences)
 						{
-							if (dragged_object is T)
+							var assetPath = AssetDatabase.GetAssetPath(dragged_object);
+
+							if (dragged_object is T && IsValidAsset(assetPath))
 							{
 								returnValue = dragged_object as T;
 							}
@@ -391,11 +394,13 @@ namespace AnimationImporter
 			return returnValue;
 		}
 
-		private bool DraggedObjectsContainType<T>() where T : UnityEngine.Object
+		private bool DraggedObjectsContainValidObject<T>(IsValidAssetDelegate IsValidAsset) where T : UnityEngine.Object
 		{
 			foreach (UnityEngine.Object dragged_object in DragAndDrop.objectReferences)
 			{
-				if (dragged_object is T)
+				var assetPath = AssetDatabase.GetAssetPath(dragged_object);
+
+				if (dragged_object is T && IsValidAsset(assetPath))
 				{
 					return true;
 				}

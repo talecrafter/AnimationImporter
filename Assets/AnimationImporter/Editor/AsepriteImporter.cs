@@ -7,8 +7,9 @@ using AnimationImporter.Boomlagoon.JSON;
 using UnityEditor;
 using System.IO;
 
-namespace AnimationImporter
+namespace AnimationImporter.Aseprite
 {
+	[InitializeOnLoad]
 	public class AsepriteImporter
 	{
 		// ================================================================================
@@ -34,72 +35,111 @@ namespace AnimationImporter
 		}
 
 		// ================================================================================
-		//  calling Aseprite for creating PNG and JSON files
+		//  public methods
 		// --------------------------------------------------------------------------------
+
+		static AsepriteImporter ()
+		{
+			AnimationImporter.RegisterImporter("ase", Import);
+			AnimationImporter.RegisterImporter("aseprite", Import);
+		}
+
+		public static ImportedAnimationSheet Import(AnimationImportJob job, AnimationImporterSharedConfig config)
+		{
+			if (CreateSpriteAtlasAndMetaFile(job))
+			{
+				AssetDatabase.Refresh();
+
+				ImportedAnimationSheet animationSheet = CreateAnimationSheetFromMetaData(job, config);
+
+				return animationSheet;
+			}
+
+			return null;
+		}
+
+		// ================================================================================
+		//  private methods
+		// --------------------------------------------------------------------------------
+
+		// parses a JSON file and creates the raw data for ImportedAnimationSheet from it
+		private static ImportedAnimationSheet CreateAnimationSheetFromMetaData(AnimationImportJob job, AnimationImporterSharedConfig config)
+		{
+			string textAssetFilename = job.directoryPathForSprites + "/" + job.name + ".json";
+			TextAsset textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(textAssetFilename);
+
+			if (textAsset != null)
+			{
+				JSONObject jsonObject = JSONObject.Parse(textAsset.ToString());
+				ImportedAnimationSheet animationSheet = GetAnimationInfo(jsonObject);
+
+				if (animationSheet == null)
+					return null;
+
+				animationSheet.previousImportSettings = job.previousImportSettings;
+
+				animationSheet.name = job.name;
+				animationSheet.basePath = job.assetDirectory;
+
+				animationSheet.SetNonLoopingAnimations(config.animationNamesThatDoNotLoop);
+
+				// delete JSON file afterwards
+				AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(textAsset));
+
+				return animationSheet;
+			}
+			else
+			{
+				Debug.LogWarning("Problem with JSON file: " + textAssetFilename);
+			}
+
+			return null;
+		}
 
 		/// <summary>
 		/// calls the Aseprite application which then should output a png with all sprites and a corresponding JSON
 		/// </summary>
 		/// <returns></returns>
-		public static bool CreateSpriteAtlasAndMetaFile(string applicationPath, string additionalCommandLineArguments, string assetBasePath, string fileName, string assetName, bool saveSpritesToSubfolder = true)
+		private static bool CreateSpriteAtlasAndMetaFile(AnimationImportJob job)
 		{
 			char delimiter = '\"';
-			string parameters = "--data " + delimiter + assetName + ".json" + delimiter + " --sheet " + delimiter + assetName + ".png" + delimiter + " --sheet-pack --list-tags --format json-array " + delimiter + fileName + delimiter;
+			string parameters = "--data " + delimiter + job.name + ".json" + delimiter + " --sheet " + delimiter + job.name + ".png" + delimiter + " --sheet-pack --list-tags --format json-array " + delimiter + job.fileName + delimiter;
 
-			if (!string.IsNullOrEmpty(additionalCommandLineArguments))
+			if (!string.IsNullOrEmpty(job.additionalCommandLineArguments))
 			{
-				parameters = additionalCommandLineArguments + " " + parameters;
+				parameters = job.additionalCommandLineArguments + " " + parameters;
 			}
 
-			bool success = CallAsepriteCLI(applicationPath, assetBasePath, parameters) == 0;
+			bool success = CallAsepriteCLI(AnimationImporter.Instance.asepritePath, job.assetDirectory, parameters) == 0;
 
 			// move png and json file to subfolder
-			if (success && saveSpritesToSubfolder)
+			if (success && job.directoryPathForSprites != job.assetDirectory)
 			{
 				// create subdirectory
-				if (!Directory.Exists(assetBasePath + "/Sprites"))
-					Directory.CreateDirectory(assetBasePath + "/Sprites");
+				if (!Directory.Exists(job.directoryPathForSprites))
+				{
+					Directory.CreateDirectory(job.directoryPathForSprites);
+				}
 
-				string target = assetBasePath + "/Sprites/" + assetName + ".json";
+				string target = job.directoryPathForSprites + "/" + job.name + ".json";
 				if (File.Exists(target))
+				{
 					File.Delete(target);
-				File.Move(assetBasePath + "/" + assetName + ".json", target);
+				}
+				File.Move(job.assetDirectory + "/" + job.name + ".json", target);
 
-				target = assetBasePath + "/Sprites/" + assetName + ".png";
+				target = job.directoryPathForSprites + "/" + job.name + ".png";
 				if (File.Exists(target))
+				{
 					File.Delete(target);
-				File.Move(assetBasePath + "/" + assetName + ".png", target);
+				}
+				File.Move(job.assetDirectory + "/" + job.name + ".png", target);
 			}
 
 			return success;
 		}
 
-		private static int CallAsepriteCLI(string asepritePath, string path, string buildOptions)
-		{
-			string workingDirectory = Application.dataPath.Replace("Assets", "") + path;
-
-			System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
-			start.Arguments = "-b " + buildOptions;
-			start.FileName = asepritePath;
-			start.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-			start.CreateNoWindow = true;
-			start.UseShellExecute = false;
-			start.WorkingDirectory = workingDirectory;
-
-			// Run the external process & wait for it to finish
-			using (System.Diagnostics.Process proc = System.Diagnostics.Process.Start(start))
-			{
-				proc.WaitForExit();
-				// Retrieve the app's exit code
-				return proc.ExitCode;
-			}
-		}
-
-		// ================================================================================
-		//  JSON IMPORT
-		// --------------------------------------------------------------------------------
-
-		public static ImportedAnimationSheet GetAnimationInfo(JSONObject root)
+		private static ImportedAnimationSheet GetAnimationInfo(JSONObject root)
 		{
 			if (root == null)
 			{
@@ -132,6 +172,27 @@ namespace AnimationImporter
 			animationSheet.ApplyCreatedFrames();
 
 			return animationSheet;
+		}
+
+		private static int CallAsepriteCLI(string asepritePath, string path, string buildOptions)
+		{
+			string workingDirectory = Application.dataPath.Replace("Assets", "") + path;
+
+			System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
+			start.Arguments = "-b " + buildOptions;
+			start.FileName = asepritePath;
+			start.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+			start.CreateNoWindow = true;
+			start.UseShellExecute = false;
+			start.WorkingDirectory = workingDirectory;
+
+			// Run the external process & wait for it to finish
+			using (System.Diagnostics.Process proc = System.Diagnostics.Process.Start(start))
+			{
+				proc.WaitForExit();
+				// Retrieve the app's exit code
+				return proc.ExitCode;
+			}
 		}
 
 		private static void GetMetaInfosFromJSON(ImportedAnimationSheet animationSheet, JSONObject meta)

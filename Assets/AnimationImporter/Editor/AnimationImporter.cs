@@ -4,9 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using System.IO;
-using AnimationImporter.Boomlagoon.JSON;
 using UnityEditor.Animations;
 using System.Linq;
+using AnimationImporter.Aseprite;
 
 namespace AnimationImporter
 {
@@ -34,6 +34,8 @@ namespace AnimationImporter
 		//  delegates
 		// --------------------------------------------------------------------------------
 
+		public delegate ImportedAnimationSheet ImportDelegate(AnimationImportJob job, AnimationImporterSharedConfig config);
+
 		public delegate bool CustomReImportDelegate(string fileName);
 		public static CustomReImportDelegate HasCustomReImport = null;
 		public static CustomReImportDelegate HandleCustomReImport = null;
@@ -45,7 +47,7 @@ namespace AnimationImporter
 		private const string PREFS_PREFIX = "ANIMATION_IMPORTER_";
 		private const string SHARED_CONFIG_PATH = "Assets/Resources/AnimationImporter/AnimationImporterConfig.asset";
 
-		private static string[] allowedExtensions = { "ase", "aseprite" };
+		//private static string[] allowedExtensions = { "ase", "aseprite" };
 
 		// ================================================================================
 		//  user values
@@ -93,6 +95,17 @@ namespace AnimationImporter
 			{
 				return _sharedData;
 			}
+		}
+
+		// ================================================================================
+		//  Importer Database
+		// --------------------------------------------------------------------------------
+
+		private static Dictionary<string, ImportDelegate> _importerDatabase = new Dictionary<string, ImportDelegate>();
+
+		public static void RegisterImporter(string extension, ImportDelegate importer)
+		{
+			_importerDatabase[extension] = importer;
 		}
 
 		// ================================================================================
@@ -184,25 +197,38 @@ namespace AnimationImporter
 
 		public ImportedAnimationSheet CreateAnimationsForAssetFile(string assetPath, string additionalCommandLineArguments = null)
 		{
+			ImportedAnimationSheet animationSheet = ImportSpritesAndAnimationSheet(assetPath, additionalCommandLineArguments);
+
+			if (animationSheet != null)
+			{
+				CreateAnimations(animationSheet);
+			}
+
+			return animationSheet;
+		}
+
+		public ImportedAnimationSheet ImportSpritesAndAnimationSheet(string assetPath, string additionalCommandLineArguments = null)
+		{
 			if (!IsValidAsset(assetPath))
 			{
 				return null;
 			}
 
-			string fileName = Path.GetFileName(assetPath);
-			string assetName = Path.GetFileNameWithoutExtension(fileName);
-			string basePath = GetBasePath(assetPath);
-
-			// we analyze import settings on existing files
-			PreviousImportSettings previousAnimationInfo = CollectPreviousImportSettings(basePath, assetName);
-
-			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, additionalCommandLineArguments, basePath, fileName, assetName, _sharedData.saveSpritesToSubfolder))
+			// making sure config is valid
+			if (sharedData == null)
 			{
-				AssetDatabase.Refresh();
-				return ImportJSONAndCreateAnimations(basePath, assetName, previousAnimationInfo);
+				LoadOrCreateUserConfig();
 			}
 
-			return null;
+			// create a job
+			AnimationImportJob job = CreateAnimationImportJob(assetPath, additionalCommandLineArguments);
+
+			ImportDelegate importer = _importerDatabase[GetExtension(assetPath)];
+			ImportedAnimationSheet animationSheet = importer(job, sharedData);
+
+			CreateSprites(animationSheet);
+
+			return animationSheet;
 		}
 
 		public void CreateAnimatorController(ImportedAnimationSheet animations)
@@ -283,92 +309,9 @@ namespace AnimationImporter
 			}
 		}
 
-		public ImportedAnimationSheet ImportSpritesAndAnimationSheet(string assetPath, string additionalCommandLineArguments = null)
-		{
-			if (assetPath == null)
-			{
-				return null;
-			}
-
-			if (sharedData == null)
-			{
-				LoadUserConfig();
-			}
-
-			string fileName = Path.GetFileName(assetPath);
-			string assetName = Path.GetFileNameWithoutExtension(fileName);
-			string basePath = GetBasePath(assetPath);
-
-			// we analyze import settings on existing files
-			PreviousImportSettings previousAnimationInfo = CollectPreviousImportSettings(basePath, assetName);
-
-			if (AsepriteImporter.CreateSpriteAtlasAndMetaFile(_asepritePath, additionalCommandLineArguments, basePath, fileName, assetName, _sharedData.saveSpritesToSubfolder))
-			{
-				AssetDatabase.Refresh();
-				return ImportJSONAndCreateSprites(basePath, assetName, previousAnimationInfo);
-			}
-
-			return null;
-		}
-
 		// ================================================================================
-		//  import images and create animations
+		//  create sprites and animations
 		// --------------------------------------------------------------------------------
-
-		private ImportedAnimationSheet ImportJSONAndCreateAnimations(string basePath, string name, PreviousImportSettings previousImportSettings)
-		{
-			// parse the JSON file
-			ImportedAnimationSheet animationSheet = CreateAnimationSheetFromJSON(basePath, name, previousImportSettings);
-
-			CreateSprites(animationSheet);
-			CreateAnimations(animationSheet);
-
-			return animationSheet;
-		}
-
-		private ImportedAnimationSheet ImportJSONAndCreateSprites(string basePath, string name, PreviousImportSettings previousImportSettings)
-		{
-			// parse the JSON file
-			ImportedAnimationSheet animationSheet = CreateAnimationSheetFromJSON(basePath, name, previousImportSettings);
-
-			CreateSprites(animationSheet);
-
-			return animationSheet;
-		}
-
-		// parses a JSON file and creates the raw data for ImportedAnimationSheet from it
-		private ImportedAnimationSheet CreateAnimationSheetFromJSON(string basePath, string name, PreviousImportSettings previousImportSettings)
-		{
-			string textAssetFilename = GetJSONAssetFilename(basePath, name);
-			TextAsset textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(textAssetFilename);
-
-			if (textAsset != null)
-			{
-				JSONObject jsonObject = JSONObject.Parse(textAsset.ToString());
-				ImportedAnimationSheet animationSheet = AsepriteImporter.GetAnimationInfo(jsonObject);
-
-				if (animationSheet == null)
-					return null;
-
-				animationSheet.previousImportSettings = previousImportSettings;
-
-				animationSheet.name = name;
-				animationSheet.basePath = basePath;
-
-				animationSheet.SetNonLoopingAnimations(sharedData.animationNamesThatDoNotLoop);
-
-				// delete JSON file afterwards
-				AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(textAsset));
-
-				return animationSheet;
-			}
-			else
-			{
-				Debug.LogWarning("Problem with JSON file: " + textAssetFilename);
-			}
-
-			return null;
-		}
 
 		private void CreateAnimations(ImportedAnimationSheet animationSheet)
 		{
@@ -490,17 +433,32 @@ namespace AnimationImporter
 		// check if this is a valid file; we are only looking at the file extension here
 		public static bool IsValidAsset(string path)
 		{
-			string extension = Path.GetExtension(path);
+			string extension = GetExtension(path);
 
-			for (int i = 0; i < allowedExtensions.Length; i++)
+			if (!string.IsNullOrEmpty(path))
 			{
-				if (extension == "." + allowedExtensions[i])
-				{
-					return true;
-				}
+				return _importerDatabase.ContainsKey(extension);
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		private static string GetExtension(string path)
+		{
+			if (string.IsNullOrEmpty(path))
+			{
+				return null;
 			}
 
-			return false;
+			string extension = Path.GetExtension(path);
+			if (extension.StartsWith("."))
+			{
+				extension = extension.Remove(0, 1);
+			}
+
+			return extension;
 		}
 
 		public bool HasExistingRuntimeAnimatorController(string assetPath)
@@ -586,7 +544,7 @@ namespace AnimationImporter
 
 			if (sharedData == null)
 			{
-				LoadUserConfig();
+				LoadOrCreateUserConfig();
 			}
 
 			if (HasExistingAnimatorController(filePath))
@@ -613,11 +571,41 @@ namespace AnimationImporter
 		//  private methods
 		// --------------------------------------------------------------------------------
 
-		private PreviousImportSettings CollectPreviousImportSettings(string basePath, string name)
+		private AnimationImportJob CreateAnimationImportJob(string assetPath, string additionalCommandLineArguments = "")
+		{
+			AnimationImportJob importJob = new AnimationImportJob(assetPath);
+
+			importJob.additionalCommandLineArguments = additionalCommandLineArguments;
+
+			if (_sharedData.saveSpritesToSubfolder)
+			{
+				importJob.directoryPathForSprites = importJob.assetDirectory + "/Sprites";
+			}
+			else
+			{
+				importJob.directoryPathForSprites = importJob.assetDirectory;
+			}
+
+			if (_sharedData.saveAnimationsToSubfolder)
+			{
+				importJob.directoryPathForAnimations = importJob.assetDirectory + "/Animations";
+			}
+			else
+			{
+				importJob.directoryPathForAnimations = importJob.assetDirectory;
+			}
+
+			// we analyze import settings on existing files
+			importJob.previousImportSettings = CollectPreviousImportSettings(importJob);
+
+			return importJob;
+		}
+
+		private PreviousImportSettings CollectPreviousImportSettings(AnimationImportJob importJob)
 		{
 			PreviousImportSettings previousImportSettings = new PreviousImportSettings();
 
-			previousImportSettings.GetTextureImportSettings(GetImageAssetFilename(basePath, name));
+			previousImportSettings.GetTextureImportSettings(importJob.imageAssetFilename);
 
 			return previousImportSettings;
 		}
