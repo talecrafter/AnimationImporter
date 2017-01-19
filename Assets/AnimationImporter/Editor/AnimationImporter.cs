@@ -2,7 +2,6 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Random = UnityEngine.Random;
 using UnityEditor;
 using System.IO;
 using AnimationImporter.Boomlagoon.JSON;
@@ -373,6 +372,11 @@ namespace AnimationImporter
 
 		private void CreateAnimations(ImportedAnimationSheet animationSheet)
 		{
+			if (animationSheet == null)
+			{
+				return;
+			}
+
 			string imageAssetFilename = GetImageAssetFilename(animationSheet.basePath, animationSheet.name);
 
 			if (animationSheet.hasAnimations)
@@ -406,6 +410,11 @@ namespace AnimationImporter
 
 		private void CreateSprites(ImportedAnimationSheet animationSheet)
 		{
+			if (animationSheet == null)
+			{
+				return;
+			}
+
 			string imageFile = GetImageAssetFilename(animationSheet.basePath, animationSheet.name);
 
 			TextureImporter importer = AssetImporter.GetAtPath(imageFile) as TextureImporter;
