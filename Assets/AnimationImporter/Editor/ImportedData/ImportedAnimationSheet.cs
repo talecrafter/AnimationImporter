@@ -11,7 +11,7 @@ namespace AnimationImporter
 	public class ImportedAnimationSheet
 	{
 		public string name { get; set; }
-		public string basePath { get; set; }
+		public string assetDirectory { get; set; }
 
 		public int width { get; set; }
 		public int height { get; set; }
@@ -173,7 +173,7 @@ namespace AnimationImporter
 			anim.animationClip = clip;
 		}
 
-		public void ApplyCreatedFrames()
+		public void ApplyGlobalFramesToAnimationFrames()
 		{
 			for (int i = 0; i < animations.Count; i++)
 			{
@@ -261,9 +261,29 @@ namespace AnimationImporter
 
 		public void ApplyCreatedSprites(Sprite[] sprites)
 		{
+			if (sprites == null)
+			{
+				return;
+			}
+
+			// apply to general list
 			for (int i = 0; i < sprites.Length; i++)
 			{
 				frames[i].sprite = sprites[i];
+			}
+
+			// apply to frames in animations (might be different classes than in general list)
+			foreach (var anim in animations)
+			{
+				for (int i = 0; i < anim.Count; i++)
+				{
+					int index = anim.firstSpriteIndex + i;
+
+					if (index < sprites.Length)
+					{
+						anim.frames[i].sprite = sprites[index];
+					}
+				}
 			}
 		}
 

@@ -134,17 +134,6 @@ namespace AnimationImporter
 				Aseprite Application
 			*/
 
-			// Show a button for allowing users to upgrade their config from Preferences to a saved asset
-			if (importer.sharedData.UserHasOldPreferences())
-			{
-				if (GUILayout.Button("Copy Config From Old Preferences"))
-				{
-					importer.sharedData.CopyFromPreferences();
-				}
-
-				EditorGUILayout.Space();
-			}
-
 			ShowAsepriteApplicationSelection();
 
 			GUILayout.Space(5f);
@@ -256,13 +245,16 @@ namespace AnimationImporter
 		{
 			ShowHeadline("Animations");
 
-			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
-			if (droppedAsset != null)
+			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
+			if (droppedAssets != null)
 			{
 				EditorUtility.DisplayProgressBar("Import Animations", "Importing...", 0);
 				try
 				{
-					importer.CreateAnimationsForAssetFile(droppedAsset);
+					foreach (var asset in droppedAssets)
+					{
+						importer.CreateAnimationsForAssetFile(asset);
+					}
 					AssetDatabase.Refresh();
 				}
 				catch (Exception error)
@@ -279,17 +271,20 @@ namespace AnimationImporter
 		{
 			ShowHeadline("Animator Controller + Animations");
 
-			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
-			if (droppedAsset != null)
+			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
+			if (droppedAssets != null)
 			{
 				EditorUtility.DisplayProgressBar("Import Animator Controller", "Importing...", 0);
 				try
 				{
-					var animationInfo = importer.CreateAnimationsForAssetFile(droppedAsset);
-
-					if (animationInfo != null)
+					foreach (var asset in droppedAssets)
 					{
-						importer.CreateAnimatorController(animationInfo);
+						var animationInfo = importer.CreateAnimationsForAssetFile(asset);
+
+						if (animationInfo != null)
+						{
+							importer.CreateAnimatorController(animationInfo);
+						}
 					}
 
 					AssetDatabase.Refresh();
@@ -310,17 +305,20 @@ namespace AnimationImporter
 
 			importer.baseController = EditorGUILayout.ObjectField("Based on Controller:", importer.baseController, typeof(RuntimeAnimatorController), false) as RuntimeAnimatorController;
 
-			DefaultAsset droppedAsset = ShowDropButton<DefaultAsset>(importer.canImportAnimationsForOverrideController, AnimationImporter.IsValidAsset);
-			if (droppedAsset != null)
+			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimationsForOverrideController, AnimationImporter.IsValidAsset);
+			if (droppedAssets != null)
 			{
 				EditorUtility.DisplayProgressBar("Import Animator Override Controller", "Importing...", 0);
 				try
 				{
-					var animationInfo = importer.CreateAnimationsForAssetFile(droppedAsset);
-
-					if (animationInfo != null)
+					foreach (var asset in droppedAssets)
 					{
-						importer.CreateAnimatorOverrideController(animationInfo);
+						var animationInfo = importer.CreateAnimationsForAssetFile(asset);
+
+						if (animationInfo != null)
+						{
+							importer.CreateAnimatorOverrideController(animationInfo);
+						}
 					}
 
 					AssetDatabase.Refresh();
@@ -346,9 +344,9 @@ namespace AnimationImporter
 
 		public delegate bool IsValidAssetDelegate(string path);
 
-		private T ShowDropButton<T>(bool isEnabled, IsValidAssetDelegate IsValidAsset) where T : UnityEngine.Object
+		private T[] ShowDropButton<T>(bool isEnabled, IsValidAssetDelegate IsValidAsset) where T : UnityEngine.Object
 		{
-			T returnValue = null;
+			T[] returnValue = null;
 
 			Rect drop_area = GUILayoutUtility.GetRect(0.0f, 80.0f, GUILayout.ExpandWidth(true));
 
@@ -375,15 +373,19 @@ namespace AnimationImporter
 					{
 						DragAndDrop.AcceptDrag();
 
+						List<T> validObjects = new List<T>();
+
 						foreach (UnityEngine.Object dragged_object in DragAndDrop.objectReferences)
 						{
 							var assetPath = AssetDatabase.GetAssetPath(dragged_object);
 
 							if (dragged_object is T && IsValidAsset(assetPath))
 							{
-								returnValue = dragged_object as T;
+								validObjects.Add(dragged_object as T);
 							}
 						}
+
+						returnValue = validObjects.ToArray();
 					}
 
 					evt.Use();

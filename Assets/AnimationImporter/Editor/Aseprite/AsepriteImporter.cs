@@ -10,7 +10,7 @@ using System.IO;
 namespace AnimationImporter.Aseprite
 {
 	[InitializeOnLoad]
-	public class AsepriteImporter
+	public class AsepriteImporter : IAnimationImporterPlugin
 	{
 		// ================================================================================
 		//  const
@@ -35,16 +35,20 @@ namespace AnimationImporter.Aseprite
 		}
 
 		// ================================================================================
-		//  public methods
+		//  static constructor, registering plugin
 		// --------------------------------------------------------------------------------
 
 		static AsepriteImporter ()
 		{
-			AnimationImporter.RegisterImporter("ase", Import);
-			AnimationImporter.RegisterImporter("aseprite", Import);
+			AsepriteImporter importer = new AsepriteImporter();
+			AnimationImporter.RegisterImporter(importer, "ase", "aseprite");
 		}
 
-		public static ImportedAnimationSheet Import(AnimationImportJob job, AnimationImporterSharedConfig config)
+		// ================================================================================
+		//  public methods
+		// --------------------------------------------------------------------------------
+
+		public ImportedAnimationSheet Import(AnimationImportJob job, AnimationImporterSharedConfig config)
 		{
 			if (CreateSpriteAtlasAndMetaFile(job))
 			{
@@ -56,6 +60,12 @@ namespace AnimationImporter.Aseprite
 			}
 
 			return null;
+		}
+
+		public bool IsValid()
+		{
+			return AnimationImporter.Instance != null && AnimationImporter.Instance.sharedData != null
+				&& File.Exists(AnimationImporter.Instance.asepritePath);
 		}
 
 		// ================================================================================
@@ -77,9 +87,6 @@ namespace AnimationImporter.Aseprite
 					return null;
 
 				animationSheet.previousImportSettings = job.previousImportSettings;
-
-				animationSheet.name = job.name;
-				animationSheet.basePath = job.assetDirectory;
 
 				animationSheet.SetNonLoopingAnimations(config.animationNamesThatDoNotLoop);
 
@@ -169,7 +176,7 @@ namespace AnimationImporter.Aseprite
 				return null;
 			}
 
-			animationSheet.ApplyCreatedFrames();
+			animationSheet.ApplyGlobalFramesToAnimationFrames();
 
 			return animationSheet;
 		}

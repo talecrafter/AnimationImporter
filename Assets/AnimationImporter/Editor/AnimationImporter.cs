@@ -47,8 +47,6 @@ namespace AnimationImporter
 		private const string PREFS_PREFIX = "ANIMATION_IMPORTER_";
 		private const string SHARED_CONFIG_PATH = "Assets/Resources/AnimationImporter/AnimationImporterConfig.asset";
 
-		//private static string[] allowedExtensions = { "ase", "aseprite" };
-
 		// ================================================================================
 		//  user values
 		// --------------------------------------------------------------------------------
@@ -66,7 +64,6 @@ namespace AnimationImporter
 				{
 					_asepritePath = value;
 					SaveUserConfig();
-					CheckIfApplicationIsValid();
 				}
 			}
 		}
@@ -98,26 +95,29 @@ namespace AnimationImporter
 		}
 
 		// ================================================================================
-		//  Importer Database
+		//  Importer Plugins
 		// --------------------------------------------------------------------------------
 
-		private static Dictionary<string, ImportDelegate> _importerDatabase = new Dictionary<string, ImportDelegate>();
+		private static Dictionary<string, IAnimationImporterPlugin> _importerPlugins = new Dictionary<string, IAnimationImporterPlugin>();
 
-		public static void RegisterImporter(string extension, ImportDelegate importer)
+		public static void RegisterImporter(IAnimationImporterPlugin importer, params string[] extensions)
 		{
-			_importerDatabase[extension] = importer;
+			foreach (var extension in extensions)
+			{
+				_importerPlugins[extension] = importer;
+			}
 		}
 
 		// ================================================================================
-		//  private
+		//  validation
 		// --------------------------------------------------------------------------------
 
-		private bool _hasApplication = false;
+		// this was used in the past, might be again in the future, so leave it here
 		public bool canImportAnimations
 		{
 			get
 			{
-				return _hasApplication;
+				return true;
 			}
 		}
 		public bool canImportAnimationsForOverrideController
@@ -168,8 +168,6 @@ namespace AnimationImporter
 					_baseController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(baseControllerPath);
 				}
 			}
-
-			CheckIfApplicationIsValid();
 		}
 
 		private void SaveUserConfig()
@@ -223,8 +221,11 @@ namespace AnimationImporter
 			// create a job
 			AnimationImportJob job = CreateAnimationImportJob(assetPath, additionalCommandLineArguments);
 
-			ImportDelegate importer = _importerDatabase[GetExtension(assetPath)];
-			ImportedAnimationSheet animationSheet = importer(job, sharedData);
+			IAnimationImporterPlugin importer = _importerPlugins[GetExtension(assetPath)];
+			ImportedAnimationSheet animationSheet = importer.Import(job, sharedData);
+
+			animationSheet.assetDirectory = job.assetDirectory;
+			animationSheet.name = job.name;
 
 			CreateSprites(animationSheet);
 
@@ -236,13 +237,13 @@ namespace AnimationImporter
 			AnimatorController controller;
 
 			// check if controller already exists; use this to not loose any references to this in other assets
-			string pathForAnimatorController = animations.basePath + "/" + animations.name + ".controller";
+			string pathForAnimatorController = animations.assetDirectory + "/" + animations.name + ".controller";
 			controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(pathForAnimatorController);
 
 			if (controller == null)
 			{
 				// create a new controller and place every animation as a state on the first layer
-				controller = AnimatorController.CreateAnimatorControllerAtPath(animations.basePath + "/" + animations.name + ".controller");
+				controller = AnimatorController.CreateAnimatorControllerAtPath(animations.assetDirectory + "/" + animations.name + ".controller");
 				controller.AddLayer("Default");
 
 				foreach (var animation in animations.animations)
@@ -272,7 +273,7 @@ namespace AnimationImporter
 			AnimatorOverrideController overrideController;
 
 			// check if override controller already exists; use this to not loose any references to this in other assets
-			string pathForOverrideController = animations.basePath + "/" + animations.name + ".overrideController";
+			string pathForOverrideController = animations.assetDirectory + "/" + animations.name + ".overrideController";
 			overrideController = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(pathForOverrideController);
 
 			RuntimeAnimatorController baseController = _baseController;
@@ -320,13 +321,13 @@ namespace AnimationImporter
 				return;
 			}
 
-			string imageAssetFilename = GetImageAssetFilename(animationSheet.basePath, animationSheet.name);
+			string imageAssetFilename = GetImageAssetFilename(animationSheet.assetDirectory, animationSheet.name);
 
 			if (animationSheet.hasAnimations)
 			{
 				if (sharedData.saveAnimationsToSubfolder)
 				{
-					string path = animationSheet.basePath + "/Animations";
+					string path = animationSheet.assetDirectory + "/Animations";
 					if (!Directory.Exists(path))
 					{
 						Directory.CreateDirectory(path);
@@ -336,7 +337,7 @@ namespace AnimationImporter
 				}
 				else
 				{
-					CreateAnimationAssets(animationSheet, imageAssetFilename, animationSheet.basePath);
+					CreateAnimationAssets(animationSheet, imageAssetFilename, animationSheet.assetDirectory);
 				}
 			}
 		}
@@ -358,7 +359,7 @@ namespace AnimationImporter
 				return;
 			}
 
-			string imageFile = GetImageAssetFilename(animationSheet.basePath, animationSheet.name);
+			string imageFile = GetImageAssetFilename(animationSheet.assetDirectory, animationSheet.name);
 
 			TextureImporter importer = AssetImporter.GetAtPath(imageFile) as TextureImporter;
 
@@ -437,12 +438,17 @@ namespace AnimationImporter
 
 			if (!string.IsNullOrEmpty(path))
 			{
-				return _importerDatabase.ContainsKey(extension);
+				if (_importerPlugins.ContainsKey(extension))
+				{
+					IAnimationImporterPlugin importer = _importerPlugins[extension];
+					if (importer != null)
+					{
+						return importer.IsValid();
+					}
+				}
 			}
-			else
-			{
-				return false;
-			}
+
+			return false;
 		}
 
 		private static string GetExtension(string path)
@@ -610,11 +616,6 @@ namespace AnimationImporter
 			return previousImportSettings;
 		}
 
-		private void CheckIfApplicationIsValid()
-		{
-			_hasApplication = File.Exists(_asepritePath);
-		}
-
 		private string GetBasePath(string path)
 		{
 			string extension = Path.GetExtension(path);
@@ -635,14 +636,6 @@ namespace AnimationImporter
 				basePath += "/Sprites";
 
 			return basePath + "/" + name + ".png";
-		}
-
-		private string GetJSONAssetFilename(string basePath, string name)
-		{
-			if (sharedData.saveSpritesToSubfolder)
-				basePath += "/Sprites";
-
-			return basePath + "/" + name + ".json";
 		}
 	}
 }
