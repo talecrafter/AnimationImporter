@@ -11,7 +11,7 @@ Setup
 -----
 
 Open the tool with "Window" -> "Animation Importer".
-If using Aseprite: Edit the path to the Aseprite Application on your system in that window.
+If using Aseprite: Edit the path to the Aseprite Application on your system under "Config".
 
 
 ASEPRITE:
@@ -39,6 +39,8 @@ Steps this tool goes through:
 
 
 PYXELEDIT:
+
+Tiles and Layer Blend Modes are not supported.
 
 Generate a file with animations in PyxelEdit.
 Save that file in your Unity project.

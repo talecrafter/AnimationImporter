@@ -1,0 +1,3 @@
+The Ionic.Zip.dll is part of the DotNetZip Library.
+
+You can find more about this Library, including Source Code, over here: http://dotnetzip.codeplex.com/
