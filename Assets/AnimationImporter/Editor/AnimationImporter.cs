@@ -370,7 +370,11 @@ namespace AnimationImporter
 				importer.spritePixelsPerUnit = sharedData.spritePixelsPerUnit;
 				importer.mipmapEnabled = false;
 				importer.filterMode = FilterMode.Point;
+#if UNITY_5_5_OR_NEWER
+				importer.textureCompression = TextureImporterCompression.Uncompressed;
+#else
 				importer.textureFormat = TextureImporterFormat.AutomaticTruecolor;
+#endif
 			}
 
 			// create sub sprites for this file according to the AsepriteAnimationInfo 
