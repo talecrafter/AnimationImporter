@@ -1,10 +1,10 @@
-Aseprite Animation Importer for Unity
+Pixelart Animation Importer for Unity
 ====
 
 This tool is an Aseprite and PyxelEdit Animation Importer for Unity.
 It's already used in several projects and should work for most use cases. There is no guaranteed support though, so test and use this at your own will.
 
-Tested with: Unity 5.4, Aseprite 1.1.13, PyxelEdit 0.4.3
+Tested with: Unity 5.5, Aseprite 1.1.13, PyxelEdit 0.4.3
 
 
 Setup
@@ -66,14 +66,14 @@ Steps this tool goes through:
 
 AUTOMATIC IMPORT
 
-This option reimports Aseprite files when Unity recognizes them as changed. It looks for an AnimatorController or AnimatorOverrideController with the same name and in the same directory. Current import settings are used, not the ones from first import.
+This option reimports Animation files when Unity notifies them as changed. It looks for an AnimatorController or AnimatorOverrideController with the same name and in the same directory. Current import settings are used, not the ones from first import.
 
 
 Feedback
 -----
 
-Send your comments, feedback and bugs to talecrafter@deathtrash.com or http://twitter.com/talecrafter.
-I cannot promise I have time to fix things or improve this tool, but there is a good chance I will have a look at it nonetheless.
+Send your comments and questions to talecrafter@deathtrash.com or http://twitter.com/talecrafter.
+You can use the GitHub Features (Issues, Pull Requests) for posting bugs, feature wishes and additional code.
 
 
 Credits
