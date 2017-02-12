@@ -281,7 +281,7 @@ namespace AnimationImporter
 					{
 						var animationInfo = importer.CreateAnimationsForAssetFile(asset);
 
-						if (animationInfo != null)
+						if (animationInfo != null && animationInfo.hasAnimations)
 						{
 							importer.CreateAnimatorController(animationInfo);
 						}
@@ -315,7 +315,7 @@ namespace AnimationImporter
 					{
 						var animationInfo = importer.CreateAnimationsForAssetFile(asset);
 
-						if (animationInfo != null)
+						if (animationInfo != null && animationInfo.hasAnimations)
 						{
 							importer.CreateAnimatorOverrideController(animationInfo);
 						}

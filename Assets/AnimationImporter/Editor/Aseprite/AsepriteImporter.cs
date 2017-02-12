@@ -84,7 +84,14 @@ namespace AnimationImporter.Aseprite
 				ImportedAnimationSheet animationSheet = GetAnimationInfo(jsonObject);
 
 				if (animationSheet == null)
+				{
 					return null;
+				}
+
+				if (!animationSheet.hasAnimations)
+				{
+					Debug.LogWarning("No Animations found in Aseprite file. Use Aseprite Tags to assign names to Animations.");
+				}
 
 				animationSheet.previousImportSettings = job.previousImportSettings;
 
