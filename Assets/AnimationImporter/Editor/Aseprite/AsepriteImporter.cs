@@ -128,19 +128,39 @@ namespace AnimationImporter.Aseprite
 					Directory.CreateDirectory(job.directoryPathForSprites);
 				}
 
-				string target = job.directoryPathForSprites + "/" + job.name + ".json";
-				if (File.Exists(target))
+				// check and copy json file
+				string jsonSource = job.assetDirectory + "/" + job.name + ".json";
+				string jsonTarget = job.directoryPathForSprites + "/" + job.name + ".json";
+				if (File.Exists(jsonSource))
 				{
-					File.Delete(target);
+					if (File.Exists(jsonTarget))
+					{
+						File.Delete(jsonTarget);
+					}
+					File.Move(jsonSource, jsonTarget);
 				}
-				File.Move(job.assetDirectory + "/" + job.name + ".json", target);
+				else
+				{
+					Debug.LogWarning("Calling Aseprite resulted in no json data file. Wrong Aseprite version?");
+					return false;
+				}
 
-				target = job.directoryPathForSprites + "/" + job.name + ".png";
-				if (File.Exists(target))
+				// check and copy png file
+				string pngSource = job.assetDirectory + "/" + job.name + ".png";
+				string pngTarget = job.directoryPathForSprites + "/" + job.name + ".png";
+				if (File.Exists(pngSource))
 				{
-					File.Delete(target);
+					if (File.Exists(pngTarget))
+					{
+						File.Delete(pngTarget);
+					}
+					File.Move(pngSource, pngTarget);
 				}
-				File.Move(job.assetDirectory + "/" + job.name + ".png", target);
+				else
+				{
+					Debug.LogWarning("Calling Aseprite resulted in no png Image file. Wrong Aseprite version?");
+					return false;
+				}
 			}
 
 			return success;

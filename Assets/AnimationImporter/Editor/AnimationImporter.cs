@@ -224,10 +224,13 @@ namespace AnimationImporter
 			IAnimationImporterPlugin importer = _importerPlugins[GetExtension(assetPath)];
 			ImportedAnimationSheet animationSheet = importer.Import(job, sharedData);
 
-			animationSheet.assetDirectory = job.assetDirectory;
-			animationSheet.name = job.name;
+			if (animationSheet != null)
+			{
+				animationSheet.assetDirectory = job.assetDirectory;
+				animationSheet.name = job.name;
 
-			CreateSprites(animationSheet);
+				CreateSprites(animationSheet);
+			}
 
 			return animationSheet;
 		}
