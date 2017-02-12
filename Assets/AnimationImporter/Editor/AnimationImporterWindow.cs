@@ -336,7 +336,7 @@ namespace AnimationImporter
 			Rect drop_area = GUILayoutUtility.GetRect(0.0f, 80.0f, GUILayout.ExpandWidth(true));
 
 			GUI.enabled = isEnabled;
-			GUI.Box(drop_area, "Drop Animation file here", _dropBoxStyle);
+			GUI.Box(drop_area, "Drop Animation files here", _dropBoxStyle);
 			GUI.enabled = true;
 
 			if (!isEnabled)
