@@ -248,12 +248,12 @@ namespace AnimationImporter
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
 			if (droppedAssets != null)
 			{
-				EditorUtility.DisplayProgressBar("Import Animations", "Importing...", 0);
 				try
 				{
-					foreach (var asset in droppedAssets)
+					for (int i = 0; i < droppedAssets.Length; i++)
 					{
-						importer.CreateAnimationsForAssetFile(asset);
+						EditorUtility.DisplayProgressBar("Import Animations", "Importing...", (float)i / droppedAssets.Length);
+						importer.CreateAnimationsForAssetFile(droppedAssets[i]);
 					}
 					AssetDatabase.Refresh();
 				}
@@ -274,12 +274,13 @@ namespace AnimationImporter
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
 			if (droppedAssets != null)
 			{
-				EditorUtility.DisplayProgressBar("Import Animator Controller", "Importing...", 0);
 				try
 				{
-					foreach (var asset in droppedAssets)
+					for (int i = 0; i < droppedAssets.Length; i++)
 					{
-						var animationInfo = importer.CreateAnimationsForAssetFile(asset);
+						EditorUtility.DisplayProgressBar("Import Animator Controller", "Importing...", (float)i / droppedAssets.Length);
+
+						var animationInfo = importer.CreateAnimationsForAssetFile(droppedAssets[i]);
 
 						if (animationInfo != null && animationInfo.hasAnimations)
 						{
@@ -308,12 +309,13 @@ namespace AnimationImporter
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimationsForOverrideController, AnimationImporter.IsValidAsset);
 			if (droppedAssets != null)
 			{
-				EditorUtility.DisplayProgressBar("Import Animator Override Controller", "Importing...", 0);
 				try
 				{
-					foreach (var asset in droppedAssets)
+					for (int i = 0; i < droppedAssets.Length; i++)
 					{
-						var animationInfo = importer.CreateAnimationsForAssetFile(asset);
+						EditorUtility.DisplayProgressBar("Import Animator Override Controller", "Importing...", (float)i / droppedAssets.Length);
+
+						var animationInfo = importer.CreateAnimationsForAssetFile(droppedAssets[i]);
 
 						if (animationInfo != null && animationInfo.hasAnimations)
 						{
