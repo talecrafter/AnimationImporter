@@ -12,6 +12,14 @@ namespace AnimationImporter
 		public const char UnityDirectorySeparator = '/';
 		public const string ResourcesFolderName = "Resources";
 
+		public static string projectPath
+		{
+			get
+			{
+				return Application.dataPath.RemoveLastLetters("/Assets".Length);
+			}
+		}
+
 		/// <summary>
 		/// Creates the asset and any directories that are missing along its path.
 		/// </summary>
@@ -83,6 +91,62 @@ namespace AnimationImporter
 
 				pathToFolder = string.Concat(pathToFolder, UnityDirectorySeparator);
 			}
+		}
+
+		/// <summary>
+		/// get a valid path for the AssetDatabase from absolute path or subpath
+		/// </summary>
+		/// <param name="path">absolute path or subpath like "Resources"</param>
+		/// <returns>path relative to the project directory</returns>
+		public static string GetAssetPath(string path)
+		{
+			if (path == null)
+			{
+				return null;
+			}
+
+			path = path.Remove(projectPath);
+
+			if (path.StartsWith("\\"))
+			{
+				path = path.Remove(0, 1);
+			}
+
+			if (path.StartsWith("/"))
+			{
+				path = path.Remove(0, 1);
+			}
+
+			if (!path.StartsWith("Assets") && !path.StartsWith("/Assets"))
+			{
+				path = Path.Combine("Assets", path);
+			}
+
+			return path;
+		}
+
+		// ================================================================================
+		//  string extensions
+		// --------------------------------------------------------------------------------
+
+		private static string RemoveLastLetters(this string s, int letterCount)
+		{
+			if (string.IsNullOrEmpty(s))
+			{
+				return s;
+			}
+
+			if (letterCount > s.Length)
+			{
+				letterCount = s.Length;
+			}
+
+			return s.Remove(s.Length - letterCount);
+		}
+
+		private static string Remove(this string s, string exactExpression)
+		{
+			return s.Replace(exactExpression, "");
 		}
 	}
 }

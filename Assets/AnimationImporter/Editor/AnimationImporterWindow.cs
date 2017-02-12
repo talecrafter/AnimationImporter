@@ -154,11 +154,11 @@ namespace AnimationImporter
 
 			importer.sharedData.spritePixelsPerUnit = EditorGUILayout.FloatField("Sprite Pixels per Unit", importer.sharedData.spritePixelsPerUnit);
 
-			EditorGUILayout.BeginHorizontal();
-			importer.sharedData.saveSpritesToSubfolder = EditorGUILayout.Toggle("Sprites to Subfolder", importer.sharedData.saveSpritesToSubfolder);
+			GUILayout.Space(5f);
 
-			importer.sharedData.saveAnimationsToSubfolder = EditorGUILayout.Toggle("Animations to Subfolder", importer.sharedData.saveAnimationsToSubfolder);
-			EditorGUILayout.EndHorizontal();
+			ShowTargetLocationOptions("Sprites", importer.sharedData.spritesTargetLocation);
+			ShowTargetLocationOptions("Animations", importer.sharedData.animationsTargetLocation);
+			ShowTargetLocationOptions("AnimationController", importer.sharedData.animationControllersTargetLocation);
 
 			GUILayout.Space(25f);
 
@@ -210,6 +210,48 @@ namespace AnimationImporter
 			}
 		}
 
+		private void ShowTargetLocationOptions(string label, AssetTargetLocation targetLocation)
+		{
+			EditorGUILayout.BeginHorizontal();
+
+			GUILayout.Label(label, GUILayout.Width(130f));
+
+			targetLocation.locationType = (AssetTargetLocationType)EditorGUILayout.EnumPopup(targetLocation.locationType, GUILayout.Width(130f));
+
+			bool prevEnabled = GUI.enabled;
+			GUI.enabled = targetLocation.locationType == AssetTargetLocationType.GlobalDirectory;
+
+			string globalDirectory = targetLocation.globalDirectory;
+
+			if (GUILayout.Button("Select", GUILayout.Width(50f)))
+			{
+				var startDirectory = globalDirectory;
+				if (!Directory.Exists(startDirectory))
+				{
+					startDirectory = Application.dataPath;
+				}
+				startDirectory = Application.dataPath;
+
+				var path = EditorUtility.OpenFolderPanel("Select Target Location", globalDirectory, "");
+				if (!string.IsNullOrEmpty(path) && AssetDatabase.IsValidFolder(AssetDatabaseUtility.GetAssetPath(path)))
+				{
+					targetLocation.globalDirectory = AssetDatabaseUtility.GetAssetPath(path);
+				}
+			}
+
+			if (targetLocation.locationType == AssetTargetLocationType.GlobalDirectory)
+			{
+				string displayDirectory = "/" + globalDirectory;
+				EditorGUILayout.EndHorizontal();
+				EditorGUILayout.BeginHorizontal();
+				GUILayout.Label(displayDirectory, GUILayout.MaxWidth(300f));
+			}
+
+			GUI.enabled = prevEnabled;
+
+			EditorGUILayout.EndHorizontal();
+		}
+
 		private void ShowAsepriteApplicationSelection()
 		{
 			GUILayout.BeginHorizontal();
@@ -248,7 +290,7 @@ namespace AnimationImporter
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
 			if (droppedAssets != null && droppedAssets.Length > 0)
 			{
-				importer.ImportAssets(droppedAssets);				
+				importer.ImportAssets(droppedAssets);
 			}
 		}
 

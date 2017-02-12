@@ -81,10 +81,10 @@ Credits
 
 Contributors:
 
-Stephan Hövelbrinks (http://twitter.com/talecrafter)
-Ya-ma (http://twitter.com/PixelYam)
-Edward Rowe
-Alberto Fernandez
+- Stephan Hövelbrinks (http://twitter.com/talecrafter)
+- Ya-ma (http://twitter.com/PixelYam)
+- Edward Rowe (http://twitter.com/edwardlrowe)
+- Alberto Fernandez
 
 Contains JSONObject from Boomlagoon (www.boomlagoon.com)
 

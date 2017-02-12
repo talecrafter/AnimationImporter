@@ -309,14 +309,16 @@ namespace AnimationImporter
 		{
 			AnimatorController controller;
 
+			string directory = sharedData.animationControllersTargetLocation.GetAndEnsureTargetDirectory(animations.assetDirectory);
+
 			// check if controller already exists; use this to not loose any references to this in other assets
-			string pathForAnimatorController = animations.assetDirectory + "/" + animations.name + ".controller";
+			string pathForAnimatorController = directory + "/" + animations.name + ".controller";
 			controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(pathForAnimatorController);
 
 			if (controller == null)
 			{
 				// create a new controller and place every animation as a state on the first layer
-				controller = AnimatorController.CreateAnimatorControllerAtPath(animations.assetDirectory + "/" + animations.name + ".controller");
+				controller = AnimatorController.CreateAnimatorControllerAtPath(pathForAnimatorController);
 				controller.AddLayer("Default");
 
 				foreach (var animation in animations.animations)
@@ -345,8 +347,10 @@ namespace AnimationImporter
 		{
 			AnimatorOverrideController overrideController;
 
+			string directory = sharedData.animationControllersTargetLocation.GetAndEnsureTargetDirectory(animations.assetDirectory);
+
 			// check if override controller already exists; use this to not loose any references to this in other assets
-			string pathForOverrideController = animations.assetDirectory + "/" + animations.name + ".overrideController";
+			string pathForOverrideController = directory + "/" + animations.name + ".overrideController";
 			overrideController = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(pathForOverrideController);
 
 			RuntimeAnimatorController baseController = _baseController;
@@ -398,20 +402,8 @@ namespace AnimationImporter
 
 			if (animationSheet.hasAnimations)
 			{
-				if (sharedData.saveAnimationsToSubfolder)
-				{
-					string path = animationSheet.assetDirectory + "/Animations";
-					if (!Directory.Exists(path))
-					{
-						Directory.CreateDirectory(path);
-					}
-
-					CreateAnimationAssets(animationSheet, imageAssetFilename, path);
-				}
-				else
-				{
-					CreateAnimationAssets(animationSheet, imageAssetFilename, animationSheet.assetDirectory);
-				}
+				string targetPath = _sharedData.animationsTargetLocation.GetAndEnsureTargetDirectory(animationSheet.assetDirectory);
+				CreateAnimationAssets(animationSheet, imageAssetFilename, targetPath);
 			}
 		}
 
@@ -574,8 +566,9 @@ namespace AnimationImporter
 		{
 			string name = Path.GetFileNameWithoutExtension(assetPath);
 			string basePath = GetBasePath(assetPath);
+			string targetDirectory = sharedData.animationControllersTargetLocation.GetTargetDirectory(basePath);
 
-			string pathForController = basePath + "/" + name + ".controller";
+			string pathForController = targetDirectory + "/" + name + ".controller";
 			AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(pathForController);
 
 			return controller;
@@ -585,8 +578,9 @@ namespace AnimationImporter
 		{
 			string name = Path.GetFileNameWithoutExtension(assetPath);
 			string basePath = GetBasePath(assetPath);
+			string targetDirectory = sharedData.animationControllersTargetLocation.GetTargetDirectory(basePath);
 
-			string pathForController = basePath + "/" + name + ".overrideController";
+			string pathForController = targetDirectory + "/" + name + ".overrideController";
 			AnimatorOverrideController controller = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(pathForController);
 
 			return controller;
@@ -650,23 +644,9 @@ namespace AnimationImporter
 
 			importJob.additionalCommandLineArguments = additionalCommandLineArguments;
 
-			if (_sharedData.saveSpritesToSubfolder)
-			{
-				importJob.directoryPathForSprites = importJob.assetDirectory + "/Sprites";
-			}
-			else
-			{
-				importJob.directoryPathForSprites = importJob.assetDirectory;
-			}
-
-			if (_sharedData.saveAnimationsToSubfolder)
-			{
-				importJob.directoryPathForAnimations = importJob.assetDirectory + "/Animations";
-			}
-			else
-			{
-				importJob.directoryPathForAnimations = importJob.assetDirectory;
-			}
+			importJob.directoryPathForSprites = _sharedData.spritesTargetLocation.GetAndEnsureTargetDirectory(importJob.assetDirectory);
+			importJob.directoryPathForAnimations = _sharedData.animationsTargetLocation.GetAndEnsureTargetDirectory(importJob.assetDirectory);
+			importJob.directoryPathForAnimationControllers = _sharedData.animationControllersTargetLocation.GetAndEnsureTargetDirectory(importJob.assetDirectory);
 
 			// we analyze import settings on existing files
 			importJob.previousImportSettings = CollectPreviousImportSettings(importJob);
@@ -699,10 +679,9 @@ namespace AnimationImporter
 
 		private string GetImageAssetFilename(string basePath, string name)
 		{
-			if (sharedData.saveSpritesToSubfolder)
-				basePath += "/Sprites";
+			string directory = sharedData.spritesTargetLocation.GetAndEnsureTargetDirectory(basePath);
 
-			return basePath + "/" + name + ".png";
+			return directory + "/" + name + ".png";
 		}
 	}
 }

@@ -17,6 +17,7 @@ namespace AnimationImporter
 
 		public string directoryPathForSprites = "";
 		public string directoryPathForAnimations = "";
+		public string directoryPathForAnimationControllers = "";
 
 		public string imageAssetFilename
 		{

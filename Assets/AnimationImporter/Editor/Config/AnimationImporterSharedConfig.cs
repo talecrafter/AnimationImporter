@@ -99,31 +99,27 @@ namespace AnimationImporter
 		}
 
 		[SerializeField]
-		private bool _saveSpritesToSubfolder = true;
-		public bool saveSpritesToSubfolder
+		private AssetTargetLocation _spritesTargetLocation = new AssetTargetLocation(AssetTargetLocationType.SubDirectory, "Sprites");
+		public AssetTargetLocation spritesTargetLocation
 		{
-			get
-			{
-				return _saveSpritesToSubfolder;
-			}
-			set
-			{
-				_saveSpritesToSubfolder = value;
-			}
+			get { return _spritesTargetLocation; }
+			set { _spritesTargetLocation = value; }
 		}
 
 		[SerializeField]
-		private bool _saveAnimationsToSubfolder = true;
-		public bool saveAnimationsToSubfolder
+		private AssetTargetLocation _animationsTargetLocation = new AssetTargetLocation(AssetTargetLocationType.SubDirectory, "Animations");
+		public AssetTargetLocation animationsTargetLocation
 		{
-			get
-			{
-				return _saveAnimationsToSubfolder;
-			}
-			set
-			{
-				_saveAnimationsToSubfolder = value;
-			}
+			get { return _animationsTargetLocation; }
+			set { _animationsTargetLocation = value; }
+		}
+
+		[SerializeField]
+		private AssetTargetLocation _animationControllersTargetLocation = new AssetTargetLocation(AssetTargetLocationType.SameDirectory, "Animations");
+		public AssetTargetLocation animationControllersTargetLocation
+		{
+			get { return _animationControllersTargetLocation; }
+			set { _animationControllersTargetLocation = value; }
 		}
 
 		public void RemoveAnimationThatDoesNotLoop(int index)
@@ -150,70 +146,7 @@ namespace AnimationImporter
 			var pixelsPerUnityKey = PREFS_PREFIX + "spritePixelsPerUnit";
 			return PlayerPrefs.HasKey(pixelsPerUnityKey) || EditorPrefs.HasKey(pixelsPerUnityKey);
 		}
-
-		/// <summary>
-		/// Copies shared data in from Preferences, used to upgrade versions of AnimationImporter
-		/// </summary>
-		public void CopyFromPreferences()
-		{
-			if (HasKeyInPreferences(PREFS_PREFIX + "spritePixelsPerUnit"))
-			{
-				_spritePixelsPerUnit = GetFloatFromPreferences(PREFS_PREFIX + "spritePixelsPerUnit");
-			}
-			if (HasKeyInPreferences(PREFS_PREFIX + "spriteTargetObjectType"))
-			{
-				_targetObjectType = (AnimationTargetObjectType)GetIntFromPreferences(PREFS_PREFIX + "spriteTargetObjectType");
-			}
-			if (HasKeyInPreferences(PREFS_PREFIX + "spriteAlignment"))
-			{
-				_spriteAlignment = (SpriteAlignment)GetIntFromPreferences(PREFS_PREFIX + "spriteAlignment");
-			}
-			if (HasKeyInPreferences(PREFS_PREFIX + "spriteAlignmentCustomX"))
-			{
-				_spriteAlignmentCustomX = GetFloatFromPreferences(PREFS_PREFIX + "spriteAlignmentCustomX");
-			}
-			if (HasKeyInPreferences(PREFS_PREFIX + "spriteAlignmentCustomY"))
-			{
-				_spriteAlignmentCustomY = GetFloatFromPreferences(PREFS_PREFIX + "spriteAlignmentCustomY");
-			}
-
-			if (HasKeyInPreferences(PREFS_PREFIX + "saveSpritesToSubfolder"))
-			{
-				_saveSpritesToSubfolder = GetBoolFromPreferences(PREFS_PREFIX + "saveSpritesToSubfolder");
-			}
-			if (HasKeyInPreferences(PREFS_PREFIX + "saveAnimationsToSubfolder"))
-			{
-				_saveAnimationsToSubfolder = GetBoolFromPreferences(PREFS_PREFIX + "saveAnimationsToSubfolder");
-			}
-			if (HasKeyInPreferences(PREFS_PREFIX + "automaticImporting"))
-			{
-				_automaticImporting = GetBoolFromPreferences(PREFS_PREFIX + "automaticImporting");
-			}
-
-			// Find all nonLoopingClip Prefences, load them into the sharedData.
-			int numOldClips = 0;
-			string loopCountKey = PREFS_PREFIX + "nonLoopCount";
-			if (HasKeyInPreferences(loopCountKey))
-			{
-				numOldClips = GetIntFromPreferences(loopCountKey);
-			}
-
-			for (int i = 0; i < numOldClips; ++i)
-			{
-				string clipKey = PREFS_PREFIX + "nonLoopCount" + i.ToString();
-
-				// If the clip hasn't already been moved to the shared data, do it now.
-				if (HasKeyInPreferences(clipKey))
-				{
-					var stringAtKey = GetStringFromPreferences(clipKey);
-					if (!_animationNamesThatDoNotLoop.Contains(stringAtKey))
-					{
-						_animationNamesThatDoNotLoop.Add(stringAtKey);
-					}
-				}
-			}
-		}
-
+	
 		private bool HasKeyInPreferences(string key)
 		{
 			return PlayerPrefs.HasKey(key) || EditorPrefs.HasKey(key);
