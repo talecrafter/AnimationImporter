@@ -18,10 +18,6 @@ namespace AnimationImporter
 		public string directoryPathForSprites = "";
 		public string directoryPathForAnimations = "";
 
-		public string additionalCommandLineArguments = null;
-
-		public PreviousImportSettings previousImportSettings = null;
-
 		public string imageAssetFilename
 		{
 			get
@@ -29,6 +25,14 @@ namespace AnimationImporter
 				return directoryPathForSprites + "/" + name + ".png";
 			}
 		}
+
+		public PreviousImportSettings previousImportSettings = null;
+
+		// additional import settings
+		public string additionalCommandLineArguments = null;
+		public bool createUnityAnimations = true;
+		public ImportAnimatorController importAnimatorController = ImportAnimatorController.None;
+		public bool useExistingAnimatorController = false;
 
 		// ================================================================================
 		//  constructor

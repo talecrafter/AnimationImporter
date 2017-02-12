@@ -246,24 +246,9 @@ namespace AnimationImporter
 			ShowHeadline("Animations");
 
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
-			if (droppedAssets != null)
+			if (droppedAssets != null && droppedAssets.Length > 0)
 			{
-				try
-				{
-					for (int i = 0; i < droppedAssets.Length; i++)
-					{
-						EditorUtility.DisplayProgressBar("Import Animations", "Importing...", (float)i / droppedAssets.Length);
-						importer.CreateAnimationsForAssetFile(droppedAssets[i]);
-					}
-					AssetDatabase.Refresh();
-				}
-				catch (Exception error)
-				{
-					Debug.LogWarning(error.ToString());
-					throw;
-				}
-
-				EditorUtility.ClearProgressBar();
+				importer.ImportAssets(droppedAssets);				
 			}
 		}
 
@@ -272,31 +257,9 @@ namespace AnimationImporter
 			ShowHeadline("Animator Controller + Animations");
 
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
-			if (droppedAssets != null)
+			if (droppedAssets != null && droppedAssets.Length > 0)
 			{
-				try
-				{
-					for (int i = 0; i < droppedAssets.Length; i++)
-					{
-						EditorUtility.DisplayProgressBar("Import Animator Controller", "Importing...", (float)i / droppedAssets.Length);
-
-						var animationInfo = importer.CreateAnimationsForAssetFile(droppedAssets[i]);
-
-						if (animationInfo != null && animationInfo.hasAnimations)
-						{
-							importer.CreateAnimatorController(animationInfo);
-						}
-					}
-
-					AssetDatabase.Refresh();
-				}
-				catch (Exception error)
-				{
-					Debug.LogWarning(error.ToString());
-					throw;
-				}
-
-				EditorUtility.ClearProgressBar();
+				importer.ImportAssets(droppedAssets, ImportAnimatorController.AnimatorController);
 			}
 		}
 
@@ -307,31 +270,9 @@ namespace AnimationImporter
 			importer.baseController = EditorGUILayout.ObjectField("Based on Controller:", importer.baseController, typeof(RuntimeAnimatorController), false) as RuntimeAnimatorController;
 
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimationsForOverrideController, AnimationImporter.IsValidAsset);
-			if (droppedAssets != null)
+			if (droppedAssets != null && droppedAssets.Length > 0)
 			{
-				try
-				{
-					for (int i = 0; i < droppedAssets.Length; i++)
-					{
-						EditorUtility.DisplayProgressBar("Import Animator Override Controller", "Importing...", (float)i / droppedAssets.Length);
-
-						var animationInfo = importer.CreateAnimationsForAssetFile(droppedAssets[i]);
-
-						if (animationInfo != null && animationInfo.hasAnimations)
-						{
-							importer.CreateAnimatorOverrideController(animationInfo);
-						}
-					}
-
-					AssetDatabase.Refresh();
-				}
-				catch (Exception error)
-				{
-					Debug.LogWarning(error.ToString());
-					throw;
-				}
-
-				EditorUtility.ClearProgressBar();
+				importer.ImportAssets(droppedAssets, ImportAnimatorController.AnimatorOverrideController);
 			}
 		}
 

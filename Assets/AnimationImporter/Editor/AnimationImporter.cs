@@ -188,23 +188,29 @@ namespace AnimationImporter
 		//  import methods
 		// --------------------------------------------------------------------------------
 
-		public ImportedAnimationSheet CreateAnimationsForAssetFile(DefaultAsset droppedAsset)
+		public void ImportAssets(DefaultAsset[] assets, ImportAnimatorController importAnimatorController = ImportAnimatorController.None)
 		{
-			return CreateAnimationsForAssetFile(AssetDatabase.GetAssetPath(droppedAsset));
-		}
+			List<AnimationImportJob> jobs = new List<AnimationImportJob>();
 
-		public ImportedAnimationSheet CreateAnimationsForAssetFile(string assetPath, string additionalCommandLineArguments = null)
-		{
-			ImportedAnimationSheet animationSheet = ImportSpritesAndAnimationSheet(assetPath, additionalCommandLineArguments);
-
-			if (animationSheet != null)
+			foreach (var asset in assets)
 			{
-				CreateAnimations(animationSheet);
+				string assetPath = AssetDatabase.GetAssetPath(asset);
+				if (!IsValidAsset(assetPath))
+				{
+					continue;
+				}
+
+				AnimationImportJob job = CreateAnimationImportJob(assetPath);
+				job.importAnimatorController = importAnimatorController;
+				jobs.Add(job);
 			}
 
-			return animationSheet;
+			Import(jobs.ToArray());
 		}
 
+		/// <summary>
+		/// can be used by custom import pipeline
+		/// </summary>
 		public ImportedAnimationSheet ImportSpritesAndAnimationSheet(string assetPath, string additionalCommandLineArguments = null)
 		{
 			if (!IsValidAsset(assetPath))
@@ -220,8 +226,41 @@ namespace AnimationImporter
 
 			// create a job
 			AnimationImportJob job = CreateAnimationImportJob(assetPath, additionalCommandLineArguments);
+			job.createUnityAnimations = false;
 
-			IAnimationImporterPlugin importer = _importerPlugins[GetExtension(assetPath)];
+			return ImportJob(job);
+		}
+
+		private void Import(AnimationImportJob[] jobs)
+		{
+			if (jobs == null || jobs.Length == 0)
+			{
+				return;
+			}
+
+			try
+			{
+				for (int i = 0; i < jobs.Length; i++)
+				{
+					AnimationImportJob job = jobs[i];
+
+					EditorUtility.DisplayProgressBar("Import", job.name, (float)i / jobs.Length);
+					ImportJob(job);
+				}
+				AssetDatabase.Refresh();
+			}
+			catch (Exception error)
+			{
+				Debug.LogWarning(error.ToString());
+				throw;
+			}
+
+			EditorUtility.ClearProgressBar();
+		}
+
+		private ImportedAnimationSheet ImportJob(AnimationImportJob job)
+		{
+			IAnimationImporterPlugin importer = _importerPlugins[GetExtension(job.fileName)];
 			ImportedAnimationSheet animationSheet = importer.Import(job, sharedData);
 
 			if (animationSheet != null)
@@ -230,12 +269,30 @@ namespace AnimationImporter
 				animationSheet.name = job.name;
 
 				CreateSprites(animationSheet);
+
+				if (job.createUnityAnimations)
+				{
+					CreateAnimations(animationSheet);
+				}
+
+				if (job.importAnimatorController == ImportAnimatorController.AnimatorController)
+				{
+					CreateAnimatorController(animationSheet);
+				}
+				else if (job.importAnimatorController == ImportAnimatorController.AnimatorOverrideController)
+				{
+					CreateAnimatorOverrideController(animationSheet, job.useExistingAnimatorController);
+				}
 			}
 
 			return animationSheet;
 		}
 
-		public void CreateAnimatorController(ImportedAnimationSheet animations)
+		// ================================================================================
+		//  create animator controllers
+		// --------------------------------------------------------------------------------
+
+		private void CreateAnimatorController(ImportedAnimationSheet animations)
 		{
 			AnimatorController controller;
 
@@ -271,7 +328,7 @@ namespace AnimationImporter
 			AssetDatabase.SaveAssets();
 		}
 
-		public void CreateAnimatorOverrideController(ImportedAnimationSheet animations, bool useExistingBaseController = false)
+		private void CreateAnimatorOverrideController(ImportedAnimationSheet animations, bool useExistingBaseController = false)
 		{
 			AnimatorOverrideController overrideController;
 
@@ -529,56 +586,46 @@ namespace AnimationImporter
 		/// <summary>
 		/// will be called by the AssetPostProcessor
 		/// </summary>
-		public void AutomaticReImport(string filePath)
+		public void AutomaticReImport(string[] assetPaths)
 		{
-			if (filePath == null)
-			{
-				return;
-			}
-
-			// check if file is handled by other Importers
-			if (HandleCustomReImport != null && HandleCustomReImport(filePath))
-			{
-				return;
-			}
-
-			HandleReImport(filePath);
-		}
-
-		/// <summary>
-		/// can be used for manually handling ReImport
-		/// </summary>
-		public void HandleReImport(string filePath, string additionalCommandLineArguments = null)
-		{
-			if (filePath == null)
-			{
-				return;
-			}
-
 			if (sharedData == null)
 			{
 				LoadOrCreateUserConfig();
 			}
 
-			if (HasExistingAnimatorController(filePath))
-			{
-				var animationInfo = CreateAnimationsForAssetFile(filePath, additionalCommandLineArguments);
+			List<AnimationImportJob> jobs = new List<AnimationImportJob>();
 
-				if (animationInfo != null)
+			foreach (var assetPath in assetPaths)
+			{
+				if (string.IsNullOrEmpty(assetPath))
 				{
-					CreateAnimatorController(animationInfo);
+					continue;
+				}
+
+				if (HandleCustomReImport != null && HandleCustomReImport(assetPath))
+				{
+					continue;
+				}
+
+				AnimationImportJob job = CreateAnimationImportJob(assetPath);
+				if (job != null)
+				{
+					if (HasExistingAnimatorController(assetPath))
+					{
+						job.importAnimatorController = ImportAnimatorController.AnimatorController;
+					}
+					else if (HasExistingAnimatorOverrideController(assetPath))
+					{
+						job.importAnimatorController = ImportAnimatorController.AnimatorOverrideController;
+						job.useExistingAnimatorController = true;
+					}
+
+					jobs.Add(job);
 				}
 			}
-			else if (HasExistingAnimatorOverrideController(filePath))
-			{
-				var animationInfo = CreateAnimationsForAssetFile(filePath, additionalCommandLineArguments);
 
-				if (animationInfo != null)
-				{
-					CreateAnimatorOverrideController(animationInfo, true);
-				}
-			}
-		}
+			Import(jobs.ToArray());
+		}		
 
 		// ================================================================================
 		//  private methods

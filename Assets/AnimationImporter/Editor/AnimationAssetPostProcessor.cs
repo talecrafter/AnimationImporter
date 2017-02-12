@@ -91,10 +91,7 @@ namespace AnimationImporter
 			AssetDatabase.Refresh();
 			AnimationImporter importer = AnimationImporter.Instance;
 
-			foreach (var item in _assetsMarkedForImport)
-			{
-				importer.AutomaticReImport(item);
-			}
+			importer.AutomaticReImport(_assetsMarkedForImport.ToArray());
 
 			_assetsMarkedForImport.Clear();
 		}
