@@ -238,13 +238,18 @@ namespace AnimationImporter
 				return;
 			}
 
+			float progressPerJob = 1f / jobs.Length;
+
 			try
 			{
 				for (int i = 0; i < jobs.Length; i++)
 				{
 					AnimationImportJob job = jobs[i];
 
-					EditorUtility.DisplayProgressBar("Import", job.name, (float)i / jobs.Length);
+					job.progressUpdated += (float progress) => {							
+							float completeProgress = i * progressPerJob + progress * progressPerJob;
+							EditorUtility.DisplayProgressBar("Import", job.name, completeProgress);
+						};
 					ImportJob(job);
 				}
 				AssetDatabase.Refresh();
@@ -260,8 +265,12 @@ namespace AnimationImporter
 
 		private ImportedAnimationSheet ImportJob(AnimationImportJob job)
 		{
+			job.SetProgress(0);
+
 			IAnimationImporterPlugin importer = _importerPlugins[GetExtension(job.fileName)];
 			ImportedAnimationSheet animationSheet = importer.Import(job, sharedData);
+
+			job.SetProgress(0.3f);
 
 			if (animationSheet != null)
 			{
@@ -270,18 +279,22 @@ namespace AnimationImporter
 
 				CreateSprites(animationSheet);
 
+				job.SetProgress(0.6f);
+
 				if (job.createUnityAnimations)
 				{
 					CreateAnimations(animationSheet);
-				}
 
-				if (job.importAnimatorController == ImportAnimatorController.AnimatorController)
-				{
-					CreateAnimatorController(animationSheet);
-				}
-				else if (job.importAnimatorController == ImportAnimatorController.AnimatorOverrideController)
-				{
-					CreateAnimatorOverrideController(animationSheet, job.useExistingAnimatorController);
+					job.SetProgress(0.8f);
+
+					if (job.importAnimatorController == ImportAnimatorController.AnimatorController)
+					{
+						CreateAnimatorController(animationSheet);
+					}
+					else if (job.importAnimatorController == ImportAnimatorController.AnimatorOverrideController)
+					{
+						CreateAnimatorOverrideController(animationSheet, job.useExistingAnimatorController);
+					}
 				}
 			}
 

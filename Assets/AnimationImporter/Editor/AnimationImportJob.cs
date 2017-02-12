@@ -44,6 +44,32 @@ namespace AnimationImporter
 		}
 
 		// ================================================================================
+		//  progress
+		// --------------------------------------------------------------------------------
+
+		public delegate void ProgressUpdatedDelegate(float progress);
+		public event ProgressUpdatedDelegate progressUpdated;
+
+		private float _progress = 0;
+		public float progress
+		{
+			get
+			{
+				return _progress;
+			}
+		}
+
+		public void SetProgress(float progress)
+		{
+			_progress = progress;
+
+			if (progressUpdated != null)
+			{
+				progressUpdated(_progress);
+			}
+		}
+
+		// ================================================================================
 		//  private methods
 		// --------------------------------------------------------------------------------
 
