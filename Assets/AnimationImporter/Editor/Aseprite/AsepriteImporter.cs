@@ -274,7 +274,6 @@ namespace AnimationImporter.Aseprite
 			foreach (var item in list)
 			{
 				ImportedAnimationFrame frame = new ImportedAnimationFrame();
-				frame.name = Path.GetFileNameWithoutExtension(item.Obj["filename"].Str);
 
 				var frameValues = item.Obj["frame"].Obj;
 				frame.width = (int)frameValues["w"].Number;

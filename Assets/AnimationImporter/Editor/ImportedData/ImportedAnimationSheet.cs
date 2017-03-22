@@ -259,6 +259,54 @@ namespace AnimationImporter
 			return metaData;
 		}
 
+		public void ApplySpriteNamingScheme(SpriteNamingScheme namingScheme)
+		{
+			const string NAME_DELIMITER = "_";
+
+			if (namingScheme == SpriteNamingScheme.Classic)
+			{
+				for (int i = 0; i < frames.Count; i++)
+				{
+					frames[i].name = name + " " + i.ToString();
+				}
+			}
+			else
+			{
+				foreach (var anim in animations)
+				{
+					for (int i = 0; i < anim.frames.Length; i++)
+					{
+						var animFrame = anim.frames[i];
+
+						switch (namingScheme)
+						{
+							case SpriteNamingScheme.FileAnimationZero:
+								animFrame.name = name + NAME_DELIMITER + anim.name + NAME_DELIMITER + i.ToString();
+								break;
+							case SpriteNamingScheme.FileAnimationOne:
+								animFrame.name = name + NAME_DELIMITER + anim.name + NAME_DELIMITER + (i + 1).ToString();
+								break;
+							case SpriteNamingScheme.AnimationZero:
+								animFrame.name = anim.name + NAME_DELIMITER + i.ToString();
+								break;
+							case SpriteNamingScheme.AnimationOne:
+								animFrame.name = anim.name + NAME_DELIMITER + (i + 1).ToString();
+								break;
+						}						
+					}
+				}
+			}
+
+			// remove unused frames from the list so they don't get created for the sprite sheet
+			for (int i = frames.Count - 1; i >= 0; i--)
+			{
+				if (string.IsNullOrEmpty(frames[i].name))
+				{
+					frames.RemoveAt(i);
+				}
+			}
+		}
+
 		public void ApplyCreatedSprites(Sprite[] sprites)
 		{
 			if (sprites == null)
@@ -266,22 +314,18 @@ namespace AnimationImporter
 				return;
 			}
 
-			// apply to general list
+			// add final Sprites to frames by comparing names
+			// as we can't be sure about the right order of the sprites
 			for (int i = 0; i < sprites.Length; i++)
 			{
-				frames[i].sprite = sprites[i];
-			}
+				Sprite sprite = sprites[i];
 
-			// apply to frames in animations (might be different classes than in general list)
-			foreach (var anim in animations)
-			{
-				for (int i = 0; i < anim.Count; i++)
+				for (int k = 0; k < frames.Count; k++)
 				{
-					int index = anim.firstSpriteIndex + i;
-
-					if (index < sprites.Length)
+					if (frames[k].name == sprite.name)
 					{
-						anim.frames[i].sprite = sprites[index];
+						frames[k].sprite = sprite;
+						break;
 					}
 				}
 			}

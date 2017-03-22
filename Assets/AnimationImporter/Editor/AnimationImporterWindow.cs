@@ -160,6 +160,12 @@ namespace AnimationImporter
 			ShowTargetLocationOptions("Animations", importer.sharedData.animationsTargetLocation);
 			ShowTargetLocationOptions("AnimationController", importer.sharedData.animationControllersTargetLocation);
 
+			GUILayout.Space(5f);
+
+			importer.sharedData.spriteNamingScheme = (SpriteNamingScheme)EditorGUILayout.IntPopup("Sprite Naming Scheme",
+				(int)importer.sharedData.spriteNamingScheme,
+				SpriteNaming.namingSchemesDisplayValues, SpriteNaming.namingSchemesValues);
+
 			GUILayout.Space(25f);
 
 			ShowHeadline("Automatic Import");

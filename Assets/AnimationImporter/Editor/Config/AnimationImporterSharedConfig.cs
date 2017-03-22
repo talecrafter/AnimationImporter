@@ -122,6 +122,13 @@ namespace AnimationImporter
 			set { _animationControllersTargetLocation = value; }
 		}
 
+		private SpriteNamingScheme _spriteNamingScheme = SpriteNamingScheme.Classic;
+		public SpriteNamingScheme spriteNamingScheme
+		{
+			get { return _spriteNamingScheme; }
+			set { _spriteNamingScheme = value; }
+		}
+
 		public void RemoveAnimationThatDoesNotLoop(int index)
 		{
 			animationNamesThatDoNotLoop.RemoveAt(index);

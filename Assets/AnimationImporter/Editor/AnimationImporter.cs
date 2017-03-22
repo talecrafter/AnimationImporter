@@ -277,6 +277,8 @@ namespace AnimationImporter
 				animationSheet.assetDirectory = job.assetDirectory;
 				animationSheet.name = job.name;
 
+				animationSheet.ApplySpriteNamingScheme(sharedData.spriteNamingScheme);
+
 				CreateSprites(animationSheet);
 
 				job.SetProgress(0.6f);
@@ -478,6 +480,8 @@ namespace AnimationImporter
 		private static Sprite[] GetAllSpritesFromAssetFile(string imageFilename)
 		{
 			var assets = AssetDatabase.LoadAllAssetsAtPath(imageFilename);
+
+			// make sure we only grab valid sprites here
 			List<Sprite> sprites = new List<Sprite>();
 			foreach (var item in assets)
 			{
@@ -487,13 +491,7 @@ namespace AnimationImporter
 				}
 			}
 
-			// we order the sprites by name here because the LoadAllAssets above does not necessarily return the sprites in correct order
-			// the OrderBy is fed with the last word of the name, which is an int from 0 upwards
-			Sprite[] orderedSprites = sprites
-									 .OrderBy(x => int.Parse(x.name.Substring(x.name.LastIndexOf(' ')).TrimStart()))
-									 .ToArray();
-
-			return orderedSprites;
+			return sprites.ToArray();
 		}
 
 		// ================================================================================

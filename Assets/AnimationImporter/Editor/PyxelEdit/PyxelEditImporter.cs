@@ -134,7 +134,7 @@ namespace AnimationImporter.PyxelEdit
 						frame.duration *= (int)(animationData.frameDurationMultipliers[i] / 100f);
 					}
 
-					int tileIndex = animationData.baseTile + i;
+					int tileIndex = animationData.baseTile + frameIndex;
 
 					int columnCount = data.canvas.width / tileWidth;
 
@@ -154,27 +154,14 @@ namespace AnimationImporter.PyxelEdit
 				animationSheet.animations.Add(importAnimation);
 			}
 
-			// all frames
+			// gather all frames used by animations for the sprite sheet
 			animationSheet.frames = new List<ImportedAnimationFrame>();
-			for (int i = 0; i < maxTileIndex; i++)
+			foreach (var anim in animationSheet.animations)
 			{
-				ImportedAnimationFrame frame = new ImportedAnimationFrame();
-
-				int tileIndex = i;
-
-				int columnCount = data.canvas.width / tileWidth;
-
-				int column = tileIndex % columnCount;
-				int row = tileIndex / columnCount;
-
-				frame.y = row * tileHeight;
-				frame.x = column * tileWidth;
-				frame.width = tileWidth;
-				frame.height = tileHeight;
-
-				frame.name = data.name + " " + i.ToString();
-
-				animationSheet.frames.Add(frame);
+				foreach (var frame in anim.frames)
+				{
+					animationSheet.frames.Add(frame);
+				}
 			}
 
 			return animationSheet;
