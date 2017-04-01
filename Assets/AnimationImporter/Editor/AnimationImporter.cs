@@ -372,15 +372,15 @@ namespace AnimationImporter
 				overrideController.runtimeAnimatorController = baseController;
 
 				// set override clips
-				var clipPairs = overrideController.clips;
-				for (int i = 0; i < clipPairs.Length; i++)
-				{
-					string animationName = clipPairs[i].originalClip.name;
-					AnimationClip clip = animations.GetClipOrSimilar(animationName);
-					clipPairs[i].overrideClip = clip;
-				}
-				overrideController.clips = clipPairs;
+				var clipPairs = new List<KeyValuePair<AnimationClip, AnimationClip>>(overrideController.overridesCount);
+				overrideController.GetOverrides(clipPairs);
 
+				foreach (var pair in clipPairs)
+				{
+					string animationName = pair.Key.name;
+					AnimationClip clip = animations.GetClipOrSimilar(animationName);
+					overrideController[animationName] = clip;
+				}
 				EditorUtility.SetDirty(overrideController);
 			}
 			else
