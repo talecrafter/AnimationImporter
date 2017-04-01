@@ -372,6 +372,17 @@ namespace AnimationImporter
 				overrideController.runtimeAnimatorController = baseController;
 
 				// set override clips
+#if UNITY_5_6_OR_NEWER
+				var clipPairs = new List<KeyValuePair<AnimationClip, AnimationClip>>(overrideController.overridesCount);
+				overrideController.GetOverrides(clipPairs);
+
+				foreach (var pair in clipPairs)
+				{
+					string animationName = pair.Key.name;
+					AnimationClip clip = animations.GetClipOrSimilar(animationName);
+					overrideController[animationName] = clip;
+				}
+#else
 				var clipPairs = overrideController.clips;
 				for (int i = 0; i < clipPairs.Length; i++)
 				{
@@ -380,6 +391,7 @@ namespace AnimationImporter
 					clipPairs[i].overrideClip = clip;
 				}
 				overrideController.clips = clipPairs;
+#endif
 
 				EditorUtility.SetDirty(overrideController);
 			}
