@@ -40,6 +40,8 @@ namespace AnimationImporter
 		public static CustomReImportDelegate HasCustomReImport = null;
 		public static CustomReImportDelegate HandleCustomReImport = null;
 
+		public delegate void ChangeImportJob(AnimationImportJob job);
+
 		// ================================================================================
 		//  const
 		// --------------------------------------------------------------------------------
@@ -211,7 +213,11 @@ namespace AnimationImporter
 		/// <summary>
 		/// can be used by custom import pipeline
 		/// </summary>
-		public ImportedAnimationSheet ImportSpritesAndAnimationSheet(string assetPath, string additionalCommandLineArguments = null)
+		public ImportedAnimationSheet ImportSpritesAndAnimationSheet(
+			string assetPath,
+			ChangeImportJob changeImportJob = null,
+			string additionalCommandLineArguments = null
+		)
 		{
 			if (!IsValidAsset(assetPath))
 			{
@@ -227,6 +233,11 @@ namespace AnimationImporter
 			// create a job
 			AnimationImportJob job = CreateAnimationImportJob(assetPath, additionalCommandLineArguments);
 			job.createUnityAnimations = false;
+
+			if (changeImportJob != null)
+			{
+				changeImportJob(job);
+			}
 
 			return ImportJob(job);
 		}
