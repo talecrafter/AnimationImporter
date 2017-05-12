@@ -279,13 +279,13 @@ namespace AnimationImporter
 
 				animationSheet.ApplySpriteNamingScheme(sharedData.spriteNamingScheme);
 
-				CreateSprites(animationSheet);
+				CreateSprites(animationSheet, job);
 
 				job.SetProgress(0.6f);
 
 				if (job.createUnityAnimations)
 				{
-					CreateAnimations(animationSheet);
+					CreateAnimations(animationSheet, job);
 
 					job.SetProgress(0.8f);
 
@@ -405,14 +405,14 @@ namespace AnimationImporter
 		//  create sprites and animations
 		// --------------------------------------------------------------------------------
 
-		private void CreateAnimations(ImportedAnimationSheet animationSheet)
+		private void CreateAnimations(ImportedAnimationSheet animationSheet, AnimationImportJob job)
 		{
 			if (animationSheet == null)
 			{
 				return;
 			}
 
-			string imageAssetFilename = GetImageAssetFilename(animationSheet.assetDirectory, animationSheet.name);
+			string imageAssetFilename = job.imageAssetFilename;
 
 			if (animationSheet.hasAnimations)
 			{
@@ -431,16 +431,16 @@ namespace AnimationImporter
 			}
 		}
 
-		private void CreateSprites(ImportedAnimationSheet animationSheet)
+		private void CreateSprites(ImportedAnimationSheet animationSheet, AnimationImportJob job)
 		{
 			if (animationSheet == null)
 			{
 				return;
 			}
 
-			string imageFile = GetImageAssetFilename(animationSheet.assetDirectory, animationSheet.name);
+			string imageAssetFile = job.imageAssetFilename;
 
-			TextureImporter importer = AssetImporter.GetAtPath(imageFile) as TextureImporter;
+			TextureImporter importer = AssetImporter.GetAtPath(imageAssetFile) as TextureImporter;
 
 			// apply texture import settings if there are no previous ones
 			if (!animationSheet.hasPreviousTextureImportSettings)
@@ -483,9 +483,9 @@ namespace AnimationImporter
 				Debug.LogWarning("There was a problem with applying settings to the generated sprite file: " + e.ToString());
 			}
 
-			AssetDatabase.ImportAsset(imageFile, ImportAssetOptions.ForceUpdate);
+			AssetDatabase.ImportAsset(imageAssetFile, ImportAssetOptions.ForceUpdate);
 
-			Sprite[] createdSprites = GetAllSpritesFromAssetFile(imageFile);
+			Sprite[] createdSprites = GetAllSpritesFromAssetFile(imageAssetFile);
 			animationSheet.ApplyCreatedSprites(createdSprites);
 		}
 
@@ -685,13 +685,6 @@ namespace AnimationImporter
 			string lastPart = "/" + fileName + "." + extension;
 
 			return path.Replace(lastPart, "");
-		}
-
-		private string GetImageAssetFilename(string basePath, string name)
-		{
-			string directory = sharedData.spritesTargetLocation.GetAndEnsureTargetDirectory(basePath);
-
-			return directory + "/" + name + ".png";
 		}
 	}
 }
