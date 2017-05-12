@@ -15,9 +15,59 @@ namespace AnimationImporter
 		public string fileName { get { return Path.GetFileName(_assetPath); } }
 		public string assetDirectory { get { return GetBasePath(_assetPath); } }
 
-		public string directoryPathForSprites = "";
-		public string directoryPathForAnimations = "";
-		public string directoryPathForAnimationControllers = "";
+		private string _directoryPathForSprites = "";
+		public string directoryPathForSprites
+		{
+			get
+			{
+				if (!Directory.Exists(_directoryPathForSprites))
+				{
+					Directory.CreateDirectory(_directoryPathForSprites);
+				}
+
+				return _directoryPathForSprites;
+			}
+			set
+			{
+				_directoryPathForSprites = value;
+			}
+		}
+
+		private string _directoryPathForAnimations = "";
+		public string directoryPathForAnimations
+		{
+			get
+			{
+				if (!Directory.Exists(_directoryPathForAnimations))
+				{
+					Directory.CreateDirectory(_directoryPathForAnimations);
+				}
+
+				return _directoryPathForAnimations;
+			}
+			set
+			{
+				_directoryPathForAnimations = value;
+			}
+		}
+
+		private string _directoryPathForAnimationControllers = "";
+		public string directoryPathForAnimationControllers
+		{
+			get
+			{
+				if (!Directory.Exists(_directoryPathForAnimationControllers))
+				{
+					Directory.CreateDirectory(_directoryPathForAnimationControllers);
+				}
+
+				return _directoryPathForAnimationControllers;
+			}
+			set
+			{
+				_directoryPathForAnimationControllers = value;
+			}
+		}
 
 		public string imageAssetFilename
 		{

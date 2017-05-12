@@ -665,9 +665,9 @@ namespace AnimationImporter
 
 			importJob.additionalCommandLineArguments = additionalCommandLineArguments;
 
-			importJob.directoryPathForSprites = _sharedData.spritesTargetLocation.GetAndEnsureTargetDirectory(importJob.assetDirectory);
-			importJob.directoryPathForAnimations = _sharedData.animationsTargetLocation.GetAndEnsureTargetDirectory(importJob.assetDirectory);
-			importJob.directoryPathForAnimationControllers = _sharedData.animationControllersTargetLocation.GetAndEnsureTargetDirectory(importJob.assetDirectory);
+			importJob.directoryPathForSprites = _sharedData.spritesTargetLocation.GetTargetDirectory(importJob.assetDirectory);
+			importJob.directoryPathForAnimations = _sharedData.animationsTargetLocation.GetTargetDirectory(importJob.assetDirectory);
+			importJob.directoryPathForAnimationControllers = _sharedData.animationControllersTargetLocation.GetTargetDirectory(importJob.assetDirectory);
 
 			// we analyze import settings on existing files
 			importJob.previousImportSettings = CollectPreviousImportSettings(importJob);
