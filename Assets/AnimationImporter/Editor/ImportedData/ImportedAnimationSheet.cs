@@ -113,7 +113,6 @@ namespace AnimationImporter
 			{
 				// get previous animation settings
 				targetType = PreviousImportSettings.GetAnimationTargetFromExistingClip(clip);
-				isLooping = clip.isLooping;
 			}
 			else
 			{
