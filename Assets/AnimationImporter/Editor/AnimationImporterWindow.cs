@@ -210,7 +210,12 @@ namespace AnimationImporter
 
 			EditorGUILayout.LabelField("Enter Part of the Animation Name or a Regex Expression.");
 
-			if (GUI.changed)
+
+            GUILayout.Space(25f);
+            ShowHeadline("Loop setting");
+            importer.sharedData.loopPose = EditorGUILayout.Toggle("Loop Pose", importer.sharedData.loopPose);
+
+            if (GUI.changed)
 			{
 				EditorUtility.SetDirty(importer.sharedData);
 			}

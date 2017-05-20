@@ -27,8 +27,23 @@ namespace AnimationImporter
 			}
 		}
 
-		// sprite import values
-		[SerializeField]
+        // determines if Loop Pose is selected for looping animation clips
+        [SerializeField]
+        private bool _loopPose = true;
+        public bool loopPose
+        {
+            get
+            {
+                return _loopPose;
+            }
+            set
+            {
+                _loopPose = value;
+            }
+        }
+
+        // sprite import values
+        [SerializeField]
 		private float _spritePixelsPerUnit = 100f;
 		public float spritePixelsPerUnit
 		{
