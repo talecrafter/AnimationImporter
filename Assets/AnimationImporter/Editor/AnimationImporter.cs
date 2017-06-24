@@ -219,15 +219,15 @@ namespace AnimationImporter
 			string additionalCommandLineArguments = null
 		)
 		{
-			if (!IsValidAsset(assetPath))
-			{
-				return null;
-			}
-
 			// making sure config is valid
 			if (sharedData == null)
 			{
 				LoadOrCreateUserConfig();
+			}
+
+			if (!IsValidAsset(assetPath))
+			{
+				return null;
 			}
 
 			// create a job
