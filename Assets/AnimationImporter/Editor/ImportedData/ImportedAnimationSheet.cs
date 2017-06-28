@@ -120,26 +120,21 @@ namespace AnimationImporter
 				AssetDatabase.CreateAsset(clip, fileName);
 			}
 
-			// change loop settings
-			if (isLooping)
-			{
-				clip.wrapMode = WrapMode.Loop;
-				clip.SetLoop(true);
+            // change loop settings
+            if (isLooping)
+            {
+                clip.wrapMode = WrapMode.Loop;
+                clip.SetLoop(true);
                 var settings = new AnimationClipSettings();
-
-                if (!AnimationImporter.Instance.sharedData.loopPose)
-                {
-                    settings.loopBlend = false;
-                    settings.loopTime = true;
-                    AnimationUtility.SetAnimationClipSettings(clip, settings);
-                }
-                
+                settings.loopBlend = false;
+                settings.loopTime = true;
+                AnimationUtility.SetAnimationClipSettings(clip, settings);
             }
-			else
-			{
-				clip.wrapMode = WrapMode.Clamp;
-				clip.SetLoop(false);
-			}
+            else
+            {
+                clip.wrapMode = WrapMode.Clamp;
+                clip.SetLoop(false);
+            }
 
 			ObjectReferenceKeyframe[] keyFrames = new ObjectReferenceKeyframe[anim.Count + 1]; // one more than sprites because we repeat the last sprite
 
