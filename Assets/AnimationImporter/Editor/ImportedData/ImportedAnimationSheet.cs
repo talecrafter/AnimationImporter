@@ -125,7 +125,16 @@ namespace AnimationImporter
 			{
 				clip.wrapMode = WrapMode.Loop;
 				clip.SetLoop(true);
-			}
+                var settings = new AnimationClipSettings();
+
+                if (!AnimationImporter.Instance.sharedData.loopPose)
+                {
+                    settings.loopBlend = false;
+                    settings.loopTime = true;
+                    AnimationUtility.SetAnimationClipSettings(clip, settings);
+                }
+                
+            }
 			else
 			{
 				clip.wrapMode = WrapMode.Clamp;
