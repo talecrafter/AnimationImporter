@@ -270,7 +270,7 @@ namespace AnimationImporter
 				var path = EditorUtility.OpenFilePanel(
 					"Select Aseprite Application",
 					"",
-					"exe");
+					"exe,app");
 				if (!string.IsNullOrEmpty(path))
 				{
 					newPath = path;
