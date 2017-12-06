@@ -68,6 +68,10 @@ AUTOMATIC IMPORT
 
 This option reimports Animation files when Unity notifies them as changed. It looks for an AnimatorController or AnimatorOverrideController with the same name and in the same directory. Current import settings are used, not the ones from first import.
 
+PIVOT POINTS
+
+Pivot point settings get reused on further reimports. If you want to apply the pivot point settings from the Animation Importer on Animations that got imported already, delete the sprites and then import again.
+
 
 Feedback
 -----
