@@ -41,7 +41,7 @@ namespace AnimationImporter
 			AnimationClipSettings clipSettings = new AnimationClipSettings(serializedClip.FindProperty("m_AnimationClipSettings"));
 
 			clipSettings.loopTime = value;
-			clipSettings.loopBlend = value;
+			clipSettings.loopBlend = false;
 
 			serializedClip.ApplyModifiedProperties();
 		}
