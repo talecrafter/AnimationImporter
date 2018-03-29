@@ -12,9 +12,6 @@ namespace AnimationImporter
 
 		public bool isLooping = true;
 
-		// duration of each frame
-		private List<float> timings = null;
-
 		// final animation clip; saved here for usage when building the AnimatorController
 		public AnimationClip animationClip;
 
@@ -39,45 +36,5 @@ namespace AnimationImporter
 		//  public methods
 		// --------------------------------------------------------------------------------
 
-		public void SetFrames(ImportedAnimationFrame[] frames)
-		{
-			this.frames = frames;
-
-			CalculateKeyFrameTimings();
-		}
-
-		// ================================================================================
-		//  Key Frames
-		// --------------------------------------------------------------------------------
-
-		public float GetKeyFrameTime(int i)
-		{
-			return timings[i];
-		}
-
-		public float GetLastKeyFrameTime(float frameRate)
-		{
-			float timePoint = GetKeyFrameTime(Count);
-			timePoint -= (1f / frameRate);
-
-			return timePoint;
-		}
-
-		private void CalculateKeyFrameTimings()
-		{
-			float timeCount;
-			timings = new List<float>();
-
-			// first sprite will be set at the beginning of the animation
-			timeCount = 0;
-			timings.Add(timeCount);
-
-			for (int k = 0; k < frames.Length; k++)
-			{
-				// add duration of frame in seconds
-				timeCount += frames[k].duration / 1000f;
-				timings.Add(timeCount);
-			}
-		}
 	}
 }
