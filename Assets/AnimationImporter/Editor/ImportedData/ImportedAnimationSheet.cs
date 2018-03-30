@@ -133,7 +133,7 @@ namespace AnimationImporter
 			}
 
 			// convert keyframes
-			ImportedAnimationFrame[] srcKeyframes = anim.frames;
+			ImportedAnimationFrame[] srcKeyframes = anim.ListFramesAccountingForPlaybackDirection().ToArray();
 			ObjectReferenceKeyframe[] keyFrames = new ObjectReferenceKeyframe[srcKeyframes.Length + 1];
 			float timeOffset = 0f;
 
