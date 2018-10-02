@@ -9,5 +9,6 @@ namespace AnimationImporter
 	{
 		ImportedAnimationSheet Import(AnimationImportJob job, AnimationImporterSharedConfig config);
 		bool IsValid();
+		bool IsConfigured();
 	}
 }

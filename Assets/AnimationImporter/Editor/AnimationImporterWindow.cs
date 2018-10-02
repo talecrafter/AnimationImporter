@@ -287,6 +287,13 @@ namespace AnimationImporter
 			importer.asepritePath = GUILayout.TextField(newPath, GUILayout.MaxWidth(300f));
 
 			GUILayout.EndHorizontal();
+
+			if(!File.Exists(AnimationImporter.Instance.asepritePath))
+			{
+				var fileErrorMessage = string.Format(
+					"Cannot find Aseprite at the specified path. Use the Select button to locate the application.");
+				EditorGUILayout.HelpBox(fileErrorMessage, MessageType.Warning);
+			}
 		}
 
 		private void ShowAnimationsGUI()
@@ -296,7 +303,7 @@ namespace AnimationImporter
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
 			if (droppedAssets != null && droppedAssets.Length > 0)
 			{
-				importer.ImportAssets(droppedAssets);
+				ImportAssetsOrError(droppedAssets);
 			}
 		}
 
@@ -307,7 +314,7 @@ namespace AnimationImporter
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimations, AnimationImporter.IsValidAsset);
 			if (droppedAssets != null && droppedAssets.Length > 0)
 			{
-				importer.ImportAssets(droppedAssets, ImportAnimatorController.AnimatorController);
+				ImportAssetsOrError(droppedAssets, ImportAnimatorController.AnimatorController);
 			}
 		}
 
@@ -320,8 +327,28 @@ namespace AnimationImporter
 			DefaultAsset[] droppedAssets = ShowDropButton<DefaultAsset>(importer.canImportAnimationsForOverrideController, AnimationImporter.IsValidAsset);
 			if (droppedAssets != null && droppedAssets.Length > 0)
 			{
-				importer.ImportAssets(droppedAssets, ImportAnimatorController.AnimatorOverrideController);
+				ImportAssetsOrError(droppedAssets, ImportAnimatorController.AnimatorOverrideController);
 			}
+		}
+
+		private void ImportAssetsOrError(DefaultAsset[] assets, ImportAnimatorController importAnimatorController = ImportAnimatorController.None)
+		{
+			if(AnimationImporter.IsConfiguredForAssets(assets))
+			{
+				importer.ImportAssets(assets, importAnimatorController);
+			}
+			else
+			{
+				ShowPopupForBadAsepritePath(assets[0].name);
+			}
+		}
+
+		private void ShowPopupForBadAsepritePath(string assetName)
+		{
+			var message = string.Format(
+				"Cannot import Aseprite file \"{0}\" because the application cannot be found at the configured path. Use the Select button in the Config section to locate Aseprite.",
+				assetName);
+			EditorUtility.DisplayDialog("Error", message, "Ok");
 		}
 
 		private void ShowHeadline(string headline)

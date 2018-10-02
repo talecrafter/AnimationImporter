@@ -541,6 +541,33 @@ namespace AnimationImporter
 			return false;
 		}
 
+		// check if there is a configured importer for the specified extension
+		public static bool IsConfiguredForAssets(DefaultAsset[] assets)
+		{
+			foreach(var asset in assets)
+			{
+				string assetPath = AssetDatabase.GetAssetPath(asset);
+				string extension = GetExtension(assetPath);
+
+				if (!string.IsNullOrEmpty(assetPath))
+				{
+					if (_importerPlugins.ContainsKey(extension))
+					{
+						IAnimationImporterPlugin importer = _importerPlugins[extension];
+						if (importer != null)
+						{
+							if(!importer.IsConfigured())
+							{
+								return false;
+							}
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+
 		private static string GetExtension(string path)
 		{
 			if (string.IsNullOrEmpty(path))

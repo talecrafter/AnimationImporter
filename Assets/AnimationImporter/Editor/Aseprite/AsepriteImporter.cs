@@ -64,8 +64,12 @@ namespace AnimationImporter.Aseprite
 
 		public bool IsValid()
 		{
-			return AnimationImporter.Instance != null && AnimationImporter.Instance.sharedData != null
-				&& File.Exists(AnimationImporter.Instance.asepritePath);
+			return AnimationImporter.Instance != null && AnimationImporter.Instance.sharedData != null;
+		}
+
+		public bool IsConfigured()
+		{
+			return File.Exists(AnimationImporter.Instance.asepritePath);
 		}
 
 		// ================================================================================
