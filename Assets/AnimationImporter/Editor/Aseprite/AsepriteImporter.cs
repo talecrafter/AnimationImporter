@@ -65,7 +65,7 @@ namespace AnimationImporter.Aseprite
 		public bool IsValid()
 		{
 			return AnimationImporter.Instance != null && AnimationImporter.Instance.sharedData != null
-				&& File.Exists(AnimationImporter.Instance.asepritePath);
+				&& File.Exists(Path.GetFullPath(AnimationImporter.Instance.asepritePath));
 		}
 
 		// ================================================================================
@@ -214,7 +214,7 @@ namespace AnimationImporter.Aseprite
 
 			System.Diagnostics.ProcessStartInfo start = new System.Diagnostics.ProcessStartInfo();
 			start.Arguments = "-b " + buildOptions;
-			start.FileName = asepritePath;
+			start.FileName = Path.GetFullPath(asepritePath);
 			start.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
 			start.CreateNoWindow = true;
 			start.UseShellExecute = false;
