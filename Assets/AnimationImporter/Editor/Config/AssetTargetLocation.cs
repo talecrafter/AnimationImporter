@@ -42,13 +42,27 @@ namespace AnimationImporter
 			locationType = type;
 		}
 
-		// ================================================================================
-		//  public methods
-		// --------------------------------------------------------------------------------
+        // ================================================================================
+        //  public methods
+        // --------------------------------------------------------------------------------
 
-		public string GetAndEnsureTargetDirectory(string assetDirectory)
+        private string GetBasePath(string path)
+        {
+            string extension = Path.GetExtension(path);
+            if (extension.Length > 0 && extension[0] == '.')
+            {
+                extension = extension.Remove(0, 1);
+            }
+
+            string fileName = Path.GetFileNameWithoutExtension(path);
+            string lastPart = "/" + fileName + "." + extension;
+
+            return path.Replace(lastPart, "");
+        }
+
+        public string GetAndEnsureTargetDirectory(string assetPath)
 		{
-			string directory = GetTargetDirectory(assetDirectory);
+			string directory = GetTargetDirectory(assetPath);
 
 			if (!Directory.Exists(directory))
 			{
@@ -58,18 +72,21 @@ namespace AnimationImporter
 			return directory;
 		}
 
-		public string GetTargetDirectory(string assetDirectory)
+		public string GetTargetDirectory(string assetPath)
 		{
-			if (locationType == AssetTargetLocationType.GlobalDirectory)
-			{
-				return globalDirectory;
-			}
-			else if (locationType == AssetTargetLocationType.SubDirectory)
-			{
-				return Path.Combine(assetDirectory, subDirectoryName);
-			}
-
-			return assetDirectory;
+            var basePath = GetBasePath(assetPath);
+            
+            switch (locationType)
+            {
+                case AssetTargetLocationType.GlobalDirectory:
+                    return globalDirectory;
+                case AssetTargetLocationType.SubDirectory:
+                    return Path.Combine(basePath, subDirectoryName);
+                case AssetTargetLocationType.FileNameDirectory:
+                    return Path.Combine(basePath, Path.GetFileNameWithoutExtension(assetPath));
+            }
+			
+			return basePath;
 		}
 	}
 }

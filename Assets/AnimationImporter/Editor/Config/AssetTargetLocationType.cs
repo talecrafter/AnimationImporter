@@ -5,6 +5,7 @@ namespace AnimationImporter
 	{
 		SameDirectory,
 		SubDirectory,
-		GlobalDirectory
+		GlobalDirectory,
+        FileNameDirectory,
 	}
 }

@@ -17,16 +17,16 @@ namespace AnimationImporter
 			set { _name = value; }
 		}
 
-		// ================================================================================
-		//  properties
-		// --------------------------------------------------------------------------------
+        // ================================================================================
+        //  properties
+        // --------------------------------------------------------------------------------
 
-		public int x;
-		public int y;
-		public int width;
-		public int height;
+        public Rect rect;
+        public bool trimmed;
+        public Vector2 sourceSize;
+        public Rect spriteSourceRect;
 
-		public int duration; // in milliseconds as part of an animation
+        public int duration; // in milliseconds as part of an animation
 
 		// reference to the Sprite that was created with this frame information
 		public Sprite sprite = null;

@@ -50,7 +50,7 @@ namespace AnimationImporter.Aseprite
 
 		public ImportedAnimationSheet Import(AnimationImportJob job, AnimationImporterSharedConfig config)
 		{
-			if (CreateSpriteAtlasAndMetaFile(job))
+			if (CreateSpriteAtlasAndMetaFile(job, config.trim))
 			{
 				AssetDatabase.Refresh();
 
@@ -114,17 +114,22 @@ namespace AnimationImporter.Aseprite
 		/// calls the Aseprite application which then should output a png with all sprites and a corresponding JSON
 		/// </summary>
 		/// <returns></returns>
-		private static bool CreateSpriteAtlasAndMetaFile(AnimationImportJob job)
+		private static bool CreateSpriteAtlasAndMetaFile(AnimationImportJob job, bool trim)
 		{
-			char delimiter = '\"';
-			string parameters = "--data " + delimiter + job.name + ".json" + delimiter + " --sheet " + delimiter + job.name + ".png" + delimiter + " --sheet-pack --list-tags --format json-array " + delimiter + job.fileName + delimiter;
+            const char delimiter = '\"';
+            string parameters = "--data " + delimiter + job.name + ".json" + delimiter + " --sheet " + delimiter + job.name + ".png" + delimiter + " --sheet-pack --list-tags --format json-array " + delimiter + job.fileName + delimiter;
 
-			if (!string.IsNullOrEmpty(job.additionalCommandLineArguments))
+            if (trim)
+            {
+                parameters += " --trim";
+            }
+
+            if (!string.IsNullOrEmpty(job.additionalCommandLineArguments))
 			{
 				parameters = job.additionalCommandLineArguments + " " + parameters;
 			}
 
-			bool success = CallAsepriteCLI(AnimationImporter.Instance.asepritePath, job.assetDirectory, parameters) == 0;
+            bool success = CallAsepriteCLI(AnimationImporter.Instance.asepritePath, job.assetDirectory, parameters) == 0;
 
 			// move png and json file to subfolder
 			if (success && job.directoryPathForSprites != job.assetDirectory)
@@ -274,16 +279,28 @@ namespace AnimationImporter.Aseprite
 			foreach (var item in list)
 			{
 				ImportedAnimationFrame frame = new ImportedAnimationFrame();
+                
+				var frameRect = item.Obj["frame"].Obj;
+                frame.rect.width = (int)frameRect["w"].Number;
+				frame.rect.height = (int)frameRect["h"].Number;
+				frame.rect.x = (int)frameRect["x"].Number;
+				frame.rect.y = animationSheet.height - (int)frameRect["y"].Number - frame.rect.height; // unity has a different coord system
 
-				var frameValues = item.Obj["frame"].Obj;
-				frame.width = (int)frameValues["w"].Number;
-				frame.height = (int)frameValues["h"].Number;
-				frame.x = (int)frameValues["x"].Number;
-				frame.y = animationSheet.height - (int)frameValues["y"].Number - frame.height; // unity has a different coord system
+                frame.trimmed = item.Obj["trimmed"].Boolean;
 
-				frame.duration = (int)item.Obj["duration"].Number;
+                var sourceSize = item.Obj["sourceSize"].Obj;
+                frame.sourceSize.x = (int)sourceSize["w"].Number;
+                frame.sourceSize.y = (int)sourceSize["h"].Number;
 
-				animationSheet.frames.Add(frame);
+                var spriteSourceRect = item.Obj["spriteSourceSize"].Obj;
+                frame.spriteSourceRect.width = (int)spriteSourceRect["w"].Number;
+                frame.spriteSourceRect.height = (int)spriteSourceRect["h"].Number;
+                frame.spriteSourceRect.x = (int)spriteSourceRect["x"].Number;
+                frame.spriteSourceRect.y = frame.sourceSize.y - (int)spriteSourceRect["y"].Number - frame.spriteSourceRect.height; // unity has a different coord system
+
+                frame.duration = (int)item.Obj["duration"].Number;
+
+                animationSheet.frames.Add(frame);
 			}
 
 			return true;

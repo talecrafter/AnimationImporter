@@ -148,25 +148,31 @@ namespace AnimationImporter
 
 			if (importer.sharedData.spriteAlignment == SpriteAlignment.Custom)
 			{
-				importer.sharedData.spriteAlignmentCustomX = EditorGUILayout.Slider("x", importer.sharedData.spriteAlignmentCustomX, 0, 1f);
-				importer.sharedData.spriteAlignmentCustomY = EditorGUILayout.Slider("y", importer.sharedData.spriteAlignmentCustomY, 0, 1f);
-			}
+                Vector2 customPivot = importer.sharedData.customPivot;
+                customPivot.x = EditorGUILayout.Slider("x", customPivot.x, 0, 1f);
+                customPivot.y = EditorGUILayout.Slider("y", customPivot.y, 0, 1f);
+                importer.sharedData.customPivot = customPivot;
+
+            }
 
 			importer.sharedData.spritePixelsPerUnit = EditorGUILayout.FloatField("Sprite Pixels per Unit", importer.sharedData.spritePixelsPerUnit);
 
 			GUILayout.Space(5f);
 
-			ShowTargetLocationOptions("Sprites", importer.sharedData.spritesTargetLocation);
+            importer.sharedData.trim = EditorGUILayout.Toggle("Trim", importer.sharedData.trim);
+            ShowTargetLocationOptions("Sprites", importer.sharedData.spritesTargetLocation);
 			ShowTargetLocationOptions("Animations", importer.sharedData.animationsTargetLocation);
 			ShowTargetLocationOptions("AnimationController", importer.sharedData.animationControllersTargetLocation);
 
 			GUILayout.Space(5f);
 
-			importer.sharedData.spriteNamingScheme = (SpriteNamingScheme)EditorGUILayout.IntPopup("Sprite Naming Scheme",
+            importer.sharedData.namingScheme = (NamingScheme)EditorGUILayout.EnumPopup("Naming Scheme",
+                importer.sharedData.namingScheme);
+            importer.sharedData.spriteNamingScheme = (SpriteNamingScheme)EditorGUILayout.IntPopup("Sprite Naming Scheme",
 				(int)importer.sharedData.spriteNamingScheme,
 				SpriteNaming.namingSchemesDisplayValues, SpriteNaming.namingSchemesValues);
 
-			GUILayout.Space(25f);
+            GUILayout.Space(25f);
 
 			ShowHeadline("Automatic Import");
 			EditorGUILayout.BeginHorizontal();

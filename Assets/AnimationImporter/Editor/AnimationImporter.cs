@@ -294,22 +294,38 @@ namespace AnimationImporter
 
 				job.SetProgress(0.6f);
 
-				if (job.createUnityAnimations)
+                if (job.createUnityAnimations)
 				{
-					CreateAnimations(animationSheet, job);
+                    CreateAnimations(animationSheet, job);
 
 					job.SetProgress(0.8f);
 
 					if (job.importAnimatorController == ImportAnimatorController.AnimatorController)
 					{
-						CreateAnimatorController(animationSheet);
+						CreateAnimatorController(animationSheet, job);
 					}
 					else if (job.importAnimatorController == ImportAnimatorController.AnimatorOverrideController)
 					{
-						CreateAnimatorOverrideController(animationSheet, job.useExistingAnimatorController);
+						CreateAnimatorOverrideController(animationSheet, job);
 					}
 				}
-			}
+
+                if (sharedData.namingScheme == NamingScheme.ItsName)
+                {
+                    var oldImageAssetFileName = Path.Combine(job.directoryPathForSprites, "Sprites" + Path.GetExtension(job.imageAssetFilename));
+                    var oldAsset = AssetDatabase.LoadMainAssetAtPath(oldImageAssetFileName);
+
+                    if (oldAsset == null)
+                    {
+                        AssetDatabase.RenameAsset(job.imageAssetFilename, "Sprites");
+                    }
+                    else
+                    {
+                        EditorUtility.CopySerialized(AssetDatabase.LoadMainAssetAtPath(job.imageAssetFilename), oldAsset);
+                        AssetDatabase.DeleteAsset(job.imageAssetFilename);
+                    }
+                }
+            }
 
 			return animationSheet;
 		}
@@ -318,14 +334,19 @@ namespace AnimationImporter
 		//  create animator controllers
 		// --------------------------------------------------------------------------------
 
-		private void CreateAnimatorController(ImportedAnimationSheet animations)
+		private void CreateAnimatorController(ImportedAnimationSheet animations, AnimationImportJob job)
 		{
 			AnimatorController controller;
 
-			string directory = sharedData.animationControllersTargetLocation.GetAndEnsureTargetDirectory(animations.assetDirectory);
+            string directory = sharedData.animationControllersTargetLocation.GetAndEnsureTargetDirectory(job.assetPath);
+            
+            // check if controller already exists; use this to not loose any references to this in other assets
+            string pathForAnimatorController;
 
-			// check if controller already exists; use this to not loose any references to this in other assets
-			string pathForAnimatorController = directory + "/" + animations.name + ".controller";
+            if (sharedData.namingScheme == NamingScheme.ItsName)
+                pathForAnimatorController = $"{directory}/animatorController.controller";
+            else
+                pathForAnimatorController = $"{directory}/{animations.name}.controller";
 			controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(pathForAnimatorController);
 
 			if (controller == null)
@@ -356,18 +377,22 @@ namespace AnimationImporter
 			AssetDatabase.SaveAssets();
 		}
 
-		private void CreateAnimatorOverrideController(ImportedAnimationSheet animations, bool useExistingBaseController = false)
+		private void CreateAnimatorOverrideController(ImportedAnimationSheet animations, AnimationImportJob job)
 		{
 			AnimatorOverrideController overrideController;
 
-			string directory = sharedData.animationControllersTargetLocation.GetAndEnsureTargetDirectory(animations.assetDirectory);
+			string directory = sharedData.animationControllersTargetLocation.GetAndEnsureTargetDirectory(job.assetPath);
 
-			// check if override controller already exists; use this to not loose any references to this in other assets
-			string pathForOverrideController = directory + "/" + animations.name + ".overrideController";
+            string pathForOverrideController;
+            // check if override controller already exists; use this to not loose any references to this in other assets
+            if (sharedData.namingScheme == NamingScheme.ItsName)
+                pathForOverrideController = $"{directory}/animatorController.overrideController";
+            else
+                pathForOverrideController = $"{directory}/{animations.name}.overrideController";
 			overrideController = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(pathForOverrideController);
 
 			RuntimeAnimatorController baseController = _baseController;
-			if (useExistingBaseController && overrideController.runtimeAnimatorController != null)
+			if (job.useExistingAnimatorController && overrideController.runtimeAnimatorController != null)
 			{
 				baseController = overrideController.runtimeAnimatorController;
 			}
@@ -423,18 +448,22 @@ namespace AnimationImporter
 				return;
 			}
 
-			string imageAssetFilename = job.imageAssetFilename;
+            string imageAssetFilename = job.imageAssetFilename;
 
 			if (animationSheet.hasAnimations)
 			{
-				string targetPath = _sharedData.animationsTargetLocation.GetAndEnsureTargetDirectory(animationSheet.assetDirectory);
+				string targetPath = _sharedData.animationsTargetLocation.GetAndEnsureTargetDirectory(job.assetPath);
 				CreateAnimationAssets(animationSheet, imageAssetFilename, targetPath);
 			}
 		}
 
 		private void CreateAnimationAssets(ImportedAnimationSheet animationInfo, string imageAssetFilename, string pathForAnimations)
 		{
-			string masterName = Path.GetFileNameWithoutExtension(imageAssetFilename);
+            string masterName;
+            if (sharedData.namingScheme == NamingScheme.ItsName)
+                masterName = string.Empty;
+            else
+                masterName = Path.GetFileNameWithoutExtension(imageAssetFilename);
 
 			foreach (var animation in animationInfo.animations)
 			{
@@ -456,7 +485,7 @@ namespace AnimationImporter
 			// apply texture import settings if there are no previous ones
 			if (!animationSheet.hasPreviousTextureImportSettings)
 			{
-				importer.textureType = TextureImporterType.Sprite;
+                importer.textureType = TextureImporterType.Sprite;
 				importer.spritePixelsPerUnit = sharedData.spritePixelsPerUnit;
 				importer.mipmapEnabled = false;
 				importer.filterMode = FilterMode.Point;
@@ -467,20 +496,17 @@ namespace AnimationImporter
 #endif
 			}
 
-			// create sub sprites for this file according to the AsepriteAnimationInfo 
-			importer.spritesheet = animationSheet.GetSpriteSheet(
-				sharedData.spriteAlignment,
-				sharedData.spriteAlignmentCustomX,
-				sharedData.spriteAlignmentCustomY);
+            // create sub sprites for this file according to the AsepriteAnimationInfo 
+            importer.spritesheet = animationSheet.GetSpriteSheet(sharedData.spriteAlignment, sharedData.customPivot);
 
-			// reapply old import settings (pivot settings for sprites)
-			if (animationSheet.hasPreviousTextureImportSettings)
-			{
-				animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(importer);
-			}
+            //// reapply old import settings (pivot settings for sprites)
+            //if (animationSheet.hasPreviousTextureImportSettings && !sharedData.trim)
+            //{
+            //    animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(importer);
+            //}
 
-			// these values will be set in any case, not influenced by previous import settings
-			importer.spriteImportMode = SpriteImportMode.Multiple;
+            // these values will be set in any case, not influenced by previous import settings
+            importer.spriteImportMode = SpriteImportMode.Multiple;
 			importer.maxTextureSize = animationSheet.maxTextureSize;
 
 			EditorUtility.SetDirty(importer);
@@ -497,7 +523,8 @@ namespace AnimationImporter
 			AssetDatabase.ImportAsset(imageAssetFile, ImportAssetOptions.ForceUpdate);
 
 			Sprite[] createdSprites = GetAllSpritesFromAssetFile(imageAssetFile);
-			animationSheet.ApplyCreatedSprites(createdSprites);
+
+            animationSheet.ApplyCreatedSprites(createdSprites);
 		}
 
 		private static Sprite[] GetAllSpritesFromAssetFile(string imageFilename)
@@ -586,8 +613,7 @@ namespace AnimationImporter
 		public AnimatorController GetExistingAnimatorController(string assetPath)
 		{
 			string name = Path.GetFileNameWithoutExtension(assetPath);
-			string basePath = GetBasePath(assetPath);
-			string targetDirectory = sharedData.animationControllersTargetLocation.GetTargetDirectory(basePath);
+			string targetDirectory = sharedData.animationControllersTargetLocation.GetTargetDirectory(assetPath);
 
 			string pathForController = targetDirectory + "/" + name + ".controller";
 			AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(pathForController);
@@ -598,8 +624,7 @@ namespace AnimationImporter
 		public AnimatorOverrideController GetExistingAnimatorOverrideController(string assetPath)
 		{
 			string name = Path.GetFileNameWithoutExtension(assetPath);
-			string basePath = GetBasePath(assetPath);
-			string targetDirectory = sharedData.animationControllersTargetLocation.GetTargetDirectory(basePath);
+			string targetDirectory = sharedData.animationControllersTargetLocation.GetTargetDirectory(assetPath);
 
 			string pathForController = targetDirectory + "/" + name + ".overrideController";
 			AnimatorOverrideController controller = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(pathForController);
@@ -665,9 +690,9 @@ namespace AnimationImporter
 
 			importJob.additionalCommandLineArguments = additionalCommandLineArguments;
 
-			importJob.directoryPathForSprites = _sharedData.spritesTargetLocation.GetTargetDirectory(importJob.assetDirectory);
-			importJob.directoryPathForAnimations = _sharedData.animationsTargetLocation.GetTargetDirectory(importJob.assetDirectory);
-			importJob.directoryPathForAnimationControllers = _sharedData.animationControllersTargetLocation.GetTargetDirectory(importJob.assetDirectory);
+			importJob.directoryPathForSprites = _sharedData.spritesTargetLocation.GetTargetDirectory(assetPath);
+			importJob.directoryPathForAnimations = _sharedData.animationsTargetLocation.GetTargetDirectory(assetPath);
+			importJob.directoryPathForAnimationControllers = _sharedData.animationControllersTargetLocation.GetTargetDirectory(assetPath);
 
 			// we analyze import settings on existing files
 			importJob.previousImportSettings = CollectPreviousImportSettings(importJob);
@@ -682,20 +707,6 @@ namespace AnimationImporter
 			previousImportSettings.GetTextureImportSettings(importJob.imageAssetFilename);
 
 			return previousImportSettings;
-		}
-
-		private string GetBasePath(string path)
-		{
-			string extension = Path.GetExtension(path);
-			if (extension.Length > 0 && extension[0] == '.')
-			{
-				extension = extension.Remove(0, 1);
-			}
-
-			string fileName = Path.GetFileNameWithoutExtension(path);
-			string lastPart = "/" + fileName + "." + extension;
-
-			return path.Replace(lastPart, "");
 		}
 	}
 }

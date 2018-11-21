@@ -9,11 +9,11 @@ namespace AnimationImporter
 {
 	public class AnimationImportJob
 	{
-		private string _assetPath;
+		public readonly string assetPath;
 
 		public string name { get { return Path.GetFileNameWithoutExtension(fileName); } }
-		public string fileName { get { return Path.GetFileName(_assetPath); } }
-		public string assetDirectory { get { return GetBasePath(_assetPath); } }
+		public string fileName { get { return Path.GetFileName(assetPath); } }
+		public string assetDirectory { get { return GetBasePath(assetPath); } }
 
 		private string _directoryPathForSprites = "";
 		public string directoryPathForSprites
@@ -91,7 +91,7 @@ namespace AnimationImporter
 
 		public AnimationImportJob(string assetPath)
 		{
-			_assetPath = assetPath;
+			this.assetPath = assetPath;
 		}
 
 		// ================================================================================

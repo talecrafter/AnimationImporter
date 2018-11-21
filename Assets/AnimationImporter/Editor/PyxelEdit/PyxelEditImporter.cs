@@ -141,10 +141,10 @@ namespace AnimationImporter.PyxelEdit
 					int column = tileIndex % columnCount;
 					int row = tileIndex / columnCount;
 
-					frame.y = row * tileHeight;
-					frame.x = column * tileWidth;
-					frame.width = tileWidth;
-					frame.height = tileHeight;
+					frame.rect.y = row * tileHeight;
+					frame.rect.x = column * tileWidth;
+					frame.rect.width = tileWidth;
+					frame.rect.height = tileHeight;
 
 					frames[frameIndex] = frame;
 				}

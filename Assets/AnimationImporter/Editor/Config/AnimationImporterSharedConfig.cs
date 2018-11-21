@@ -4,7 +4,13 @@ using System.Collections.Generic;
 
 namespace AnimationImporter
 {
-	public class AnimationImporterSharedConfig : ScriptableObject
+    public enum NamingScheme : int
+    {
+        FileName,
+        ItsName,
+    }
+
+    public class AnimationImporterSharedConfig : ScriptableObject
 	{
 		private const string PREFS_PREFIX = "ANIMATION_IMPORTER_";
 
@@ -14,7 +20,6 @@ namespace AnimationImporter
 
 		[SerializeField]
 		private bool _automaticImporting = false;
-
 		public bool automaticImporting
 		{
 			get
@@ -71,34 +76,34 @@ namespace AnimationImporter
 		}
 
 		[SerializeField]
-		private float _spriteAlignmentCustomX = 0;
-		public float spriteAlignmentCustomX
-		{
+		private Vector2 _customPivot;
+		public Vector2 customPivot
+        {
 			get
 			{
-				return _spriteAlignmentCustomX;
+				return _customPivot;
 			}
 			set
 			{
-				_spriteAlignmentCustomX = value;
+                _customPivot = value;
 			}
 		}
 
-		[SerializeField]
-		private float _spriteAlignmentCustomY = 0;
-		public float spriteAlignmentCustomY
-		{
-			get
-			{
-				return _spriteAlignmentCustomY;
-			}
-			set
-			{
-				_spriteAlignmentCustomY = value;
-			}
-		}
+        [SerializeField]
+        private bool _trim;
+        public bool trim
+        {
+            get
+            {
+                return _trim;
+            }
+            set
+            {
+                _trim = value;
+            }
+        }
 
-		[SerializeField]
+        [SerializeField]
 		private AssetTargetLocation _spritesTargetLocation = new AssetTargetLocation(AssetTargetLocationType.SubDirectory, "Sprites");
 		public AssetTargetLocation spritesTargetLocation
 		{
@@ -122,14 +127,23 @@ namespace AnimationImporter
 			set { _animationControllersTargetLocation = value; }
 		}
 
-		private SpriteNamingScheme _spriteNamingScheme = SpriteNamingScheme.Classic;
+        [SerializeField]
+        private NamingScheme _namingScheme;
+        public NamingScheme namingScheme
+        {
+            get { return _namingScheme; }
+            set { _namingScheme = value; }
+        }
+
+        [SerializeField]
+        private SpriteNamingScheme _spriteNamingScheme = SpriteNamingScheme.Classic;
 		public SpriteNamingScheme spriteNamingScheme
 		{
 			get { return _spriteNamingScheme; }
 			set { _spriteNamingScheme = value; }
 		}
 
-		public void RemoveAnimationThatDoesNotLoop(int index)
+        public void RemoveAnimationThatDoesNotLoop(int index)
 		{
 			animationNamesThatDoNotLoop.RemoveAt(index);
 		}

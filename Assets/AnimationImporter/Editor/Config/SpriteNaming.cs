@@ -12,7 +12,7 @@ namespace AnimationImporter
 		AnimationOne        // idle_1, ...
 	}
 
-	public static class SpriteNaming
+    public static class SpriteNaming
 	{
 		private static int[] _namingSchemesValues = null;
 		public static int[] namingSchemesValues

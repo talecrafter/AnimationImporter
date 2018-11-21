@@ -104,8 +104,13 @@ namespace AnimationImporter
 		public void CreateAnimation(ImportedAnimation anim, string basePath, string masterName, AnimationTargetObjectType targetType)
 		{
 			AnimationClip clip;
-            string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
-			bool isLooping = anim.isLooping;
+            string fileName;
+            if (string.IsNullOrEmpty(masterName))
+                fileName = $"{basePath}/{anim.name}.anim";
+            else
+                fileName = $"{basePath}/{masterName}_{anim.name}.anim";
+
+            bool isLooping = anim.isLooping;
 
 			// check if animation file already exists
 			clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(fileName);
@@ -228,31 +233,72 @@ namespace AnimationImporter
 			return new System.Text.RegularExpressions.Regex(regexString);
 		}
 
-		// ================================================================================
-		//  Sprite Data
-		// --------------------------------------------------------------------------------
+        // ================================================================================
+        //  Sprite Data
+        // --------------------------------------------------------------------------------
 
-		public SpriteMetaData[] GetSpriteSheet(SpriteAlignment spriteAlignment, float customX, float customY)
+        static Vector2 GetPivotValue(SpriteAlignment alignment, Vector2 customOffset)
+        {
+            switch (alignment)
+            {
+                case SpriteAlignment.TopLeft:
+                    return new Vector2(0f, 1f);
+                case SpriteAlignment.TopCenter:
+                    return new Vector2(0.5f, 1f);
+                case SpriteAlignment.TopRight:
+                    return new Vector2(1f, 1f);
+
+                case SpriteAlignment.LeftCenter:
+                    return new Vector2(0f, 0.5f);
+                case SpriteAlignment.Center:
+                    return new Vector2(0.5f, 0.5f);
+                case SpriteAlignment.RightCenter:
+                    return new Vector2(1f, 0.5f);
+
+                case SpriteAlignment.BottomLeft:
+                    return new Vector2(0f, 0f);
+                case SpriteAlignment.BottomCenter:
+                    return new Vector2(0.5f, 0f);
+                case SpriteAlignment.BottomRight:
+                    return new Vector2(1f, 0f);
+            }
+
+            return customOffset;
+        }
+
+        public SpriteMetaData[] GetSpriteSheet(SpriteAlignment spriteAlignment, Vector2 custom)
 		{
-			SpriteMetaData[] metaData = new SpriteMetaData[frames.Count];
+            SpriteMetaData[] metaData = new SpriteMetaData[frames.Count];
 
 			for (int i = 0; i < frames.Count; i++)
 			{
 				ImportedAnimationFrame spriteInfo = frames[i];
-				SpriteMetaData spriteMetaData = new SpriteMetaData();
+                SpriteMetaData spriteMetaData = new SpriteMetaData();
 
-				// sprite alignment
-				spriteMetaData.alignment = (int)spriteAlignment;
-				if (spriteAlignment == SpriteAlignment.Custom)
-				{
-					spriteMetaData.pivot.x = customX;
-					spriteMetaData.pivot.y = customY;
-				}
+                // sprite alignment
+                if (spriteInfo.trimmed)
+                {
+                    var pivotBeforeTrim = GetPivotValue(spriteAlignment, custom);
+                    var originAfterTrim = spriteInfo.spriteSourceRect.position / spriteInfo.sourceSize;
+                    var ratio = new Vector2(spriteInfo.sourceSize.x / spriteInfo.rect.size.x, spriteInfo.sourceSize.y / spriteInfo.rect.size.y);
+
+                    spriteMetaData.alignment = (int)SpriteAlignment.Custom;
+                    spriteMetaData.pivot = ratio * (pivotBeforeTrim - originAfterTrim);
+                }
+                else
+                {
+                    spriteMetaData.alignment = (int)spriteAlignment;
+                    if (spriteAlignment == SpriteAlignment.Custom)
+                    {
+                        spriteMetaData.pivot.x = custom.x;
+                        spriteMetaData.pivot.y = custom.y;
+                    }
+                }
 
 				spriteMetaData.name = spriteInfo.name;
-				spriteMetaData.rect = new Rect(spriteInfo.x, spriteInfo.y, spriteInfo.width, spriteInfo.height);
+                spriteMetaData.rect = new Rect(spriteInfo.rect.position, spriteInfo.rect.size);
 
-				metaData[i] = spriteMetaData;
+                metaData[i] = spriteMetaData;
 			}
 
 			return metaData;
