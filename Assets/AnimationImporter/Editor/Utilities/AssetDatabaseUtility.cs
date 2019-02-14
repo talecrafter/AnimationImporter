@@ -28,6 +28,10 @@ namespace AnimationImporter
 		public static void CreateAssetAndDirectories(UnityEngine.Object unityObject, string unityFilePath)
 		{
 			var pathDirectory = Path.GetDirectoryName(unityFilePath) + UnityDirectorySeparator;
+
+			// necessary fix for Windows because Path.GetDirectoryName is changing the directory separators to Windows style
+			pathDirectory = pathDirectory.Replace('\\', UnityDirectorySeparator);
+
 			CreateDirectoriesInPath(pathDirectory);
 
 			AssetDatabase.CreateAsset(unityObject, unityFilePath);
