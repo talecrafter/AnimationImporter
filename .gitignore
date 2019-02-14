@@ -16,8 +16,14 @@ Temp
 Obj
 UnityGenerated
 /Library/
+/Logs/
 /.vs
+
  
+# Unity packages (we don't need any specific package for this plugin)
+
+/Packages/
+
 
 # Visual Studio / MonoDevelop generated
 
