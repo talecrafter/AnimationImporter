@@ -88,7 +88,7 @@ Contributors:
 - Stephan Hövelbrinks (http://twitter.com/talecrafter)
 - Ya-ma (http://twitter.com/PixelYam)
 - Edward Rowe (http://twitter.com/edwardlrowe)
-- Alberto Fernandez
+- Alberto Fernandez (http://github.com/AlbertoFdzM)
 - Jihun Song (http://github.com/OpenLevel)
 - Hugo Ratiney (http://github.com/hu9o)
 - rage (http://github.com/rage-lule)
