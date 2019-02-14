@@ -89,6 +89,10 @@ Contributors:
 - Ya-ma (http://twitter.com/PixelYam)
 - Edward Rowe (http://twitter.com/edwardlrowe)
 - Alberto Fernandez
+- Jihun Song (http://github.com/OpenLevel)
+- Hugo Ratiney (http://github.com/hu9o)
+- rage (http://github.com/rage-lule)
+- SystemAddict85 (http://github.com/SystemAddict85)
 
 Contains JSONObject from Boomlagoon (www.boomlagoon.com)
 
