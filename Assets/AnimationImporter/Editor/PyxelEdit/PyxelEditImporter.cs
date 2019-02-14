@@ -154,7 +154,7 @@ namespace AnimationImporter.PyxelEdit
 					frames[frameIndex] = frame;
 				}
 
-				importAnimation.SetFrames(frames);
+				importAnimation.frames = frames;
 
 				animationSheet.animations.Add(importAnimation);
 			}

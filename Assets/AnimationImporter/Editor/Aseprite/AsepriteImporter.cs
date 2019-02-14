@@ -258,6 +258,19 @@ namespace AnimationImporter.Aseprite
 				anim.firstSpriteIndex = (int)(frameTag["from"].Number);
 				anim.lastSpriteIndex = (int)(frameTag["to"].Number);
 
+				switch (frameTag["direction"].Str)
+				{
+					default:
+						anim.direction = PlaybackDirection.Forward;
+						break;
+					case "reverse":
+						anim.direction = PlaybackDirection.Reverse;
+						break;
+					case "pingpong":
+						anim.direction = PlaybackDirection.PingPong;
+						break;
+				}
+
 				animationSheet.animations.Add(anim);
 			}
 
