@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 namespace AnimationImporter
 {
@@ -41,6 +42,15 @@ namespace AnimationImporter
 				_spritePixelsPerUnit = value;
 			}
 		}
+
+		[SerializeField]
+		private CustomAlignmentType _customAlignmentType = CustomAlignmentType.Normalized;
+		public CustomAlignmentType customAlignmentType
+		{
+			get { return this._customAlignmentType; }
+			set { this._customAlignmentType = value; }
+		}
+
 
 		[SerializeField]
 		private AnimationTargetObjectType _targetObjectType = AnimationTargetObjectType.SpriteRenderer;
@@ -153,7 +163,7 @@ namespace AnimationImporter
 			var pixelsPerUnityKey = PREFS_PREFIX + "spritePixelsPerUnit";
 			return PlayerPrefs.HasKey(pixelsPerUnityKey) || EditorPrefs.HasKey(pixelsPerUnityKey);
 		}
-	
+
 		private bool HasKeyInPreferences(string key)
 		{
 			return PlayerPrefs.HasKey(key) || EditorPrefs.HasKey(key);
