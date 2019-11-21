@@ -11,7 +11,7 @@
 
 
 # Unity generated
-
+*.meta
 Temp
 Obj
 UnityGenerated

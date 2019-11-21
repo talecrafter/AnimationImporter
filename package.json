@@ -1,0 +1,8 @@
+{
+  "name": "com.talecrafter.animationimporter",
+  "version": "1.4.0",
+  "displayName": "Animation Importer",
+  "unity": "2019.2",
+  "description": "An Aseprite and PyxelEdit Animation Importer for Unity",
+  "hideInEditor": false
+}

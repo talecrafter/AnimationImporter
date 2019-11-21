@@ -20,7 +20,7 @@ namespace AnimationImporter
 			get
 			{
 				return Mathf.Max(width, height);
-			}			
+			}
 		}
 
 		public List<ImportedAnimationFrame> frames = new List<ImportedAnimationFrame>();
@@ -60,7 +60,7 @@ namespace AnimationImporter
 		//  public methods
 		// --------------------------------------------------------------------------------
 
-		// get animation by name; used when updating an existing AnimatorController 
+		// get animation by name; used when updating an existing AnimatorController
 		public AnimationClip GetClip(string clipName)
 		{
 			if (_animationDatabase == null)
@@ -72,7 +72,7 @@ namespace AnimationImporter
 			return null;
 		}
 
-		/* 
+		/*
 			get animation by name; used when creating an AnimatorOverrideController
 			we look for similar names so the OverrideController is still functional in cases where more specific or alternative animations are not present
 			idle <- idle
@@ -297,7 +297,7 @@ namespace AnimationImporter
 							case SpriteNamingScheme.AnimationOne:
 								animFrame.name = anim.name + NAME_DELIMITER + (i + 1).ToString();
 								break;
-						}						
+						}
 					}
 				}
 			}
