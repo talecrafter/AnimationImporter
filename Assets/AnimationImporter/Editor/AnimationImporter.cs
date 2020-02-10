@@ -469,6 +469,7 @@ namespace AnimationImporter
 
 			// create sub sprites for this file according to the AsepriteAnimationInfo 
 			importer.spritesheet = animationSheet.GetSpriteSheet(
+                sharedData.applySliceParameter,
 				sharedData.spriteAlignment,
 				sharedData.spriteAlignmentCustomX,
 				sharedData.spriteAlignmentCustomY);
@@ -476,7 +477,7 @@ namespace AnimationImporter
 			// reapply old import settings (pivot settings for sprites)
 			if (animationSheet.hasPreviousTextureImportSettings)
 			{
-				animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(importer);
+				animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(importer, sharedData.applySliceParameter);
 			}
 
 			// these values will be set in any case, not influenced by previous import settings

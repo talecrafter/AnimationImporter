@@ -54,9 +54,23 @@ namespace AnimationImporter
 			{
 				_targetObjectType = value;
 			}
-		}
+        }
 
-		[SerializeField]
+        [SerializeField]
+        private bool _applySliceParameter = false;
+        public bool applySliceParameter
+        {
+            get
+            {
+                return _applySliceParameter;
+            }
+            set
+            {
+                _applySliceParameter = value;
+            }
+        }
+
+        [SerializeField]
 		private SpriteAlignment _spriteAlignment = SpriteAlignment.BottomCenter;
 		public SpriteAlignment spriteAlignment
 		{
@@ -70,7 +84,7 @@ namespace AnimationImporter
 			}
 		}
 
-		[SerializeField]
+        [SerializeField]
 		private float _spriteAlignmentCustomX = 0;
 		public float spriteAlignmentCustomX
 		{
