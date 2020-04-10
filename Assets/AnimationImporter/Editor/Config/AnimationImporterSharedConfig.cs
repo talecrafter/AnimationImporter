@@ -122,6 +122,7 @@ namespace AnimationImporter
 			set { _animationControllersTargetLocation = value; }
 		}
 
+		[SerializeField]
 		private SpriteNamingScheme _spriteNamingScheme = SpriteNamingScheme.Classic;
 		public SpriteNamingScheme spriteNamingScheme
 		{
