@@ -98,5 +98,27 @@ namespace AnimationImporter
 				return AnimationTargetObjectType.SpriteRenderer;
 			}
 		}
+
+		public static void GetComponentPathsFromExistingClip(AnimationClip clip, AnimationTargetObjectType targetType, out string spriteRendererComponentPath, out string imageComponentPath)
+		{
+			var curveBindings = AnimationUtility.GetObjectReferenceCurveBindings(clip);
+
+			spriteRendererComponentPath = string.Empty;
+			imageComponentPath = string.Empty;
+
+			for (int i = 0; i < curveBindings.Length; i++)
+			{
+				if (targetType != AnimationTargetObjectType.Image && curveBindings[i].type == typeof(SpriteRenderer))
+				{
+					spriteRendererComponentPath = curveBindings[i].path;
+				}
+				else if (targetType != AnimationTargetObjectType.SpriteRenderer && curveBindings[i].type == typeof(UnityEngine.UI.Image))
+				{
+					imageComponentPath = curveBindings[i].path;
+				}
+			}
+
+			return;
+		}
 	}
 }

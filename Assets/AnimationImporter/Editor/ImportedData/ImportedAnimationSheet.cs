@@ -101,7 +101,7 @@ namespace AnimationImporter
 			return null;
 		}
 
-		public void CreateAnimation(ImportedAnimation anim, string basePath, string masterName, AnimationTargetObjectType targetType)
+		public void CreateAnimation(ImportedAnimation anim, string basePath, string masterName, AnimationTargetObjectType targetType, string spriteRendererComponentPath, string imageComponentPath)
 		{
 			AnimationClip clip;
             string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
@@ -113,6 +113,9 @@ namespace AnimationImporter
 			{
 				// get previous animation settings
 				targetType = PreviousImportSettings.GetAnimationTargetFromExistingClip(clip);
+
+				// get path(s) to SpriteRenderer and Image Components from previous clip
+				PreviousImportSettings.GetComponentPathsFromExistingClip(clip, targetType, out spriteRendererComponentPath, out imageComponentPath);
 			}
 			else
 			{
@@ -160,18 +163,18 @@ namespace AnimationImporter
 			// save curve into clip, either for SpriteRenderer, Image, or both
 			if (targetType == AnimationTargetObjectType.SpriteRenderer)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.spriteRendererCurveBinding, keyFrames);
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.imageCurveBinding, null);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetSpriteRendererCurveBinding(spriteRendererComponentPath), keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetImageCurveBinding(imageComponentPath), null);
 			}
 			else if (targetType == AnimationTargetObjectType.Image)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.spriteRendererCurveBinding, null);
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.imageCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetSpriteRendererCurveBinding(spriteRendererComponentPath), null);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetImageCurveBinding(imageComponentPath), keyFrames);
 			}
 			else if (targetType == AnimationTargetObjectType.SpriteRendererAndImage)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.spriteRendererCurveBinding, keyFrames);
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.imageCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetSpriteRendererCurveBinding(spriteRendererComponentPath), keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetImageCurveBinding(imageComponentPath), keyFrames);
 			}
 
 			EditorUtility.SetDirty(clip);

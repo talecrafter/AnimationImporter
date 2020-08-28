@@ -63,6 +63,15 @@ namespace AnimationImporter
 			}
 		}
 
+		// get spriteRendererCurveBinding with an optional parameter of setting a custom path
+		public static EditorCurveBinding GetSpriteRendererCurveBinding(string transformPathToSpriteRenderer = "")
+		{
+			EditorCurveBinding curveBinding = spriteRendererCurveBinding;
+			curveBinding.path = transformPathToSpriteRenderer;
+
+			return curveBinding;
+		}
+
 		public static EditorCurveBinding imageCurveBinding
 		{
 			get
@@ -74,6 +83,15 @@ namespace AnimationImporter
 					propertyName = "m_Sprite"
 				};
 			}
+		}
+
+		// get imageCurveBinding with an optional parameter of setting a custom path
+		public static EditorCurveBinding GetImageCurveBinding(string transformPathToImage = "")
+		{
+			EditorCurveBinding curveBinding = imageCurveBinding;
+			curveBinding.path = transformPathToImage;
+
+			return curveBinding;
 		}
 	}
 }
