@@ -129,24 +129,25 @@ namespace AnimationImporter.PyxelEdit
 				maxTileIndex = Mathf.Max(maxTileIndex, importAnimation.lastSpriteIndex);
 
 				ImportedAnimationFrame[] frames = new ImportedAnimationFrame[animationData.length];
-				for (int frameIndex = 0; frameIndex < animationData.length; frameIndex++)
+					for (int frameIndex = 0; frameIndex < animationData.length; frameIndex++)
 				{
 					ImportedAnimationFrame frame = new ImportedAnimationFrame();
 
 					frame.duration = animationData.frameDuration;
-					if (animationData.frameDurationMultipliers[i] != 100)
+					if (animationData.frameDurationMultipliers[frameIndex] != 100)
 					{
-						frame.duration *= (int)(animationData.frameDurationMultipliers[i] / 100f);
+						frame.duration *= (int)(animationData.frameDurationMultipliers[frameIndex] / 100f);
 					}
 
 					int tileIndex = animationData.baseTile + frameIndex;
 
 					int columnCount = data.canvas.width / tileWidth;
+					int rowCount = data.canvas.height / tileHeight;
 
 					int column = tileIndex % columnCount;
-					int row = tileIndex / columnCount;
+					int row = data.canvas.height - (tileHeight * i );
 
-					frame.y = row * tileHeight;
+					frame.y = row - tileHeight;
 					frame.x = column * tileWidth;
 					frame.width = tileWidth;
 					frame.height = tileHeight;
