@@ -20,7 +20,7 @@ namespace AnimationImporter
 			get
 			{
 				return Mathf.Max(width, height);
-			}			
+			}
 		}
 
 		public List<ImportedAnimationFrame> frames = new List<ImportedAnimationFrame>();
@@ -104,7 +104,7 @@ namespace AnimationImporter
 		public void CreateAnimation(ImportedAnimation anim, string basePath, string masterName, AnimationTargetObjectType targetType)
 		{
 			AnimationClip clip;
-            string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
+			string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
 			bool isLooping = anim.isLooping;
 
 			// check if animation file already exists
@@ -238,13 +238,19 @@ namespace AnimationImporter
 		//  Sprite Data
 		// --------------------------------------------------------------------------------
 
-		public SpriteMetaData[] GetSpriteSheet(SpriteAlignment spriteAlignment, float customX, float customY)
+		public SpriteMetaData[] GetSpriteSheet(
+			SpriteAlignment spriteAlignment,
+			CustomAlignmentType customAlignmentType,
+			float customX,
+			float customY
+		)
 		{
 			SpriteMetaData[] metaData = new SpriteMetaData[frames.Count];
 
 			for (int i = 0; i < frames.Count; i++)
 			{
 				ImportedAnimationFrame spriteInfo = frames[i];
+
 				SpriteMetaData spriteMetaData = new SpriteMetaData();
 
 				// sprite alignment
@@ -253,6 +259,11 @@ namespace AnimationImporter
 				{
 					spriteMetaData.pivot.x = customX;
 					spriteMetaData.pivot.y = customY;
+					if (customAlignmentType == CustomAlignmentType.Pixels)
+					{
+						spriteMetaData.pivot.x /= spriteInfo.width;
+						spriteMetaData.pivot.y /= spriteInfo.height;
+					}
 				}
 
 				spriteMetaData.name = spriteInfo.name;
@@ -297,7 +308,7 @@ namespace AnimationImporter
 							case SpriteNamingScheme.AnimationOne:
 								animFrame.name = anim.name + NAME_DELIMITER + (i + 1).ToString();
 								break;
-						}						
+						}
 					}
 				}
 			}

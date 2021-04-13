@@ -13,7 +13,7 @@ namespace AnimationImporter
 	public class AnimationImporter
 	{
 		// ================================================================================
-		//	Singleton
+		//  Singleton
 		// --------------------------------------------------------------------------------
 
 		private static AnimationImporter _instance = null;
@@ -257,10 +257,11 @@ namespace AnimationImporter
 				{
 					AnimationImportJob job = jobs[i];
 
-					job.progressUpdated += (float progress) => {							
-							float completeProgress = i * progressPerJob + progress * progressPerJob;
-							EditorUtility.DisplayProgressBar("Import", job.name, completeProgress);
-						};
+					job.progressUpdated += (float progress) =>
+					{
+						float completeProgress = i * progressPerJob + progress * progressPerJob;
+						EditorUtility.DisplayProgressBar("Import", job.name, completeProgress);
+					};
 					ImportJob(job);
 				}
 				AssetDatabase.Refresh();
@@ -470,6 +471,7 @@ namespace AnimationImporter
 			// create sub sprites for this file according to the AsepriteAnimationInfo 
 			importer.spritesheet = animationSheet.GetSpriteSheet(
 				sharedData.spriteAlignment,
+				sharedData.customAlignmentType,
 				sharedData.spriteAlignmentCustomX,
 				sharedData.spriteAlignmentCustomY);
 
@@ -544,7 +546,7 @@ namespace AnimationImporter
 		// check if there is a configured importer for the specified extension
 		public static bool IsConfiguredForAssets(DefaultAsset[] assets)
 		{
-			foreach(var asset in assets)
+			foreach (var asset in assets)
 			{
 				string assetPath = AssetDatabase.GetAssetPath(asset);
 				string extension = GetExtension(assetPath);
@@ -556,7 +558,7 @@ namespace AnimationImporter
 						IAnimationImporterPlugin importer = _importerPlugins[extension];
 						if (importer != null)
 						{
-							if(!importer.IsConfigured())
+							if (!importer.IsConfigured())
 							{
 								return false;
 							}
@@ -680,7 +682,7 @@ namespace AnimationImporter
 			}
 
 			Import(jobs.ToArray());
-		}		
+		}
 
 		// ================================================================================
 		//  private methods
