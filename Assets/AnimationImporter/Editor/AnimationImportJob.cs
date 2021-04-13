@@ -77,6 +77,19 @@ namespace AnimationImporter
 			}
 		}
 
+		private string _sheetConfigParameter = "--sheet-pack";
+		public string sheetConfigParameter
+		{
+			get
+			{
+				return _sheetConfigParameter;
+			}
+			set
+			{
+				_sheetConfigParameter = value;
+			}
+		}
+
 		public PreviousImportSettings previousImportSettings = null;
 
 		// additional import settings
