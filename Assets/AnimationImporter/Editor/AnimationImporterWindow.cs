@@ -144,13 +144,21 @@ namespace AnimationImporter
 
 			importer.sharedData.targetObjectType = (AnimationTargetObjectType)EditorGUILayout.EnumPopup("Target Object", importer.sharedData.targetObjectType);
 
-			importer.sharedData.spriteAlignment = (SpriteAlignment)EditorGUILayout.EnumPopup("Sprite Alignment", importer.sharedData.spriteAlignment);
+            EditorGUILayout.BeginHorizontal();
+            importer.sharedData.applySliceParameter = EditorGUILayout.Toggle("Apply Slice Parameter", importer.sharedData.applySliceParameter);
+            EditorGUILayout.EndHorizontal();
 
-			if (importer.sharedData.spriteAlignment == SpriteAlignment.Custom)
-			{
-				importer.sharedData.spriteAlignmentCustomX = EditorGUILayout.Slider("x", importer.sharedData.spriteAlignmentCustomX, 0, 1f);
-				importer.sharedData.spriteAlignmentCustomY = EditorGUILayout.Slider("y", importer.sharedData.spriteAlignmentCustomY, 0, 1f);
-			}
+            // no longer need setting SpriteAlignment and \pivot when Apply Slice Parameter
+            if (!importer.sharedData.applySliceParameter)
+            {
+                importer.sharedData.spriteAlignment = (SpriteAlignment)EditorGUILayout.EnumPopup("Sprite Alignment", importer.sharedData.spriteAlignment);
+
+                if (importer.sharedData.spriteAlignment == SpriteAlignment.Custom)
+                {
+                    importer.sharedData.spriteAlignmentCustomX = EditorGUILayout.Slider("x", importer.sharedData.spriteAlignmentCustomX, 0, 1f);
+                    importer.sharedData.spriteAlignmentCustomY = EditorGUILayout.Slider("y", importer.sharedData.spriteAlignmentCustomY, 0, 1f);
+                }
+            }
 
 			importer.sharedData.spritePixelsPerUnit = EditorGUILayout.FloatField("Sprite Pixels per Unit", importer.sharedData.spritePixelsPerUnit);
 

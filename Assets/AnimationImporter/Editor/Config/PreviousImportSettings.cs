@@ -39,28 +39,33 @@ namespace AnimationImporter
 			}
 		}
 
-		public void ApplyPreviousTextureImportSettings(TextureImporter importer)
+		public void ApplyPreviousTextureImportSettings(TextureImporter importer, bool isAppliedSliceParameter)
 		{
 			if (!_hasPreviousTextureImportSettings|| importer == null)
 			{
 				return;
 			}
 
-			// apply old pivot point settings
-			// we assume every sprite should have the same pivot point
-			if (_previousFirstSprite.HasValue)
-			{
-				var spritesheet = importer.spritesheet; // read values
+            // I assume every SLICED sprite shourd have the new pivot point
+            if (isAppliedSliceParameter)
+            {
+                return;
+            }
+            // apply old pivot point settings
+            // we assume every sprite should have the same pivot point
+            if (_previousFirstSprite.HasValue)
+            {
+                var spritesheet = importer.spritesheet; // read values
 
-				for (int i = 0; i < spritesheet.Length; i++)
-				{
-					spritesheet[i].alignment = _previousFirstSprite.Value.alignment;
-					spritesheet[i].pivot = _previousFirstSprite.Value.pivot;
-				}
+                for (int i = 0; i < spritesheet.Length; i++)
+                {
+                    spritesheet[i].alignment = _previousFirstSprite.Value.alignment;
+                    spritesheet[i].pivot = _previousFirstSprite.Value.pivot;
+                }
 
-				importer.spritesheet = spritesheet; // write values
-			}
-		}
+                importer.spritesheet = spritesheet; // write values
+            }
+        }
 
 		// ================================================================================
 		//  analyzing animations

@@ -25,6 +25,8 @@ namespace AnimationImporter
 		public int y;
 		public int width;
 		public int height;
+        public float pivotX;
+        public float pivotY;
 
 		public int duration; // in milliseconds as part of an animation
 

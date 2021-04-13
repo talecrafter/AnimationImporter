@@ -238,7 +238,7 @@ namespace AnimationImporter
 		//  Sprite Data
 		// --------------------------------------------------------------------------------
 
-		public SpriteMetaData[] GetSpriteSheet(SpriteAlignment spriteAlignment, float customX, float customY)
+		public SpriteMetaData[] GetSpriteSheet(bool isAppliedSliceParameter, SpriteAlignment spriteAlignment, float customX, float customY)
 		{
 			SpriteMetaData[] metaData = new SpriteMetaData[frames.Count];
 
@@ -247,13 +247,22 @@ namespace AnimationImporter
 				ImportedAnimationFrame spriteInfo = frames[i];
 				SpriteMetaData spriteMetaData = new SpriteMetaData();
 
-				// sprite alignment
-				spriteMetaData.alignment = (int)spriteAlignment;
-				if (spriteAlignment == SpriteAlignment.Custom)
-				{
-					spriteMetaData.pivot.x = customX;
-					spriteMetaData.pivot.y = customY;
-				}
+                // sprite alignment
+                spriteMetaData.alignment = (int)spriteAlignment;
+                if (isAppliedSliceParameter)
+                {
+                    spriteMetaData.alignment = (int)SpriteAlignment.Custom;
+                    spriteMetaData.pivot.x = spriteInfo.pivotX / spriteInfo.width;
+                    spriteMetaData.pivot.y = (spriteInfo.height - spriteInfo.pivotY) / spriteInfo.height;
+                }
+                else
+                {
+                    if (spriteAlignment == SpriteAlignment.Custom)
+                    {
+                        spriteMetaData.pivot.x = customX;
+                        spriteMetaData.pivot.y = customY;
+                    }
+                }
 
 				spriteMetaData.name = spriteInfo.name;
 				spriteMetaData.rect = new Rect(spriteInfo.x, spriteInfo.y, spriteInfo.width, spriteInfo.height);

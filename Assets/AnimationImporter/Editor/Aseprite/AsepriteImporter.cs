@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
@@ -121,7 +122,7 @@ namespace AnimationImporter.Aseprite
 		private static bool CreateSpriteAtlasAndMetaFile(AnimationImportJob job)
 		{
 			char delimiter = '\"';
-			string parameters = "--data " + delimiter + job.name + ".json" + delimiter + " --sheet " + delimiter + job.name + ".png" + delimiter + " --sheet-pack --list-tags --format json-array " + delimiter + job.fileName + delimiter;
+			string parameters = "--data " + delimiter + job.name + ".json" + delimiter + " --sheet " + delimiter + job.name + ".png" + delimiter + " --sheet-pack --list-tags --list-slices --format json-array " + delimiter + job.fileName + delimiter;
 
 			if (!string.IsNullOrEmpty(job.additionalCommandLineArguments))
 			{
@@ -278,8 +279,9 @@ namespace AnimationImporter.Aseprite
 		}
 
 		private static bool GetFramesFromJSON(ImportedAnimationSheet animationSheet, JSONObject root)
-		{
-			var list = root["frames"].Array;
+        {
+            var list = root["frames"].Array;
+            var sliceParameter = root["meta"].Obj["slices"]?.Array[0];
 
 			if (list == null)
 			{
@@ -288,17 +290,34 @@ namespace AnimationImporter.Aseprite
 				return false;
 			}
 
-			foreach (var item in list)
+            for (var index = 0; index < list.Length; index++)
 			{
 				ImportedAnimationFrame frame = new ImportedAnimationFrame();
 
-				var frameValues = item.Obj["frame"].Obj;
-				frame.width = (int)frameValues["w"].Number;
-				frame.height = (int)frameValues["h"].Number;
-				frame.x = (int)frameValues["x"].Number;
-				frame.y = animationSheet.height - (int)frameValues["y"].Number - frame.height; // unity has a different coord system
+				var frameValues = list[index].Obj["frame"].Obj;
+                var assighnedSliceParameter = sliceParameter?.Obj["keys"].Array.FirstOrDefault(s => s.Obj["frame"].Number == index);
 
-				frame.duration = (int)item.Obj["duration"].Number;
+                frame.width = assighnedSliceParameter != null ? 
+                    (int)assighnedSliceParameter.Obj["bounds"].Obj["w"].Number : 
+                    (int)frameValues["w"].Number;
+                frame.height = assighnedSliceParameter != null ? 
+                    (int)assighnedSliceParameter.Obj["bounds"].Obj["h"].Number : 
+                    (int)frameValues["h"].Number;
+                frame.x = assighnedSliceParameter != null ? 
+                    (int)(frameValues["x"].Number + assighnedSliceParameter.Obj["bounds"].Obj["x"].Number) : 
+                    (int)frameValues["x"].Number;
+                var y = assighnedSliceParameter != null ?
+                    (int)(frameValues["y"].Number + assighnedSliceParameter.Obj["bounds"].Obj["y"].Number) :
+                    (int)frameValues["y"].Number;
+                frame.y = animationSheet.height - y - frame.height; // unity has a different coord system
+                frame.pivotX = assighnedSliceParameter != null ? 
+                    (int)assighnedSliceParameter.Obj["pivot"].Obj["x"].Number :
+                    frame.pivotX;
+                frame.pivotY = assighnedSliceParameter != null ? 
+                    (int)assighnedSliceParameter.Obj["pivot"].Obj["y"].Number :
+                    frame.pivotY;
+
+                frame.duration = (int)list[index].Obj["duration"].Number;
 
 				animationSheet.frames.Add(frame);
 			}
