@@ -7,6 +7,27 @@ It's already used in several projects and should work for most use cases. There 
 Tested with: Unity 5.6, Aseprite 1.1.13, PyxelEdit 0.4.3
 
 
+Installation
+-----
+
+This extension can be installed using Unity package manager.  
+`https://github.com/talecrafter/AnimationImporter.git?path=/Assets`  
+
+* Package manager UI  
+
+	![screenshot](https://user-images.githubusercontent.com/6723783/72479980-c9554c80-37aa-11ea-8fd8-978d3fa860bd.png)
+
+* Manifest
+```
+{
+	"dependencies": {
+		"com.talecrafter.animationimporter": "https://github.com/talecrafter/AnimationImporter.git?path=/Assets"
+	}
+}
+```
+
+Or by importing the content of `Assets` into the `Plugins` folder in Unity.
+
 Setup
 -----
 
