@@ -7,10 +7,29 @@ using UnityEditor;
 
 namespace AnimationImporter
 {
+	[InitializeOnLoad]
 	public class AnimationAssetPostprocessor : AssetPostprocessor
 	{
 		private static List<string> _assetsMarkedForImport = new List<string>();
 		private static EditorApplication.CallbackFunction _importDelegate;
+
+		private static bool _editorIsInUserMode = false;
+
+		// ================================================================================
+		//  static constructor
+		// --------------------------------------------------------------------------------
+
+		static AnimationAssetPostprocessor()
+		{
+			EditorApplication.update += EditorApplicationRunOnce;
+		}
+
+		static void EditorApplicationRunOnce()
+		{			
+			EditorApplication.update -= EditorApplicationRunOnce;
+
+			_editorIsInUserMode = true;
+		}
 
 		// ================================================================================
 		//  unity methods
@@ -18,6 +37,12 @@ namespace AnimationImporter
 
 		private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromPath)
 		{
+			// skip automatic import on opening a project since this might create a few unexpected issues, including broken preview images
+			if (!_editorIsInUserMode)
+			{
+				return;
+			}
+
 			AnimationImporter importer = AnimationImporter.Instance;
 
 			if (importer == null)
