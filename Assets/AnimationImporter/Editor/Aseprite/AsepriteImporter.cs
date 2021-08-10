@@ -38,7 +38,7 @@ namespace AnimationImporter.Aseprite
 		//  static constructor, registering plugin
 		// --------------------------------------------------------------------------------
 
-		static AsepriteImporter ()
+		static AsepriteImporter()
 		{
 			AsepriteImporter importer = new AsepriteImporter();
 			AnimationImporter.RegisterImporter(importer, "ase", "aseprite");
@@ -121,7 +121,7 @@ namespace AnimationImporter.Aseprite
 		private static bool CreateSpriteAtlasAndMetaFile(AnimationImportJob job)
 		{
 			char delimiter = '\"';
-			string parameters = "--data " + delimiter + job.name + ".json" + delimiter + " --sheet " + delimiter + job.name + ".png" + delimiter + " --sheet-pack --list-tags --format json-array " + delimiter + job.fileName + delimiter;
+			string parameters = "--data " + delimiter + job.name + ".json" + delimiter + " --sheet " + delimiter + job.name + ".png" + delimiter + " " + job.sheetConfigParameter + " --list-tags --format json-array " + delimiter + job.fileName + delimiter;
 
 			if (!string.IsNullOrEmpty(job.additionalCommandLineArguments))
 			{
@@ -200,7 +200,7 @@ namespace AnimationImporter.Aseprite
 			if (GetAnimationsFromJSON(animationSheet, meta) == false)
 			{
 				return null;
-			}		
+			}
 
 			if (GetFramesFromJSON(animationSheet, root) == false)
 			{

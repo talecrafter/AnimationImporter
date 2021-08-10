@@ -151,8 +151,17 @@ namespace AnimationImporter
 
 			if (importer.sharedData.spriteAlignment == SpriteAlignment.Custom)
 			{
-				importer.sharedData.spriteAlignmentCustomX = EditorGUILayout.Slider("x", importer.sharedData.spriteAlignmentCustomX, 0, 1f);
-				importer.sharedData.spriteAlignmentCustomY = EditorGUILayout.Slider("y", importer.sharedData.spriteAlignmentCustomY, 0, 1f);
+				importer.sharedData.pivotAlignmentType = (pivotAlignmentType)EditorGUILayout.EnumPopup("Pivot Alignment Type", importer.sharedData.pivotAlignmentType);
+				if (importer.sharedData.pivotAlignmentType == pivotAlignmentType.Normalized)
+				{
+					importer.sharedData.spriteAlignmentCustomX = EditorGUILayout.Slider("x", importer.sharedData.spriteAlignmentCustomX, 0, 1f);
+					importer.sharedData.spriteAlignmentCustomY = EditorGUILayout.Slider("y", importer.sharedData.spriteAlignmentCustomY, 0, 1f);
+				}
+				else
+				{
+					importer.sharedData.spriteAlignmentCustomX = EditorGUILayout.FloatField("x", importer.sharedData.spriteAlignmentCustomX);
+					importer.sharedData.spriteAlignmentCustomY = EditorGUILayout.FloatField("y", importer.sharedData.spriteAlignmentCustomY);
+				}
 			}
 
 			importer.sharedData.spritePixelsPerUnit = EditorGUILayout.FloatField("Sprite Pixels per Unit", importer.sharedData.spritePixelsPerUnit);
@@ -291,7 +300,7 @@ namespace AnimationImporter
 
 			GUILayout.EndHorizontal();
 
-			if(!File.Exists(AnimationImporter.Instance.asepritePath))
+			if (!File.Exists(AnimationImporter.Instance.asepritePath))
 			{
 				var fileErrorMessage = string.Format(
 					"Cannot find Aseprite at the specified path. Use the Select button to locate the application.");
@@ -336,7 +345,7 @@ namespace AnimationImporter
 
 		private void ImportAssetsOrError(DefaultAsset[] assets, ImportAnimatorController importAnimatorController = ImportAnimatorController.None)
 		{
-			if(AnimationImporter.IsConfiguredForAssets(assets))
+			if (AnimationImporter.IsConfiguredForAssets(assets))
 			{
 				importer.ImportAssets(assets, importAnimatorController);
 			}

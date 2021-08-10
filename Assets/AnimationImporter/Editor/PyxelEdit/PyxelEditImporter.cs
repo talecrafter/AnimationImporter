@@ -134,9 +134,9 @@ namespace AnimationImporter.PyxelEdit
 					ImportedAnimationFrame frame = new ImportedAnimationFrame();
 
 					frame.duration = animationData.frameDuration;
-					if (animationData.frameDurationMultipliers[i] != 100)
+					if (animationData.frameDurationMultipliers[frameIndex] != 100)
 					{
-						frame.duration *= (int)(animationData.frameDurationMultipliers[i] / 100f);
+						frame.duration *= (int)(animationData.frameDurationMultipliers[frameIndex] / 100f);
 					}
 
 					int tileIndex = animationData.baseTile + frameIndex;
@@ -146,8 +146,8 @@ namespace AnimationImporter.PyxelEdit
 					int column = tileIndex % columnCount;
 					int row = tileIndex / columnCount;
 
-					frame.y = row * tileHeight;
 					frame.x = column * tileWidth;
+					frame.y = animationSheet.height - (row + 1) * tileHeight;
 					frame.width = tileWidth;
 					frame.height = tileHeight;
 
