@@ -143,9 +143,11 @@ namespace AnimationImporter
 			*/
 
 			importer.sharedData.targetObjectType = (AnimationTargetObjectType)EditorGUILayout.EnumPopup("Target Object", importer.sharedData.targetObjectType);
-
-			importer.sharedData.pathToSpriteRendererComponent = EditorGUILayout.TextField("Path to Sprite Renderer", importer.sharedData.pathToSpriteRendererComponent);
-			importer.sharedData.pathToImageComponent = EditorGUILayout.TextField("Path to Image", importer.sharedData.pathToImageComponent);
+			
+			if(importer.sharedData.targetObjectType == AnimationTargetObjectType.SpriteRenderer || importer.sharedData.targetObjectType == AnimationTargetObjectType.SpriteRendererAndImage)
+				importer.sharedData.pathToSpriteRendererComponent = EditorGUILayout.TextField("Path to Sprite Renderer", importer.sharedData.pathToSpriteRendererComponent);
+			if(importer.sharedData.targetObjectType == AnimationTargetObjectType.Image || importer.sharedData.targetObjectType == AnimationTargetObjectType.SpriteRendererAndImage)
+				importer.sharedData.pathToImageComponent = EditorGUILayout.TextField("Path to Image", importer.sharedData.pathToImageComponent);
 
 			importer.sharedData.spriteAlignment = (SpriteAlignment)EditorGUILayout.EnumPopup("Sprite Alignment", importer.sharedData.spriteAlignment);
 
