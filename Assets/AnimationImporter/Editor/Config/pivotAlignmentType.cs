@@ -1,6 +1,6 @@
 namespace AnimationImporter
 {
-	public enum CustomAlignmentType
+	public enum pivotAlignmentType
 	{
 		Normalized,
 		Pixels

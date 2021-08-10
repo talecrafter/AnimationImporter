@@ -471,7 +471,7 @@ namespace AnimationImporter
 			// create sub sprites for this file according to the AsepriteAnimationInfo 
 			importer.spritesheet = animationSheet.GetSpriteSheet(
 				sharedData.spriteAlignment,
-				sharedData.customAlignmentType,
+				sharedData.pivotAlignmentType,
 				sharedData.spriteAlignmentCustomX,
 				sharedData.spriteAlignmentCustomY);
 

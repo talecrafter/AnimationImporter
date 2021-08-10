@@ -44,11 +44,11 @@ namespace AnimationImporter
 		}
 
 		[SerializeField]
-		private CustomAlignmentType _customAlignmentType = CustomAlignmentType.Normalized;
-		public CustomAlignmentType customAlignmentType
+		private pivotAlignmentType _pivotAlignmentType = pivotAlignmentType.Normalized;
+		public pivotAlignmentType pivotAlignmentType
 		{
-			get { return this._customAlignmentType; }
-			set { this._customAlignmentType = value; }
+			get { return this._pivotAlignmentType; }
+			set { this._pivotAlignmentType = value; }
 		}
 
 

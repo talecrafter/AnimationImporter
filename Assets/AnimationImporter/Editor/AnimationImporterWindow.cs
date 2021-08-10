@@ -148,8 +148,8 @@ namespace AnimationImporter
 
 			if (importer.sharedData.spriteAlignment == SpriteAlignment.Custom)
 			{
-				importer.sharedData.customAlignmentType = (CustomAlignmentType)EditorGUILayout.EnumPopup("Custom Alignment Type", importer.sharedData.customAlignmentType);
-				if (importer.sharedData.customAlignmentType == CustomAlignmentType.Normalized)
+				importer.sharedData.pivotAlignmentType = (pivotAlignmentType)EditorGUILayout.EnumPopup("Pivot Alignment Type", importer.sharedData.pivotAlignmentType);
+				if (importer.sharedData.pivotAlignmentType == pivotAlignmentType.Normalized)
 				{
 					importer.sharedData.spriteAlignmentCustomX = EditorGUILayout.Slider("x", importer.sharedData.spriteAlignmentCustomX, 0, 1f);
 					importer.sharedData.spriteAlignmentCustomY = EditorGUILayout.Slider("y", importer.sharedData.spriteAlignmentCustomY, 0, 1f);
