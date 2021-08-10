@@ -85,11 +85,12 @@ namespace AnimationImporter
 				}
 
 				// Create folders that don't exist
+				var parentFolder = pathToFolder;
 				pathToFolder = string.Concat(pathToFolder, folder);
 				if (!UnityEditor.AssetDatabase.IsValidFolder(pathToFolder))
 				{
-					var pathToParent = System.IO.Directory.GetParent(pathToFolder).ToString();
-					AssetDatabase.CreateFolder(pathToParent, folder);
+					parentFolder = parentFolder.Remove(parentFolder.Length-1);
+					AssetDatabase.CreateFolder(parentFolder, folder);
 					AssetDatabase.Refresh();
 				}
 
