@@ -8,7 +8,7 @@
 
 /ProjectSettings/
 /UnityPackageManager/
-
+/UserSettings/
 
 # Unity generated
 
@@ -18,7 +18,7 @@ UnityGenerated
 /Library/
 /Logs/
 /.vs
-
+/.vsconfig
  
 # Unity packages (we don't need any specific package for this plugin)
 
@@ -39,6 +39,7 @@ ExportedObj
 *.unityproj
 *.booproj
 *.vscode
+*.idea
  
 
 # OS generated
