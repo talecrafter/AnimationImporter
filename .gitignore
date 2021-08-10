@@ -38,6 +38,7 @@ ExportedObj
 *.user
 *.unityproj
 *.booproj
+*.vscode
 *.idea
  
 
