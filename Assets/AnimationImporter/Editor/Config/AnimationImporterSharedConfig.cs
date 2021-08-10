@@ -67,6 +67,34 @@ namespace AnimationImporter
 		}
 
 		[SerializeField]
+		private string _pathToSpriteRendererComponent = "";
+		public string pathToSpriteRendererComponent
+		{
+			get
+			{
+				return _pathToSpriteRendererComponent;
+			}
+			set
+			{
+				_pathToSpriteRendererComponent = value;
+			}
+		}
+
+		[SerializeField]
+		private string _pathToImageComponent = "";
+		public string pathToImageComponent
+		{
+			get
+			{
+				return _pathToImageComponent;
+			}
+			set
+			{
+				_pathToImageComponent = value;
+			}
+		}
+
+		[SerializeField]
 		private SpriteAlignment _spriteAlignment = SpriteAlignment.BottomCenter;
 		public SpriteAlignment spriteAlignment
 		{
