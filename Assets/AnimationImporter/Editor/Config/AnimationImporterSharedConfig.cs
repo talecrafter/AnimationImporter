@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 namespace AnimationImporter
 {
@@ -43,6 +44,15 @@ namespace AnimationImporter
 		}
 
 		[SerializeField]
+		private pivotAlignmentType _pivotAlignmentType = pivotAlignmentType.Normalized;
+		public pivotAlignmentType pivotAlignmentType
+		{
+			get { return this._pivotAlignmentType; }
+			set { this._pivotAlignmentType = value; }
+		}
+
+
+		[SerializeField]
 		private AnimationTargetObjectType _targetObjectType = AnimationTargetObjectType.SpriteRenderer;
 		public AnimationTargetObjectType targetObjectType
 		{
@@ -53,6 +63,34 @@ namespace AnimationImporter
 			set
 			{
 				_targetObjectType = value;
+			}
+		}
+
+		[SerializeField]
+		private string _pathToSpriteRendererComponent = "";
+		public string pathToSpriteRendererComponent
+		{
+			get
+			{
+				return _pathToSpriteRendererComponent;
+			}
+			set
+			{
+				_pathToSpriteRendererComponent = value;
+			}
+		}
+
+		[SerializeField]
+		private string _pathToImageComponent = "";
+		public string pathToImageComponent
+		{
+			get
+			{
+				return _pathToImageComponent;
+			}
+			set
+			{
+				_pathToImageComponent = value;
 			}
 		}
 
@@ -154,7 +192,7 @@ namespace AnimationImporter
 			var pixelsPerUnityKey = PREFS_PREFIX + "spritePixelsPerUnit";
 			return PlayerPrefs.HasKey(pixelsPerUnityKey) || EditorPrefs.HasKey(pixelsPerUnityKey);
 		}
-	
+
 		private bool HasKeyInPreferences(string key)
 		{
 			return PlayerPrefs.HasKey(key) || EditorPrefs.HasKey(key);

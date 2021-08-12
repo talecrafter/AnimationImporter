@@ -20,7 +20,7 @@ namespace AnimationImporter
 			get
 			{
 				return Mathf.Max(width, height);
-			}			
+			}
 		}
 
 		public List<ImportedAnimationFrame> frames = new List<ImportedAnimationFrame>();
@@ -101,10 +101,10 @@ namespace AnimationImporter
 			return null;
 		}
 
-		public void CreateAnimation(ImportedAnimation anim, string basePath, string masterName, AnimationTargetObjectType targetType)
+		public void CreateAnimation(ImportedAnimation anim, string basePath, string masterName, AnimationTargetObjectType targetType, string spriteRendererComponentPath, string imageComponentPath)
 		{
 			AnimationClip clip;
-            string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
+			string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
 			bool isLooping = anim.isLooping;
 
 			// check if animation file already exists
@@ -113,6 +113,9 @@ namespace AnimationImporter
 			{
 				// get previous animation settings
 				targetType = PreviousImportSettings.GetAnimationTargetFromExistingClip(clip);
+
+				// get path(s) to SpriteRenderer and Image Components from previous clip
+				PreviousImportSettings.GetComponentPathsFromExistingClip(clip, targetType, out spriteRendererComponentPath, out imageComponentPath);
 			}
 			else
 			{
@@ -160,18 +163,18 @@ namespace AnimationImporter
 			// save curve into clip, either for SpriteRenderer, Image, or both
 			if (targetType == AnimationTargetObjectType.SpriteRenderer)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.spriteRendererCurveBinding, keyFrames);
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.imageCurveBinding, null);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetSpriteRendererCurveBinding(spriteRendererComponentPath), keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetImageCurveBinding(imageComponentPath), null);
 			}
 			else if (targetType == AnimationTargetObjectType.Image)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.spriteRendererCurveBinding, null);
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.imageCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetSpriteRendererCurveBinding(spriteRendererComponentPath), null);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetImageCurveBinding(imageComponentPath), keyFrames);
 			}
 			else if (targetType == AnimationTargetObjectType.SpriteRendererAndImage)
 			{
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.spriteRendererCurveBinding, keyFrames);
-				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.imageCurveBinding, keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetSpriteRendererCurveBinding(spriteRendererComponentPath), keyFrames);
+				AnimationUtility.SetObjectReferenceCurve(clip, AnimationClipUtility.GetImageCurveBinding(imageComponentPath), keyFrames);
 			}
 
 			EditorUtility.SetDirty(clip);
@@ -238,13 +241,19 @@ namespace AnimationImporter
 		//  Sprite Data
 		// --------------------------------------------------------------------------------
 
-		public SpriteMetaData[] GetSpriteSheet(SpriteAlignment spriteAlignment, float customX, float customY)
+		public SpriteMetaData[] GetSpriteSheet(
+			SpriteAlignment spriteAlignment,
+			pivotAlignmentType pivotAlignmentType,
+			float customX,
+			float customY
+		)
 		{
 			SpriteMetaData[] metaData = new SpriteMetaData[frames.Count];
 
 			for (int i = 0; i < frames.Count; i++)
 			{
 				ImportedAnimationFrame spriteInfo = frames[i];
+
 				SpriteMetaData spriteMetaData = new SpriteMetaData();
 
 				// sprite alignment
@@ -253,6 +262,11 @@ namespace AnimationImporter
 				{
 					spriteMetaData.pivot.x = customX;
 					spriteMetaData.pivot.y = customY;
+					if (pivotAlignmentType == pivotAlignmentType.Pixels)
+					{
+						spriteMetaData.pivot.x /= spriteInfo.width;
+						spriteMetaData.pivot.y /= spriteInfo.height;
+					}
 				}
 
 				spriteMetaData.name = spriteInfo.name;
@@ -297,7 +311,7 @@ namespace AnimationImporter
 							case SpriteNamingScheme.AnimationOne:
 								animFrame.name = anim.name + NAME_DELIMITER + (i + 1).ToString();
 								break;
-						}						
+						}
 					}
 				}
 			}
