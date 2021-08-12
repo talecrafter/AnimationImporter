@@ -93,6 +93,7 @@ Contributors:
 - Hugo Ratiney (http://github.com/hu9o)
 - rage (http://github.com/rage-lule)
 - SystemAddict85 (http://github.com/SystemAddict85)
+- Jo Giezi (https://github.com/GieziJo)
 
 Contains JSONObject from Boomlagoon (www.boomlagoon.com)
 
