@@ -168,6 +168,8 @@ namespace AnimationImporter
 
 			importer.sharedData.spritePixelsPerUnit = EditorGUILayout.FloatField("Sprite Pixels per Unit", importer.sharedData.spritePixelsPerUnit);
 
+			importer.sharedData.animationFrameRate = EditorGUILayout.FloatField("Animation Sample Frames", importer.sharedData.animationFrameRate);
+
 			GUILayout.Space(5f);
 
 			ShowTargetLocationOptions("Sprites", importer.sharedData.spritesTargetLocation);
