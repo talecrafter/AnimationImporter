@@ -101,7 +101,7 @@ namespace AnimationImporter
 			return null;
 		}
 
-		public void CreateAnimation(ImportedAnimation anim, string basePath, string masterName, AnimationTargetObjectType targetType, string spriteRendererComponentPath, string imageComponentPath)
+		public void CreateAnimation(ImportedAnimation anim, string basePath, string masterName, AnimationTargetObjectType targetType, string spriteRendererComponentPath, string imageComponentPath, float frameRate)
 		{
 			AnimationClip clip;
 			string fileName = basePath + "/" + masterName + "_" + anim.name + ".anim";
@@ -134,6 +134,8 @@ namespace AnimationImporter
 				clip.wrapMode = WrapMode.Clamp;
 				clip.SetLoop(false);
 			}
+
+			clip.frameRate = frameRate;
 
 			// convert keyframes
 			ImportedAnimationFrame[] srcKeyframes = anim.ListFramesAccountingForPlaybackDirection().ToArray();

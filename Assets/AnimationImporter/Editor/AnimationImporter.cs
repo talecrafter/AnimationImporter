@@ -439,7 +439,7 @@ namespace AnimationImporter
 
 			foreach (var animation in animationInfo.animations)
 			{
-				animationInfo.CreateAnimation(animation, pathForAnimations, masterName, sharedData.targetObjectType, sharedData.pathToSpriteRendererComponent, sharedData.pathToImageComponent);
+				animationInfo.CreateAnimation(animation, pathForAnimations, masterName, sharedData.targetObjectType, sharedData.pathToSpriteRendererComponent, sharedData.pathToImageComponent, sharedData.animationFrameRate);
 			}
 		}
 

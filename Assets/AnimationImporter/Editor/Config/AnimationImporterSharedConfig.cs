@@ -44,6 +44,20 @@ namespace AnimationImporter
 		}
 
 		[SerializeField]
+		private float _animationFrameRate = 60f;
+		public float animationFrameRate
+        {
+            get
+            {
+				return _animationFrameRate;
+            }
+            set
+            {
+				_animationFrameRate = value;
+            }
+        }
+
+		[SerializeField]
 		private pivotAlignmentType _pivotAlignmentType = pivotAlignmentType.Normalized;
 		public pivotAlignmentType pivotAlignmentType
 		{
