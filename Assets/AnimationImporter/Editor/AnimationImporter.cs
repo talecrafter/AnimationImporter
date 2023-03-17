@@ -502,6 +502,12 @@ namespace AnimationImporter
 			}
 			spriteNameFileIdDataProvider.SetNameFileIdPairs(spriteNameFileIdPairs);
 
+			// reapply old import settings (pivot settings for sprites)
+			if (animationSheet.hasPreviousTextureImportSettings)
+			{
+				animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(dataProvider);
+			}
+
 			dataProvider.Apply();
 #else
 			// create sub sprites for this file according to the AsepriteAnimationInfo 
@@ -510,13 +516,13 @@ namespace AnimationImporter
 				sharedData.pivotAlignmentType,
 				sharedData.spriteAlignmentCustomX,
 				sharedData.spriteAlignmentCustomY);
-#endif
 
 			// reapply old import settings (pivot settings for sprites)
 			if (animationSheet.hasPreviousTextureImportSettings)
 			{
 				animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(importer);
 			}
+#endif
 
 			EditorUtility.SetDirty(importer);
 
