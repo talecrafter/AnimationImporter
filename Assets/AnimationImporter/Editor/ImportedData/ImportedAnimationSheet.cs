@@ -112,10 +112,10 @@ namespace AnimationImporter
 			if (clip != null)
 			{
 				// get previous animation settings
-				targetType = PreviousImportSettings.GetAnimationTargetFromExistingClip(clip);
+				targetType = AnimationClipUtility.GetAnimationTargetFromExistingClip(clip);
 
 				// get path(s) to SpriteRenderer and Image Components from previous clip
-				PreviousImportSettings.GetComponentPathsFromExistingClip(clip, targetType, out spriteRendererComponentPath, out imageComponentPath);
+				AnimationClipUtility.GetComponentPathsFromExistingClip(clip, targetType, out spriteRendererComponentPath, out imageComponentPath);
 			}
 			else
 			{

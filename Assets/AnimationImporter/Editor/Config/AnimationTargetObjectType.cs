@@ -1,7 +1,10 @@
 ﻿
-public enum AnimationTargetObjectType : int
+namespace AnimationImporter
 {
-    SpriteRenderer,
-	Image,
-	SpriteRendererAndImage
+	public enum AnimationTargetObjectType : int
+	{
+		SpriteRenderer,
+		Image,
+		SpriteRendererAndImage
+	}
 }
