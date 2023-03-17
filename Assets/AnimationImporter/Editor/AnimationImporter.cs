@@ -471,6 +471,10 @@ namespace AnimationImporter
 #endif
 			}
 
+			// these values will be set in any case, not influenced by previous import settings
+			importer.spriteImportMode = SpriteImportMode.Multiple;
+			importer.maxTextureSize = animationSheet.maxTextureSize;
+
 #if UNITY_2021_2_OR_NEWER
 			// get data provider
 			var factory = new SpriteDataProviderFactories();
@@ -513,10 +517,6 @@ namespace AnimationImporter
 			{
 				animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(importer);
 			}
-
-			// these values will be set in any case, not influenced by previous import settings
-			importer.spriteImportMode = SpriteImportMode.Multiple;
-			importer.maxTextureSize = animationSheet.maxTextureSize;
 
 			EditorUtility.SetDirty(importer);
 
