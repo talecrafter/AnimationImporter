@@ -4,7 +4,9 @@ Pixelart Animation Importer for Unity
 This tool is an Aseprite and PyxelEdit Animation Importer for Unity.
 It's already used in several projects and should work for most use cases. There is no guaranteed support though, so test and use this at your own will.
 
-Tested with: Unity 5.6, Aseprite 1.1.13, PyxelEdit 0.4.3
+Tested with: Unity 2021.3, Aseprite 1.2.40
+
+Required Unity packages: 2D
 
 
 Installation
