@@ -243,7 +243,7 @@ namespace AnimationImporter
 
 		public SpriteMetaData[] GetSpriteSheet(
 			SpriteAlignment spriteAlignment,
-			pivotAlignmentType pivotAlignmentType,
+			PivotAlignmentType pivotAlignmentType,
 			float customX,
 			float customY
 		)
@@ -262,7 +262,7 @@ namespace AnimationImporter
 				{
 					spriteMetaData.pivot.x = customX;
 					spriteMetaData.pivot.y = customY;
-					if (pivotAlignmentType == pivotAlignmentType.Pixels)
+					if (pivotAlignmentType == PivotAlignmentType.Pixels)
 					{
 						spriteMetaData.pivot.x /= spriteInfo.width;
 						spriteMetaData.pivot.y /= spriteInfo.height;

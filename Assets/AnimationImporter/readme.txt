@@ -101,4 +101,4 @@ Contains JSONObject from Boomlagoon (www.boomlagoon.com)
 License
 -----
 
-You can freely use/distribute this project in any way possible with the exception of selling it on it's own.
+You can freely use/distribute this project in any way possible with the exception of selling it on its own.

@@ -1,7 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UIElements;
 
 namespace AnimationImporter
 {
@@ -44,8 +43,8 @@ namespace AnimationImporter
 		}
 
 		[SerializeField]
-		private pivotAlignmentType _pivotAlignmentType = pivotAlignmentType.Normalized;
-		public pivotAlignmentType pivotAlignmentType
+		private PivotAlignmentType _pivotAlignmentType = PivotAlignmentType.Normalized;
+		public PivotAlignmentType pivotAlignmentType
 		{
 			get { return this._pivotAlignmentType; }
 			set { this._pivotAlignmentType = value; }
@@ -191,75 +190,6 @@ namespace AnimationImporter
 		{
 			var pixelsPerUnityKey = PREFS_PREFIX + "spritePixelsPerUnit";
 			return PlayerPrefs.HasKey(pixelsPerUnityKey) || EditorPrefs.HasKey(pixelsPerUnityKey);
-		}
-
-		private bool HasKeyInPreferences(string key)
-		{
-			return PlayerPrefs.HasKey(key) || EditorPrefs.HasKey(key);
-		}
-
-		private int GetIntFromPreferences(string intKey)
-		{
-			if (PlayerPrefs.HasKey(intKey))
-			{
-				return PlayerPrefs.GetInt(intKey);
-			}
-			else if (EditorPrefs.HasKey(intKey))
-			{
-				return EditorPrefs.GetInt(intKey);
-			}
-			else
-			{
-				return int.MinValue;
-			}
-		}
-
-		private float GetFloatFromPreferences(string floatKey)
-		{
-			if (PlayerPrefs.HasKey(floatKey))
-			{
-				return PlayerPrefs.GetFloat(floatKey);
-			}
-			else if (EditorPrefs.HasKey(floatKey))
-			{
-				return EditorPrefs.GetFloat(floatKey);
-			}
-			else
-			{
-				return float.NaN;
-			}
-		}
-
-		private bool GetBoolFromPreferences(string boolKey)
-		{
-			if (PlayerPrefs.HasKey(boolKey))
-			{
-				return System.Convert.ToBoolean(PlayerPrefs.GetInt(boolKey));
-			}
-			else if (EditorPrefs.HasKey(boolKey))
-			{
-				return EditorPrefs.GetBool(boolKey);
-			}
-			else
-			{
-				return false;
-			}
-		}
-
-		private string GetStringFromPreferences(string stringKey)
-		{
-			if (PlayerPrefs.HasKey(stringKey))
-			{
-				return PlayerPrefs.GetString(stringKey);
-			}
-			else if (EditorPrefs.HasKey(stringKey))
-			{
-				return EditorPrefs.GetString(stringKey);
-			}
-			else
-			{
-				return string.Empty;
-			}
 		}
 	}
 }

@@ -143,18 +143,18 @@ namespace AnimationImporter
 			*/
 
 			importer.sharedData.targetObjectType = (AnimationTargetObjectType)EditorGUILayout.EnumPopup("Target Object", importer.sharedData.targetObjectType);
-			
-			if(importer.sharedData.targetObjectType == AnimationTargetObjectType.SpriteRenderer || importer.sharedData.targetObjectType == AnimationTargetObjectType.SpriteRendererAndImage)
+
+			if (importer.sharedData.targetObjectType == AnimationTargetObjectType.SpriteRenderer || importer.sharedData.targetObjectType == AnimationTargetObjectType.SpriteRendererAndImage)
 				importer.sharedData.pathToSpriteRendererComponent = EditorGUILayout.TextField("Path to Sprite Renderer", importer.sharedData.pathToSpriteRendererComponent);
-			if(importer.sharedData.targetObjectType == AnimationTargetObjectType.Image || importer.sharedData.targetObjectType == AnimationTargetObjectType.SpriteRendererAndImage)
+			if (importer.sharedData.targetObjectType == AnimationTargetObjectType.Image || importer.sharedData.targetObjectType == AnimationTargetObjectType.SpriteRendererAndImage)
 				importer.sharedData.pathToImageComponent = EditorGUILayout.TextField("Path to Image", importer.sharedData.pathToImageComponent);
 
 			importer.sharedData.spriteAlignment = (SpriteAlignment)EditorGUILayout.EnumPopup("Sprite Alignment", importer.sharedData.spriteAlignment);
 
 			if (importer.sharedData.spriteAlignment == SpriteAlignment.Custom)
 			{
-				importer.sharedData.pivotAlignmentType = (pivotAlignmentType)EditorGUILayout.EnumPopup("Pivot Alignment Type", importer.sharedData.pivotAlignmentType);
-				if (importer.sharedData.pivotAlignmentType == pivotAlignmentType.Normalized)
+				importer.sharedData.pivotAlignmentType = (PivotAlignmentType)EditorGUILayout.EnumPopup("Pivot Alignment Type", importer.sharedData.pivotAlignmentType);
+				if (importer.sharedData.pivotAlignmentType == PivotAlignmentType.Normalized)
 				{
 					importer.sharedData.spriteAlignmentCustomX = EditorGUILayout.Slider("x", importer.sharedData.spriteAlignmentCustomX, 0, 1f);
 					importer.sharedData.spriteAlignmentCustomY = EditorGUILayout.Slider("y", importer.sharedData.spriteAlignmentCustomY, 0, 1f);
@@ -245,13 +245,6 @@ namespace AnimationImporter
 
 			if (GUILayout.Button("Select", GUILayout.Width(50f)))
 			{
-				var startDirectory = globalDirectory;
-				if (!Directory.Exists(startDirectory))
-				{
-					startDirectory = Application.dataPath;
-				}
-				startDirectory = Application.dataPath;
-
 				var path = EditorUtility.OpenFolderPanel("Select Target Location", globalDirectory, "");
 				if (!string.IsNullOrEmpty(path) && AssetDatabase.IsValidFolder(AssetDatabaseUtility.GetAssetPath(path)))
 				{
