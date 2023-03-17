@@ -7,6 +7,9 @@ using System.IO;
 using UnityEditor.Animations;
 using System.Linq;
 using AnimationImporter.Aseprite;
+#if UNITY_2021_2_OR_NEWER
+using UnityEditor.U2D.Sprites;
+#endif
 
 namespace AnimationImporter
 {
@@ -468,12 +471,42 @@ namespace AnimationImporter
 #endif
 			}
 
+#if UNITY_2021_2_OR_NEWER
+			// get data provider
+			var factory = new SpriteDataProviderFactories();
+			factory.Init();
+			var dataProvider = factory.GetSpriteEditorDataProviderFromObject(importer);
+			dataProvider.InitSpriteEditorDataProvider();
+
+			// apply sprite rects
+			var existingSpriteRects = dataProvider.GetSpriteRects();
+			var newSpriteRects = animationSheet.GetSpriteSheet(
+				existingSpriteRects,
+				sharedData.spriteAlignment,
+				sharedData.pivotAlignmentType,
+				sharedData.spriteAlignmentCustomX,
+				sharedData.spriteAlignmentCustomY);
+			dataProvider.SetSpriteRects(newSpriteRects);
+
+			// apply name pairs
+			var spriteNameFileIdDataProvider = dataProvider.GetDataProvider<ISpriteNameFileIdDataProvider>();
+			List<SpriteNameFileIdPair> spriteNameFileIdPairs = new List<SpriteNameFileIdPair>();
+			for (int i = 0; i < newSpriteRects.Length; i++)
+			{
+				var spriteRect = newSpriteRects[i];
+				spriteNameFileIdPairs.Add(new SpriteNameFileIdPair(spriteRect.name, spriteRect.spriteID));
+			}
+			spriteNameFileIdDataProvider.SetNameFileIdPairs(spriteNameFileIdPairs);
+
+			dataProvider.Apply();
+#else
 			// create sub sprites for this file according to the AsepriteAnimationInfo 
 			importer.spritesheet = animationSheet.GetSpriteSheet(
 				sharedData.spriteAlignment,
 				sharedData.pivotAlignmentType,
 				sharedData.spriteAlignmentCustomX,
 				sharedData.spriteAlignmentCustomY);
+#endif
 
 			// reapply old import settings (pivot settings for sprites)
 			if (animationSheet.hasPreviousTextureImportSettings)

@@ -2,7 +2,7 @@
     "name": "com.talecrafter.animationimporter.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:ba3c18ee443f5fc428ce11b0dc16eb4b"
+        "GUID:2c573e6b271651846a79655161004c5b"
     ],
     "includePlatforms": [
         "Editor"

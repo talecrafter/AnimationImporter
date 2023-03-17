@@ -278,6 +278,65 @@ namespace AnimationImporter
 			return metaData;
 		}
 
+#if UNITY_2021_2_OR_NEWER
+		public SpriteRect[] GetSpriteSheet(
+			SpriteRect[] existingSpriteRects,
+			SpriteAlignment spriteAlignment,
+			PivotAlignmentType pivotAlignmentType,
+			float customX,
+			float customY)
+		{
+			SpriteRect[] spriteRects = new SpriteRect[frames.Count];
+
+			for (int frameIndex = 0; frameIndex < frames.Count; frameIndex++)
+			{
+				ImportedAnimationFrame spriteInfo = frames[frameIndex];
+
+				SpriteRect spriteRect = new SpriteRect();
+
+				// sprite alignment
+				spriteRect.alignment = spriteAlignment;
+				if (spriteAlignment == SpriteAlignment.Custom)
+				{
+					if (pivotAlignmentType == PivotAlignmentType.Pixels)
+					{
+						spriteRect.pivot = new Vector2(customX / spriteInfo.width, customY / spriteInfo.height);
+					}
+					else
+					{
+						spriteRect.pivot = new Vector2(customX, customY);
+					}
+				}
+
+				spriteRect.name = spriteInfo.name;
+				spriteRect.rect = new Rect(spriteInfo.x, spriteInfo.y, spriteInfo.width, spriteInfo.height);
+
+				spriteRects[frameIndex] = spriteRect;
+			}
+
+			for (int spriteIndex = 0; spriteIndex < spriteRects.Length; spriteIndex++)
+			{
+				if (spriteIndex < existingSpriteRects.Length
+					&& IsValidGUID(existingSpriteRects[spriteIndex].spriteID))
+				{
+					spriteRects[spriteIndex].spriteID = existingSpriteRects[spriteIndex].spriteID;
+				}
+			}
+
+			return spriteRects;
+		}
+#endif
+
+		public bool IsValidGUID(GUID guid)
+		{
+			if (guid.Empty())
+			{
+				return false;
+			}
+
+			return true;
+		}
+
 		public void ApplySpriteNamingScheme(SpriteNamingScheme namingScheme)
 		{
 			const string NAME_DELIMITER = "_";
