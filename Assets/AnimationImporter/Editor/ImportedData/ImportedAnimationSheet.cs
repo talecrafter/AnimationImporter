@@ -256,21 +256,12 @@ namespace AnimationImporter
 
 				SpriteMetaData spriteMetaData = new SpriteMetaData();
 
-				// sprite alignment
-				spriteMetaData.alignment = (int)spriteAlignment;
-				if (spriteAlignment == SpriteAlignment.Custom)
-				{
-					spriteMetaData.pivot.x = customX;
-					spriteMetaData.pivot.y = customY;
-					if (pivotAlignmentType == PivotAlignmentType.Pixels)
-					{
-						spriteMetaData.pivot.x /= spriteInfo.width;
-						spriteMetaData.pivot.y /= spriteInfo.height;
-					}
-				}
-
 				spriteMetaData.name = spriteInfo.name;
 				spriteMetaData.rect = new Rect(spriteInfo.x, spriteInfo.y, spriteInfo.width, spriteInfo.height);
+
+				// sprite alignment
+				spriteMetaData.alignment = (int)spriteAlignment;
+				spriteMetaData.pivot = GetSpritePivot(spriteAlignment, pivotAlignmentType, customX, customY, spriteInfo.width, spriteInfo.height);
 
 				metaData[i] = spriteMetaData;
 			}
@@ -280,7 +271,7 @@ namespace AnimationImporter
 
 #if UNITY_2021_2_OR_NEWER
 		public SpriteRect[] GetSpriteSheet(
-			SpriteRect[] existingSpriteRects,
+			SpriteRect[] previousSpriteRects,
 			SpriteAlignment spriteAlignment,
 			PivotAlignmentType pivotAlignmentType,
 			float customX,
@@ -294,33 +285,29 @@ namespace AnimationImporter
 
 				SpriteRect spriteRect = new SpriteRect();
 
-				// sprite alignment
-				spriteRect.alignment = spriteAlignment;
-				if (spriteAlignment == SpriteAlignment.Custom)
-				{
-					if (pivotAlignmentType == PivotAlignmentType.Pixels)
-					{
-						spriteRect.pivot = new Vector2(customX / spriteInfo.width, customY / spriteInfo.height);
-					}
-					else
-					{
-						spriteRect.pivot = new Vector2(customX, customY);
-					}
-				}
-
 				spriteRect.name = spriteInfo.name;
 				spriteRect.rect = new Rect(spriteInfo.x, spriteInfo.y, spriteInfo.width, spriteInfo.height);
+
+				// sprite alignment
+				spriteRect.alignment = spriteAlignment;
+				spriteRect.pivot = GetSpritePivot(spriteAlignment, pivotAlignmentType, customX, customY, spriteInfo.width, spriteInfo.height);
 
 				spriteRects[frameIndex] = spriteRect;
 			}
 
+			// applying the spriteIDs from the previous sprites;
+			// this is a very simple implementation, reassigning IDs on a first come first serve basis;
+			// an improved implementation might take the sprite names into account to find the correct pairs
+			// if a Sprite naming style was used that takes animation names into account
 			for (int spriteIndex = 0; spriteIndex < spriteRects.Length; spriteIndex++)
 			{
-				if (spriteIndex < existingSpriteRects.Length
-					&& IsValidGUID(existingSpriteRects[spriteIndex].spriteID))
+				if (spriteIndex < previousSpriteRects.Length
+					&& IsValidGUID(previousSpriteRects[spriteIndex].spriteID))
 				{
-					spriteRects[spriteIndex].spriteID = existingSpriteRects[spriteIndex].spriteID;
+					spriteRects[spriteIndex].spriteID = previousSpriteRects[spriteIndex].spriteID;
 				}
+
+				// if a new spriteId is needed, it got assigned already through the SpriteRect constructor
 			}
 
 			return spriteRects;
@@ -412,6 +399,55 @@ namespace AnimationImporter
 		// ================================================================================
 		//  private methods
 		// --------------------------------------------------------------------------------
+
+		private static Vector2 GetSpritePivot(SpriteAlignment spriteAlignment, PivotAlignmentType pivotAlignmentType, float customX, float customY, int spriteWidth, int spriteHeight)
+		{
+			if (spriteAlignment == SpriteAlignment.Custom)
+			{
+				if (pivotAlignmentType == PivotAlignmentType.Pixels)
+				{
+					return new Vector2(customX / spriteWidth, customY / spriteHeight);
+				}
+				else
+				{
+					return new Vector2(customX, customY);
+				}
+			}
+			else
+			{
+				// we're setting a correct pivot value even if not custom;
+				// technically this is not needed but Unity might set it to this value anyway at some point,
+				// by setting it ourselves we prevent meta file changes
+				return GetSpritePivotForStandardAlignment(spriteAlignment);
+			}
+		}
+
+		private static Vector2 GetSpritePivotForStandardAlignment(SpriteAlignment alignment)
+		{
+			switch (alignment)
+			{
+				case SpriteAlignment.Center:
+					return new Vector2(0.5f, 0.5f);
+				case SpriteAlignment.TopLeft:
+					return new Vector2(0f, 1f);
+				case SpriteAlignment.TopCenter:
+					return new Vector2(0.5f, 1f);
+				case SpriteAlignment.TopRight:
+					return new Vector2(1f, 1f);
+				case SpriteAlignment.LeftCenter:
+					return new Vector2(0f, 0.5f);
+				case SpriteAlignment.RightCenter:
+					return new Vector2(1f, 0.5f);
+				case SpriteAlignment.BottomLeft:
+					return new Vector2(0f, 0f);
+				case SpriteAlignment.BottomCenter:
+					return new Vector2(0.5f, 0f);
+				case SpriteAlignment.BottomRight:
+					return new Vector2(1f, 0f);
+			}
+
+			return default;
+		}
 
 		private void BuildIndex()
 		{
