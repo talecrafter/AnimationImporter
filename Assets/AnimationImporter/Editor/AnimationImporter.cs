@@ -491,6 +491,20 @@ namespace AnimationImporter
 				sharedData.spriteAlignmentCustomX,
 				sharedData.spriteAlignmentCustomY);
 			dataProvider.SetSpriteRects(newSpriteRects);
+			
+			try
+			{
+				dataProvider.SetSpriteRects(newSpriteRects);
+			}
+			catch (Exception _)
+			{
+				for (int i = 0; i < newSpriteRects.Length; i++)
+				{
+					if(newSpriteRects[i].spriteID == new GUID("00000000000000000800000000000000"))
+						newSpriteRects[i].spriteID = GUID.Generate();
+				}
+				dataProvider.SetSpriteRects(newSpriteRects);
+			}
 
 			// apply name pairs
 			var spriteNameFileIdDataProvider = dataProvider.GetDataProvider<ISpriteNameFileIdDataProvider>();
