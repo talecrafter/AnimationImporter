@@ -314,11 +314,24 @@ namespace AnimationImporter
 		}
 #endif
 
+		private static GUID[] INVALID_GUIDS = new GUID[]
+			{
+				new GUID("00000000000000000800000000000000")
+			};
+
 		public bool IsValidGUID(GUID guid)
 		{
 			if (guid.Empty())
 			{
 				return false;
+			}
+
+			foreach (var invalidGUID in INVALID_GUIDS)
+			{
+				if (guid == invalidGUID)
+				{
+					return false;
+				}
 			}
 
 			return true;

@@ -482,47 +482,42 @@ namespace AnimationImporter
 			var dataProvider = factory.GetSpriteEditorDataProviderFromObject(importer);
 			dataProvider.InitSpriteEditorDataProvider();
 
-			// apply sprite rects
-			var existingSpriteRects = dataProvider.GetSpriteRects();
-			var newSpriteRects = animationSheet.GetSpriteSheet(
-				existingSpriteRects,
-				sharedData.spriteAlignment,
-				sharedData.pivotAlignmentType,
-				sharedData.spriteAlignmentCustomX,
-				sharedData.spriteAlignmentCustomY);
-			dataProvider.SetSpriteRects(newSpriteRects);
-			
+			// apply sprite rects			
 			try
 			{
+				var existingSpriteRects = dataProvider.GetSpriteRects();
+
+				var newSpriteRects = animationSheet.GetSpriteSheet(
+					existingSpriteRects,
+					sharedData.spriteAlignment,
+					sharedData.pivotAlignmentType,
+					sharedData.spriteAlignmentCustomX,
+					sharedData.spriteAlignmentCustomY);
+
 				dataProvider.SetSpriteRects(newSpriteRects);
-			}
-			catch (Exception _)
-			{
+
+				// apply name pairs
+				var spriteNameFileIdDataProvider = dataProvider.GetDataProvider<ISpriteNameFileIdDataProvider>();
+				List<SpriteNameFileIdPair> spriteNameFileIdPairs = new List<SpriteNameFileIdPair>();
 				for (int i = 0; i < newSpriteRects.Length; i++)
 				{
-					if(newSpriteRects[i].spriteID == new GUID("00000000000000000800000000000000"))
-						newSpriteRects[i].spriteID = GUID.Generate();
+					var spriteRect = newSpriteRects[i];
+					spriteNameFileIdPairs.Add(new SpriteNameFileIdPair(spriteRect.name, spriteRect.spriteID));
 				}
-				dataProvider.SetSpriteRects(newSpriteRects);
-			}
+				spriteNameFileIdDataProvider.SetNameFileIdPairs(spriteNameFileIdPairs);
 
-			// apply name pairs
-			var spriteNameFileIdDataProvider = dataProvider.GetDataProvider<ISpriteNameFileIdDataProvider>();
-			List<SpriteNameFileIdPair> spriteNameFileIdPairs = new List<SpriteNameFileIdPair>();
-			for (int i = 0; i < newSpriteRects.Length; i++)
+				// reapply old import settings (pivot settings for sprites)
+				if (animationSheet.hasPreviousTextureImportSettings)
+				{
+					animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(dataProvider);
+				}
+
+				dataProvider.Apply();
+			}
+			catch (Exception e)
 			{
-				var spriteRect = newSpriteRects[i];
-				spriteNameFileIdPairs.Add(new SpriteNameFileIdPair(spriteRect.name, spriteRect.spriteID));
+				UnityEngine.Debug.LogError(e);
 			}
-			spriteNameFileIdDataProvider.SetNameFileIdPairs(spriteNameFileIdPairs);
-
-			// reapply old import settings (pivot settings for sprites)
-			if (animationSheet.hasPreviousTextureImportSettings)
-			{
-				animationSheet.previousImportSettings.ApplyPreviousTextureImportSettings(dataProvider);
-			}
-
-			dataProvider.Apply();
 #else
 			// create sub sprites for this file according to the AsepriteAnimationInfo 
 			importer.spritesheet = animationSheet.GetSpriteSheet(
