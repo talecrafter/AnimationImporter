@@ -6,7 +6,7 @@ It's already used in several projects and should work for most use cases. There 
 
 Tested with: Unity 2021.3, Aseprite 1.2.40
 
-Required Unity packages: 2D
+Required Unity packages: 2D Sprite
 
 
 Installation

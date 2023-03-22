@@ -4,8 +4,31 @@ Pixelart Animation Importer for Unity
 This tool is an Aseprite and PyxelEdit Animation Importer for Unity.
 It's already used in several projects and should work for most use cases. There is no guaranteed support though, so test and use this at your own will.
 
-Tested with: Unity 5.5, Aseprite 1.1.13, PyxelEdit 0.4.3
+Tested with: Unity 2021.3, Aseprite 1.2.40
 
+Required Unity packages: 2D Sprite
+
+
+Installation
+-----
+
+This extension can be installed using Unity package manager.  
+`https://github.com/talecrafter/AnimationImporter.git?path=/Assets`  
+
+* Package manager UI  
+
+	![screenshot](https://user-images.githubusercontent.com/6723783/72479980-c9554c80-37aa-11ea-8fd8-978d3fa860bd.png)
+
+* Manifest
+```
+{
+	"dependencies": {
+		"com.talecrafter.animationimporter": "https://github.com/talecrafter/AnimationImporter.git?path=/Assets"
+	}
+}
+```
+
+Or by importing the content of `Assets` into the `Plugins` folder in Unity.
 
 Setup
 -----
@@ -93,7 +116,6 @@ Contributors:
 - Hugo Ratiney (http://github.com/hu9o)
 - rage (http://github.com/rage-lule)
 - SystemAddict85 (http://github.com/SystemAddict85)
-- Jo Giezi (https://github.com/GieziJo)
 
 Contains JSONObject from Boomlagoon (www.boomlagoon.com)
 
@@ -101,4 +123,4 @@ Contains JSONObject from Boomlagoon (www.boomlagoon.com)
 License
 -----
 
-You can freely use/distribute this project in any way possible with the exception of selling it on its own.
+You can freely use/distribute this project in any way possible with the exception of selling it on it's own.
